@@ -87,3 +87,4 @@ Drag-drop that folder into a Netlify site to use it.
 UI is translated into English, Deutsch, Français and Русский. Templates stay in English. Add or edit translations in `public/app.js` (the `I18N` object).
 
 <!-- git setup test -->
+<!-- gcm-fix verified -->
