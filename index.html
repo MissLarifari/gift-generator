@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>🎁 Gift Generator · 3dxchat</title>
+<link rel="stylesheet" href="/styles.css"/>
+</head>
+<body>
+
+<!-- topbar -->
+<div class="topbar">
+  <div class="tb-brand">
+    <h1>🎁 Gift Generator</h1>
+    <span class="tb-proto" data-i18n="prototype_badge" title="Prototype — work in progress">PROTOTYPE</span>
+    <div class="tb-brand-sep"></div>
+    <span class="tb-brand-sub">
+      for <a href="https://3dxchat.com/" target="_blank">3dxchat.com</a>
+      <span class="by-sep"> · by </span><a href="https://sophey.vodka/lari" target="_blank">MissLarifari</a>
+    </span>
+  </div>
+  <div class="tb-counter" id="counterBar">
+    <span class="tb-counter-label" data-i18n="chars">Chars</span>
+    <span class="cv ok" id="charCount">0</span>
+    <span class="tb-sep">/</span>
+    <span class="tb-counter-label">240</span>
+    <span class="tb-sep">·</span>
+    <span class="tb-counter-label" data-i18n="bytes">Bytes</span>
+    <span class="cv ok" id="byteCount">0</span>
+    <span class="tb-sep">/</span>
+    <span class="tb-counter-label">255</span>
+  </div>
+  <span class="tb-feedback"><span data-i18n="feedback_pre">Feedback · </span><a href="https://discord.com/users/1167838697157308528" target="_blank" rel="noopener">xlari</a><span data-i18n="feedback_post"> on Discord</span></span>
+  <div class="ui-lang">
+    <span class="ui-lang-tab on" data-lang="en" onclick="setUILang('en')">🇬🇧 EN</span>
+    <span class="ui-lang-tab"    data-lang="de" onclick="setUILang('de')">🇩🇪 DE</span>
+    <span class="ui-lang-tab"    data-lang="fr" onclick="setUILang('fr')">🇫🇷 FR</span>
+    <span class="ui-lang-tab"    data-lang="ru" onclick="setUILang('ru')">🇷🇺 RU</span>
+  </div>
+</div>
+
+<!-- proto notice (under topbar) -->
+<div class="proto-notice" data-i18n="prototype_thanks">💛 This is a prototype — thank you to everyone who uses it and supports me!</div>
+
+<!-- app -->
+<div class="app">
+
+<!-- ── LEFT: editor ── -->
+<div class="col col-left">
+
+  <!-- How it works -->
+  <div class="sec">
+    <div class="sec-head open" onclick="toggleSec(this)">
+      <span class="sec-title"><span class="sec-title-icon">ⓘ</span> <span data-i18n="howto_title">How It Works</span></span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body open">
+      <div class="sec-inner">
+        <div class="howto">
+          <div class="howto-row">
+            <span class="howto-step">1</span>
+            <div data-i18n-html="howto_step1"><b>Pick a layout</b> below — center, inline, compact, framed, minimal or pyramid. Each one arranges the lines differently.</div>
+          </div>
+          <div class="howto-row">
+            <span class="howto-step">2</span>
+            <div data-i18n-html="howto_step2"><b>Edit each line.</b> A gift has six fields: <i>Deco top</i>, <i>Top line</i>, <i>Main text</i>, <i>Bottom line</i>, <i>Kaomoji</i> and <i>Deco bottom</i>. Type your own text or click a chip suggestion.</div>
+          </div>
+          <div class="howto-row">
+            <span class="howto-step">3</span>
+            <div data-i18n-html="howto_step3"><b>Style each field</b> with the little color square next to the input — pick a color, a gradient, or toggle "no color" to save characters. Font toggle (Aa / αв / ꜱᴄ) switches normal, fancy or small caps.</div>
+          </div>
+          <div class="howto-row howto-row--highlight">
+            <span class="howto-step">4</span>
+            <div data-i18n-html="howto_step_reorder"><b>Reorder or remove lines directly in the preview</b> — hover any line and use the <b>▲ / ▼</b> arrows to move it up or down, or the <b>✕</b> button to clear it. Works in Center, Framed, Minimal and Pyramid layouts. The generated code below updates instantly.</div>
+          </div>
+          <div class="howto-row">
+            <span class="howto-step">5</span>
+            <div data-i18n-html="howto_step4"><b>Browse the templates</b> on the right — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday and more. One click fills all three text lines at once.</div>
+          </div>
+          <div class="howto-row">
+            <span class="howto-step">6</span>
+            <div data-i18n-html="howto_step5"><b>Watch the counter</b> in the topbar. 3dxchat allows <b>240 chars / 255 bytes</b>. If it turns red, shorten text, drop a line, or remove a gradient.</div>
+          </div>
+          <div class="howto-row">
+            <span class="howto-step">7</span>
+            <div data-i18n-html="howto_step6"><b>Copy the code</b> with the big button under the preview, then paste it in 3dxchat as a gift message. Done.</div>
+          </div>
+          <div class="howto-tip" data-i18n="howto_tip">
+            💡 Tip — click any line in the live preview to jump straight to its input field.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="sec">
+    <div class="sec-head open" onclick="toggleSec(this)">
+      <span class="sec-title"><span class="sec-title-icon">⊞</span> <span data-i18n="layout">Layout</span></span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body open">
+      <div class="sec-inner">
+        <div class="layout-grid">
+          <div class="lbtn on" id="lay_center"  onclick="setLayout('center')"  data-i18n="layout_center">Center</div>
+          <div class="lbtn"    id="lay_inline"  onclick="setLayout('inline')"  data-i18n="layout_inline">Inline</div>
+          <div class="lbtn"    id="lay_compact" onclick="setLayout('compact')" data-i18n="layout_compact">Compact</div>
+          <div class="lbtn"    id="lay_framed"  onclick="setLayout('framed')"  data-i18n="layout_framed">Framed</div>
+          <div class="lbtn"    id="lay_minimal" onclick="setLayout('minimal')" data-i18n="layout_minimal">Minimal</div>
+          <div class="lbtn"    id="lay_pyramid" onclick="setLayout('pyramid')" data-i18n="layout_pyramid">Pyramid</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deco top -->
+  <div class="sec">
+    <div class="sec-head" onclick="toggleSec(this)">
+      <span class="sec-title"><span class="sec-title-icon">✦</span> <span data-i18n="deco_top">Deco Top</span></span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="sec-inner">
+        <div class="field">
+          <div class="chips">
+            <span class="chip" onclick="setField('dekoTop','· ily ·←')">· ily ·←</span>
+            <span class="chip" onclick="setField('dekoTop','❀ · ❀ · ❀')">❀·❀·❀</span>
+            <span class="chip" onclick="setField('dekoTop','✦ · · · ✦')">✦···✦</span>
+            <span class="chip" onclick="setField('dekoTop','♥ · ♥ · ♥')">♥·♥·♥</span>
+            <span class="chip" onclick="setField('dekoTop','★.° ★.°')">★.°★.°</span>
+            <span class="chip" onclick="setField('dekoTop','· · ·')">· · ·</span>
+          </div>
+          <div class="sym-label" data-i18n="plus_symbol">+ Symbol</div>
+          <div class="chips">
+            <span class="chip" onclick="insertIntoField('dekoTop','♡')">♡</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','♥')">♥</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','❀')">❀</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','✿')">✿</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','✦')">✦</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','★')">★</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','·')">·</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','°')">°</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','˚')">˚</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','⋆')">⋆</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','←')">←</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','→')">→</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','∞')">∞</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','~')">~</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','｡ﾟ')">｡ﾟ</span>
+            <span class="chip" onclick="insertIntoField('dekoTop','ꕥ')">ꕥ</span>
+          </div>
+          <div class="row">
+            <input type="text" id="dekoTop" value="· ily ·←" oninput="generate()" placeholder="deco top…" data-i18n-ph="ph_deco_top"/>
+            <div class="cbtn" id="btn_dekoTop" style="background:#555" onclick="openModal('dekoTop')"></div>
+          </div>
+          <div class="meta">
+            <div class="ftoggle">
+              <span class="chip on"  id="font_dekoTop_normal"    onclick="setFontStyle('dekoTop','normal')">Aa</span>
+              <span class="chip"     id="font_dekoTop_fancy"     onclick="setFontStyle('dekoTop','fancy')">αв</span>
+              <span class="chip"     id="font_dekoTop_smallcaps" onclick="setFontStyle('dekoTop','smallcaps')">ꜱᴄ</span>
+            </div>
+            <span class="meta-label" data-i18n="size">Size</span>
+            <input type="number" id="sizeDekoTop" value="12" oninput="generate()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top line -->
+  <div class="sec">
+    <div class="sec-head" onclick="toggleSec(this)">
+      <span class="sec-title" data-i18n="top_line">Top Line</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="sec-inner">
+        <div class="field">
+          <div class="row">
+            <input type="text" id="topText" value=".. stop being .." oninput="generate()" placeholder="top line…" data-i18n-ph="ph_top"/>
+            <div class="cbtn" id="btn_topText" style="background:#8f8f8f" onclick="openModal('topText')"></div>
+          </div>
+          <div class="meta" style="margin-bottom:.4rem">
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="topBold" onchange="generate()" style="width:auto;margin:0"/> <b data-i18n="bold">Bold</b>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="topItalic" onchange="generate()" style="width:auto;margin:0"/> <i data-i18n="italic">Italic</i>
+            </label>
+          </div>
+          <div class="meta">
+            <div class="ftoggle">
+              <span class="chip on" id="font_topText_normal"    onclick="setFontStyle('topText','normal')">Aa</span>
+              <span class="chip"    id="font_topText_fancy"     onclick="setFontStyle('topText','fancy')">αв</span>
+              <span class="chip"    id="font_topText_smallcaps" onclick="setFontStyle('topText','smallcaps')">ꜱᴄ</span>
+            </div>
+            <span class="meta-label" data-i18n="size">Size</span>
+            <input type="number" id="sizeTopText" value="14" oninput="generate()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main text -->
+  <div class="sec">
+    <div class="sec-head" onclick="toggleSec(this)">
+      <span class="sec-title"><span class="sec-title-icon">✶</span> <span data-i18n="main_text">Main Text</span></span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="sec-inner">
+        <div class="field">
+          <div class="row">
+            <input type="text" id="mainText" value="so cute" oninput="generate()" placeholder="main text…" data-i18n-ph="ph_main"/>
+            <div class="cbtn" id="btn_mainText" style="background:var(--pink)" onclick="openModal('mainText')"></div>
+          </div>
+          <div class="meta" style="margin-bottom:.4rem">
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="mainBold" onchange="generate()" style="width:auto;margin:0"/> <b data-i18n="bold">Bold</b>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="mainItalic" onchange="generate()" style="width:auto;margin:0"/> <i data-i18n="italic">Italic</i>
+            </label>
+          </div>
+          <div class="meta">
+            <div class="ftoggle">
+              <span class="chip on" id="font_mainText_normal"    onclick="setFontStyle('mainText','normal')">Aa</span>
+              <span class="chip"    id="font_mainText_fancy"     onclick="setFontStyle('mainText','fancy')">αв</span>
+              <span class="chip"    id="font_mainText_smallcaps" onclick="setFontStyle('mainText','smallcaps')">ꜱᴄ</span>
+            </div>
+            <span class="meta-label" data-i18n="size">Size</span>
+            <input type="number" id="fontSize" value="60" oninput="generate()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom line -->
+  <div class="sec">
+    <div class="sec-head" onclick="toggleSec(this)">
+      <span class="sec-title" data-i18n="bottom_line">Bottom Line</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="sec-inner">
+        <div class="field">
+          <div class="row">
+            <input type="text" id="bottomText" value=".. i cant handle it .." oninput="generate()" placeholder="bottom line…" data-i18n-ph="ph_bottom"/>
+            <div class="cbtn" id="btn_bottomText" style="background:#8f8f8f" onclick="openModal('bottomText')"></div>
+          </div>
+          <div class="meta" style="margin-bottom:.4rem">
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="bottomBold" onchange="generate()" style="width:auto;margin:0"/> <b data-i18n="bold">Bold</b>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="bottomItalic" onchange="generate()" style="width:auto;margin:0"/> <i data-i18n="italic">Italic</i>
+            </label>
+          </div>
+          <div class="meta">
+            <div class="ftoggle">
+              <span class="chip on" id="font_bottomText_normal"    onclick="setFontStyle('bottomText','normal')">Aa</span>
+              <span class="chip"    id="font_bottomText_fancy"     onclick="setFontStyle('bottomText','fancy')">αв</span>
+              <span class="chip"    id="font_bottomText_smallcaps" onclick="setFontStyle('bottomText','smallcaps')">ꜱᴄ</span>
+            </div>
+            <span class="meta-label" data-i18n="size">Size</span>
+            <input type="number" id="sizeBottomText" value="14" oninput="generate()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kaomoji / Emoji -->
+  <div class="sec">
+    <div class="sec-head" onclick="toggleSec(this)">
+      <span class="sec-title"><span class="sec-title-icon">(◕‿◕)</span> <span data-i18n="kaomoji">Kaomoji</span></span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="sec-inner">
+        <div class="kao-toggle">
+          <span class="chip on" id="kao_on"  onclick="setKaoMode(true)"  data-i18n="with_kao">✦ With</span>
+          <span class="chip danger" id="kao_off" onclick="setKaoMode(false)" data-i18n="without_kao">✕ Without</span>
+        </div>
+        <div id="kaoSection">
+          <div class="sym-label" data-i18n="cute">Cute</div>
+          <div class="chips">
+            <span class="chip" onclick="setField('kaomoji','(✿˘‿˘)')">✿˘‿˘</span>
+            <span class="chip" onclick="setField('kaomoji','(❀◡❀)')">❀◡❀</span>
+            <span class="chip" onclick="setField('kaomoji','(✿╹‿╹)ノ')">✿╹‿╹ノ</span>
+            <span class="chip" onclick="setField('kaomoji','(❀˘‿˘)ノ')">❀˘‿˘ノ</span>
+            <span class="chip" onclick="setField('kaomoji','(✿≧‿≦)')">✿≧‿≦</span>
+            <span class="chip" onclick="setField('kaomoji','(◉_◉❀)')">◉_◉❀</span>
+            <span class="chip" onclick="setField('kaomoji','(˘³˘)♥')">˘³˘♥</span>
+            <span class="chip" onclick="setField('kaomoji','(っ˘з˘)っ')">っ˘з˘っ</span>
+            <span class="chip" onclick="setField('kaomoji','(♡˘▽˘♡)')">♡˘▽˘♡</span>
+            <span class="chip" onclick="setField('kaomoji','(*˘︶˘*).｡.:*♡')">˘︶˘♡</span>
+            <span class="chip" onclick="setField('kaomoji','(灬♡ω♡灬)')">♡ω♡</span>
+            <span class="chip" onclick="setField('kaomoji','(◍•ᴗ•◍)❤')">◍•ᴗ•◍</span>
+            <span class="chip" onclick="setField('kaomoji','(⌒▽⌒)♡')">⌒▽⌒♡</span>
+            <span class="chip" onclick="setField('kaomoji','꒰˘̩̩̩⌣˘̩̩̩꒱♡')">˘⌣˘♡</span>
+            <span class="chip" onclick="setField('kaomoji','( ˶ˆ꒳ˆ˵ )')">ˆ꒳ˆ</span>
+            <span class="chip" onclick="setField('kaomoji','(◕‿◕✿)')">◕‿◕✿</span>
+          </div>
+          <div class="sym-label" style="margin-top:.3rem" data-i18n="ascii">ASCII</div>
+          <div class="chips">
+            <span class="chip" onclick="setField('kaomoji','(づ｡◕‿‿◕｡)づ')">づ◕‿◕づ</span>
+            <span class="chip" onclick="setField('kaomoji','┐(￣ヮ￣)┌')">┐ヮ┌</span>
+            <span class="chip" onclick="setField('kaomoji','¯\\_(ツ)_/¯')">¯\_(ツ)_/¯</span>
+            <span class="chip" onclick="setField('kaomoji','( ͡° ͜ʖ ͡°)')">( ͡° ͜ʖ ͡°)</span>
+            <span class="chip" onclick="setField('kaomoji','(ᵔᴥᵔ)')">ᵔᴥᵔ</span>
+            <span class="chip" onclick="setField('kaomoji','(•ᴗ•)♡')">•ᴗ•♡</span>
+            <span class="chip" onclick="setField('kaomoji','ヽ(´▽`)/')">ヽ´▽`/</span>
+            <span class="chip" onclick="setField('kaomoji','(°ロ°) !')">°ロ°!</span>
+            <span class="chip" onclick="setField('kaomoji','(*^▽^*)')">*^▽^*</span>
+          </div>
+          <div class="row" style="margin-top:.4rem">
+            <input type="text" id="kaomoji" value="(❀◡❀)" oninput="generate()" placeholder="kaomoji…" data-i18n-ph="ph_kao"/>
+            <div class="cbtn" id="btn_kaomoji" style="background:var(--gold)" onclick="openModal('kaomoji')"></div>
+          </div>
+          <div class="meta">
+            <span class="meta-label" data-i18n="size">Size</span>
+            <input type="number" id="sizeKaomoji" value="16" oninput="generate()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deco bottom -->
+  <div class="sec">
+    <div class="sec-head" onclick="toggleSec(this)">
+      <span class="sec-title"><span class="sec-title-icon">✦</span> <span data-i18n="deco_bottom">Deco Bottom</span></span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="sec-inner">
+        <div class="field">
+          <div class="chips">
+            <span class="chip" onclick="setField('dekoBottom','.. ･ ✦ ･ ..')">..･✦･..</span>
+            <span class="chip" onclick="setField('dekoBottom','· · · · ·')">·····</span>
+            <span class="chip" onclick="setField('dekoBottom','♡ ·° ☆ ·° ♡')">♡·°☆·°♡</span>
+            <span class="chip" onclick="setField('dekoBottom','❀ ♡ ✦ ♡ ❀')">❀♡✦♡❀</span>
+            <span class="chip" onclick="setField('dekoBottom','~ · ~ · ~')">~·~·~</span>
+          </div>
+          <div class="sym-label" data-i18n="plus_symbol">+ Symbol</div>
+          <div class="chips">
+            <span class="chip" onclick="insertIntoField('dekoBottom','♡')">♡</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','♥')">♥</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','❀')">❀</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','✿')">✿</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','✦')">✦</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','★')">★</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','·')">·</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','°')">°</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','˚')">˚</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','⋆')">⋆</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','←')">←</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','→')">→</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','∞')">∞</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','~')">~</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','｡ﾟ')">｡ﾟ</span>
+            <span class="chip" onclick="insertIntoField('dekoBottom','ꕥ')">ꕥ</span>
+          </div>
+          <div class="row">
+            <input type="text" id="dekoBottom" value=".. ･ ✦ ･ .." oninput="generate()" placeholder="deco bottom…" data-i18n-ph="ph_deco_bottom"/>
+            <div class="cbtn" id="btn_dekoBottom" style="background:#5c5c7a" onclick="openModal('dekoBottom')"></div>
+          </div>
+          <div class="meta">
+            <div class="ftoggle">
+              <span class="chip on" id="font_dekoBottom_normal"    onclick="setFontStyle('dekoBottom','normal')">Aa</span>
+              <span class="chip"    id="font_dekoBottom_fancy"     onclick="setFontStyle('dekoBottom','fancy')">αв</span>
+              <span class="chip"    id="font_dekoBottom_smallcaps" onclick="setFontStyle('dekoBottom','smallcaps')">ꜱᴄ</span>
+            </div>
+            <span class="meta-label" data-i18n="size">Size</span>
+            <input type="number" id="sizeDekoBottom" value="12" oninput="generate()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Symbols -->
+  <div class="sec">
+    <div class="sec-head" onclick="toggleSec(this)">
+      <span class="sec-title"><span class="sec-title-icon">✿</span> <span data-i18n="symbols">Symbols</span></span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="sec-inner">
+        <div class="sym-label" data-i18n="hearts">Hearts</div>
+        <div class="chips" style="margin-bottom:.5rem">
+          <span class="chip" onclick="copySymbol('♡')">♡</span>
+          <span class="chip" onclick="copySymbol('♥')">♥</span>
+          <span class="chip" onclick="copySymbol('❤')">❤</span>
+          <span class="chip" onclick="copySymbol('❥')">❥</span>
+          <span class="chip" onclick="copySymbol('ღ')">ღ</span>
+        </div>
+        <div class="sym-label" data-i18n="stars">Stars</div>
+        <div class="chips" style="margin-bottom:.5rem">
+          <span class="chip" onclick="copySymbol('✦')">✦</span>
+          <span class="chip" onclick="copySymbol('✧')">✧</span>
+          <span class="chip" onclick="copySymbol('★')">★</span>
+          <span class="chip" onclick="copySymbol('☆')">☆</span>
+          <span class="chip" onclick="copySymbol('⋆')">⋆</span>
+          <span class="chip" onclick="copySymbol('°')">°</span>
+          <span class="chip" onclick="copySymbol('˚')">˚</span>
+        </div>
+        <div class="sym-label" data-i18n="flowers">Flowers</div>
+        <div class="chips" style="margin-bottom:.5rem">
+          <span class="chip" onclick="copySymbol('❀')">❀</span>
+          <span class="chip" onclick="copySymbol('✿')">✿</span>
+          <span class="chip" onclick="copySymbol('❁')">❁</span>
+          <span class="chip" onclick="copySymbol('✾')">✾</span>
+          <span class="chip" onclick="copySymbol('ꕥ')">ꕥ</span>
+        </div>
+        <div class="sym-label" data-i18n="arrows_deco">Arrows & Deco</div>
+        <div class="chips" style="margin-bottom:.5rem">
+          <span class="chip" onclick="copySymbol('←')">←</span>
+          <span class="chip" onclick="copySymbol('→')">→</span>
+          <span class="chip" onclick="copySymbol('➳')">➳</span>
+          <span class="chip" onclick="copySymbol('‹')">‹</span>
+          <span class="chip" onclick="copySymbol('›')">›</span>
+          <span class="chip" onclick="copySymbol('∞')">∞</span>
+          <span class="chip" onclick="copySymbol('~')">~</span>
+          <span class="chip" onclick="copySymbol('·')">·</span>
+        </div>
+        <div class="sym-label" data-i18n="misc">Misc</div>
+        <div class="chips" style="margin-bottom:.5rem">
+          <span class="chip" onclick="copySymbol('｡ﾟ')">｡ﾟ</span>
+          <span class="chip" onclick="copySymbol('･')">･</span>
+          <span class="chip" onclick="copySymbol('꒷꒦')">꒷꒦</span>
+          <span class="chip" onclick="copySymbol('₊˚ʚ')">₊˚ʚ</span>
+          <span class="chip" onclick="copySymbol('✩°。⋆')">✩°。⋆</span>
+          <span class="chip" onclick="copySymbol('ᗢ₊˚✧')">ᗢ₊˚✧</span>
+        </div>
+        <div id="copyFeedback" style="font-size:11px;color:var(--green);height:14px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /col-left -->
+
+<!-- ── MIDDLE: preview ── -->
+<div class="col col-mid">
+  <div class="preview-wrap">
+    <div class="pv-label">
+      <span data-i18n="preview">Preview</span>
+      <span data-i18n="click_edit">Click to edit</span>
+    </div>
+    <div class="pv-popup">
+      <div class="pv-popup-head">
+        <span class="pv-popup-uname">Sophey</span>
+        <span class="pv-popup-backbtn">Back To Profile</span>
+        <span class="pv-popup-closex">✕</span>
+      </div>
+      <div class="pv-popup-tabs">
+        <span class="pv-popup-tab">Message</span>
+        <span class="pv-popup-tab">Gallery ( )</span>
+        <span class="pv-popup-tab on">Gifts ( )</span>
+        <span class="pv-popup-tab">Send Gift</span>
+        <span class="pv-popup-tab">Unfriend</span>
+        <span class="pv-popup-tab">Report</span>
+      </div>
+      <div class="pv-card" id="previewCard">
+        <div class="pv-popup-sender">
+          <div class="pv-popup-sender-name">MissLarifari</div>
+          <div class="pv-popup-sender-date">May, 24 2026</div>
+        </div>
+        <div class="pv-popup-sep"></div>
+      <div class="pv-gift-img">
+        <img src="/gift.png" alt=""/>
+      </div>
+
+      <div id="pvDekoTop"    class="pvc" onclick="pvClick('dekoTop')"    style="font-size:11px;letter-spacing:4px;color:#777;margin-top:6px"></div>
+      <div id="pvTopRow"     class="pvc" onclick="pvClick('topText')"    style="font-size:13px;color:#aaa"></div>
+      <div id="pvMain"       class="pvc" onclick="pvClick('mainText')"   style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--pink)"></div>
+      <div id="pvBottom"     class="pvc" onclick="pvClick('bottomText')" style="font-size:12px;letter-spacing:2px;color:#888"></div>
+      <div id="pvKaomoji"    class="pvc" onclick="pvClick('kaomoji')"    style="font-size:1.1rem;color:var(--gold)"></div>
+      <div id="pvDekoBottom" class="pvc" onclick="pvClick('dekoBottom')" style="font-size:11px;letter-spacing:3px;color:#5c5c7a;margin-bottom:6px"></div>
+      </div><!-- /pv-card -->
+    </div><!-- /pv-popup -->
+    <div class="code-label" data-i18n="code">Code</div>
+    <div class="code-box" id="outputBox" onclick="copyCode()" title="click to copy" data-i18n-title="click_to_copy"></div>
+    <div class="opt-panel" id="optimizeTips">
+      <div class="opt-header" id="optHeader"></div>
+      <div id="optList"></div>
+    </div>
+    <div class="code-actions">
+      <button class="btn btn-copy" onclick="copyCode()" data-i18n="copy_code">📋 Copy Code</button>
+      <button class="btn btn-reset" onclick="resetAll()" data-i18n="reset_all">↺ Reset All</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── RIGHT: templates ── -->
+<div class="col col-right">
+  <div class="tpl-search">
+    <span class="tpl-search-icon">⌕</span>
+    <input type="text" id="tplSearch" placeholder="search templates…" oninput="filterTpl(this.value)" data-i18n-ph="ph_search"/>
+  </div>
+  <!-- EN -->
+  <div class="lang-panel on" id="lang-en">
+  </div><!-- /lang-en -->
+</div><!-- /col-right -->
+
+</div><!-- /app -->
+
+<!-- global footer -->
+<footer class="page-footer" data-i18n="disclaimer">Disclaimer: This tool is provided as-is, without any guarantees. I am not responsible for any errors, bugs, or character limit issues. Use at your own risk. All texts are just suggestions.</footer>
+
+<!-- color modal -->
+<div class="modal-bg" id="colorModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Pick a color</div>
+    <div class="swatches" id="modalSwatches"></div>
+    <div class="div"></div>
+    <label class="grad-toggle"><input type="checkbox" id="useGrad" onchange="updateGradUI()"/> <span data-i18n="gradient">Gradient</span></label>
+    <div id="gradSection">
+      <div class="grad-row">
+        <div>
+          <div class="grad-sub" data-i18n="color_1">Color 1</div>
+          <div class="color-row" style="margin-bottom:0">
+            <input type="color" id="grad1Picker" value="#ff71b8" oninput="syncGrad(0,this.value)"/>
+            <input type="text" id="grad1" value="#ff71b8" oninput="syncGrad(0,this.value)"/>
+          </div>
+        </div>
+        <div>
+          <div class="grad-sub" data-i18n="color_2">Color 2</div>
+          <div class="color-row" style="margin-bottom:0">
+            <input type="color" id="grad2Picker" value="#b388ff" oninput="syncGrad(1,this.value)"/>
+            <input type="text" id="grad2" value="#b388ff" oninput="syncGrad(1,this.value)"/>
+          </div>
+        </div>
+      </div>
+      <div class="grad-preview" id="gradPreview"></div>
+    </div>
+    <div class="div"></div>
+    <div class="color-row">
+      <input type="color" id="customPicker" value="#ff71b8" oninput="setCustomColor(this.value)"/>
+      <input type="text"  id="customHex"    value="#ff71b8" placeholder="#rrggbb" oninput="setCustomColor(this.value)"/>
+    </div>
+    <div class="modal-btns">
+      <button class="btn" onclick="applyColor()" style="border-color:var(--purple);color:var(--purple)" data-i18n="apply">✓ Apply</button>
+      <button class="btn" onclick="closeModal()" style="color:var(--muted)" data-i18n="cancel">Cancel</button>
+    </div>
+    <label class="nocolor">
+      <input type="checkbox" id="useNoColor" onchange="updateNoColorUI()"/>
+      <span data-i18n="no_color">No Color Tag</span> <span style="margin-left:.2rem;color:var(--muted)" data-i18n="saves_chars">· saves chars</span>
+    </label>
+  </div>
+</div>
+
+<script src="/templates.js"></script>
+<script src="/app.js"></script>
+<script>renderAllTemplates();initUILang();</script>
+</html>
