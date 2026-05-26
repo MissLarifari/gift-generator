@@ -73,6 +73,7 @@ const ICON_MAP = {
   drumstick:          'fa-solid fa-drumstick-bite',
   gem:                'fa-solid fa-gem',
   rainbow:            'fa-solid fa-rainbow',
+  'hat-wizard':       'fa-solid fa-hat-wizard',
 
   // brand icons
   discord:            'fa-brands fa-discord',

@@ -332,6 +332,7 @@ input[type="number"]{width:60px;}
 .chip.thanksgiving{border-color:#5a3a1a!important;color:#d97706!important;}
 .chip.anniv{border-color:#4a3a2a!important;color:#e8b4b8!important;}
 .chip.pride{border-color:#5a1f43!important;}
+.chip.wicked{border-color:#4a1f5a!important;color:#d946ef!important;}
 .chip-rainbow{
   background:linear-gradient(90deg,#ffadad,#ffd6a5,#fdffb6,#caffbf,#a0c4ff,#bdb2ff)!important;
   -webkit-background-clip:text!important;background-clip:text!important;
@@ -794,6 +795,7 @@ input[type="checkbox"]:focus-visible{
 [data-theme="light"] .chip.thanksgiving{border-color:#e0b890 !important;color:#9a3412 !important;}
 [data-theme="light"] .chip.anniv{border-color:#d8c098 !important;color:#92651f !important;}
 [data-theme="light"] .chip.pride{border-color:#e8a8c8 !important;}
+[data-theme="light"] .chip.wicked{border-color:#c8a8d8 !important;color:#a21caf !important;}
 [data-theme="light"] .chip-rainbow{
   background:linear-gradient(90deg,#d44d4d,#d97706,#a16207,#15803d,#1d4ed8,#7e22ce);
   -webkit-background-clip:text;background-clip:text;

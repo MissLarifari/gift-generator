@@ -4,6 +4,18 @@
 //   label = plain text title shown next to the icon
 const TEMPLATES = {
   en: [
+    { icon: 'hat-wizard', label: 'Wicked', titleStyle: 'color:#d946ef;text-shadow:0 0 12px rgba(217,70,239,.35)', chipExtra: 'wicked', items: [
+      ['no halo',         'lost my halo',     'i lost my halo on the way',         '.. somewhere fun probably ..'],
+      ['wicked mind',     'wicked thoughts',  'my mind goes places that',          '.. you would not believe ..'],
+      ['little devil',    'tiny devil',       'i look like trouble because',       '.. i am trouble actually ..'],
+      ['bad intentions',  'bad ideas only',   'i came with nothing but',           '.. very bad intentions ..'],
+      ['evil grin',       'evil smile',       'theres an evil little smile',       '.. waiting just for you ..'],
+      ['sinful',          'worth a sin',      'youre honestly worth a sin',        '.. or maybe even two ..'],
+      ['ruin you',        'not innocent',     'i have plans for you tonight',      '.. they are not innocent ..'],
+      ['naughty list',    'top of the list',  'theyre making extra space for me',  '.. on the naughty list ..'],
+      ['mischief',        'pure mischief',    'fully powered today by',            '.. mischief and nothing else ..'],
+      ['trouble',         'big trouble',      'someone should hang a sign on me',  '.. saying trouble incoming ..'],
+    ]},
     { icon: 'candy',   label: 'Sweet', titleStyle: 'color:#ff9ec7;text-shadow:0 0 12px rgba(255,158,199,.3)', items: [
       ['stay close',      'stay close',           'please always',         '.. stay close to me ..'],
       ['feel safe',       'you make me feel safe','every single day',      '.. thank you for that ..'],
