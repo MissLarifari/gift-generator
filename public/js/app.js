@@ -1446,8 +1446,9 @@ function toggleReorderMode(){
     btn.classList.toggle('on', reorderMode);
     const lbl = btn.querySelector('span[data-i18n]');
     if (lbl) {
-      lbl.setAttribute('data-i18n', reorderMode ? 'reorder_done' : 'reorder_btn');
-      lbl.textContent = t(reorderMode ? 'reorder_done' : 'reorder_btn');
+      const key = reorderMode ? 'reorder_done' : 'click_edit';
+      lbl.setAttribute('data-i18n', key);
+      lbl.textContent = t(key);
     }
   }
 }
