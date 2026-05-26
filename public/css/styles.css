@@ -841,37 +841,52 @@ input[type="checkbox"]:focus-visible{
 
 /* ── light theme ── */
 [data-theme="light"]{
-  /* dim mode — 4 brightness steps down from previous "light" theme */
-  --bg:#6e7382;          /* outer page — medium slate, not bright at all */
-  --s1:#7a8090;          /* main column surface */
-  --s2:#646977;          /* secondary panels */
-  --s3:#585d6b;          /* sunken / input bg */
-  --b1:#454a55;          /* dark borders for clear separation */
-  --b2:#363a44;
-  --text:#0d1020;        /* deep near-black for contrast on dim grey */
-  --muted:#1e2235;
-  --subtle:#15182a;
-  /* accents pushed dark so they sit on the mid-grey without glowing */
-  --pink:#921e5e;--purple:#4523a3;--gold:#574500;
-  --green:#1a4f1a;--red:#831616;--orange:#6a3800;
+  /* harmonious light mode — soft cool slate, no pure white */
+  --bg:#d4d8e0;          /* page bg — comfortable soft slate */
+  --s1:#dde1e8;          /* main column surface — slightly elevated */
+  --s2:#c6cad3;          /* secondary panels (sunken from columns) */
+  --s3:#b8bcc7;          /* inputs / deepest surface */
+  --b1:#8e94a0;          /* clear visible borders */
+  --b2:#737a87;
+  --text:#1a1e2d;        /* deep near-black w/ subtle blue */
+  --muted:#525767;
+  --subtle:#373b4a;
+  /* accents — saturated for clean contrast on soft slate */
+  --pink:#c4368a;--purple:#6a3ce0;--gold:#7e6800;
+  --green:#246924;--red:#aa2424;--orange:#8a5300;
 }
 [data-theme="light"] body{background:var(--bg);}
 [data-theme="light"] .topbar{
   background:var(--s1);border-bottom:1px solid var(--b1);
-  box-shadow:0 1px 3px rgba(30,35,55,.06);
+  box-shadow:0 2px 8px rgba(20,25,45,.08);
 }
 [data-theme="light"] .col-left,
-[data-theme="light"] .col-right{background:var(--s1);border-color:var(--b1);}
+[data-theme="light"] .col-right{
+  background:var(--s1);border-color:var(--b1);
+  box-shadow:0 1px 3px rgba(20,25,45,.05);
+}
 [data-theme="light"] .col-mid{background:var(--bg);}
 [data-theme="light"] .sec{border-bottom-color:var(--b1);}
-[data-theme="light"] .sec-head:hover{background:rgba(30,35,55,.04);}
+[data-theme="light"] .sec-head:hover{background:rgba(20,25,45,.04);}
 [data-theme="light"] .sec-title{color:var(--subtle);}
 [data-theme="light"] .col-toolbar{background:var(--s2);border-bottom-color:var(--b1);}
+[data-theme="light"] .pv-popup{background:#191c2b;border:1px solid #2a2d3f;}
+[data-theme="light"] .pv-card{background:#191c2b;}
+[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="number"]{
+  background:var(--s2);border-color:var(--b1);color:var(--text);
+  box-shadow:inset 0 1px 2px rgba(20,25,40,.08);
+}
+[data-theme="light"] input[type="text"]:focus,
+[data-theme="light"] input[type="number"]:focus{border-color:var(--purple);outline:none;box-shadow:0 0 0 2px rgba(106,60,224,.15);}
+[data-theme="light"] .chip{background:var(--s2);border-color:var(--b1);color:var(--text);}
+[data-theme="light"] .chip:hover{background:rgba(106,60,224,.08);border-color:var(--purple);color:var(--purple);}
 [data-theme="light"] .pv-popup{background:#1a1a2a;} /* keep preview dark like the game */
 [data-theme="light"] .ce-preview-popup{background:#1a1a2a;}
 [data-theme="light"] .code-box{
-  background:#4f5462;color:#e0e3eb;
+  background:#b0b5c0;color:#1a1e2d;
   border:1px solid var(--b1);
+  box-shadow:inset 0 1px 2px rgba(20,25,40,.1);
 }
 [data-theme="light"] .preview-wrap{background:var(--s2);border-color:var(--b1);}
 [data-theme="light"] .opt-panel{background:var(--s2);border-color:var(--b1);}
