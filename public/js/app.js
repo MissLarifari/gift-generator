@@ -1190,10 +1190,12 @@ function generate(){
   const pms=Math.max(0.8,parseInt(size)/20)+'rem';
   const pvMain=document.getElementById('pvMain');
   const mainB=document.getElementById('mainBold')?.checked, mainI=document.getElementById('mainItalic')?.checked;
-  // Serif display fonts often don't have 900 weight, so we layer a text-shadow trick to thicken visibly when Bold is on
-  const mainWeight = mainB ? '900' : '700';
+  // Make Bold/Italic clearly visible in preview:
+  // - default 600 → bold 900 gives a big weight jump (serif display fonts usually only have 400 + 700, so we also add an outline-style text-shadow)
+  // - italic falls back to a skew if the font has no italic glyphs
+  const mainWeight = mainB ? '900' : '600';
   const mainStyle = mainI ? 'italic' : 'normal';
-  const mainShadow = mainB ? `text-shadow:0.6px 0 0 currentColor, -0.3px 0 0 currentColor;` : '';
+  const mainShadow = mainB ? `text-shadow:1px 0 0 currentColor, -0.5px 0 0 currentColor;` : '';
   function setMainStyle(el){
     if(grads.mainText.on){el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text`;}
     else{el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`;}
