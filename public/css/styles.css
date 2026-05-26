@@ -99,20 +99,22 @@ a{color:inherit;text-decoration:none;}
 .tb-brand-sub a:hover{opacity:.75;}
 .tb-brand-sub .by-sep{color:var(--muted);}
 .tb-counter{
-  display:flex;align-items:center;gap:.6rem;
+  display:flex;align-items:center;justify-content:center;gap:.6rem;
   background:var(--s3);border:1px solid var(--b1);border-radius:20px;
   padding:6px 20px;transition:border-color .3s;
+  line-height:1;justify-self:center;
   justify-self:center;
   white-space:nowrap;
 }
 .tb-counter.warn{border-color:var(--orange);}
 .tb-counter.over{border-color:var(--red);}
+.tb-counter > *{display:inline-flex;align-items:center;line-height:1;}
 .tb-counter-label{font-size:12px;color:var(--muted);}
 .cv{font-size:17px;font-weight:700;color:#fff;transition:color .2s;line-height:1;}
 .cv.ok{color:var(--green);}
 .cv.warn-v{color:var(--orange);}
 .cv.over-v{color:var(--red);}
-.tb-sep{color:var(--b2);font-size:10px;margin:0 .2rem;}
+.tb-sep{color:var(--b2);font-size:10px;margin:0 .2rem;line-height:1;}
 .tb-right{
   display:flex;align-items:center;gap:1rem;
   justify-self:end;min-width:0;
