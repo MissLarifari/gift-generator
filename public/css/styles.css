@@ -483,7 +483,16 @@ input[type="number"]{width:60px;}
   box-shadow:0 2px 8px rgba(0,0,0,.4);
 }
 .pv-card.reorder-mode .pv-reorder{opacity:1;pointer-events:auto;}
-.pv-card.reorder-mode .pvc{padding-right:120px;}
+.pv-card.reorder-mode{gap:12px;padding-top:8px;}
+.pv-card.reorder-mode .pvc{
+  padding-right:110px;
+  padding-top:8px;padding-bottom:8px;
+  min-height:32px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.025);border-radius:6px;
+  margin:0 8px;
+}
+.pv-card.reorder-mode .pvc:empty{display:none;}
 .pv-arr{
   display:flex;align-items:center;justify-content:center;
   width:26px;height:22px;font-size:13px;font-weight:700;line-height:1;
