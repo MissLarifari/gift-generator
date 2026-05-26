@@ -207,6 +207,8 @@ a{color:inherit;text-decoration:none;}
 .tb-thanks:hover .tb-thanks-list > span:nth-child(10){animation-delay:.50s;}
 .tb-brand h1:has(.tb-brand-icon:hover) .tb-thanks-list > span:nth-child(11),
 .tb-thanks:hover .tb-thanks-list > span:nth-child(11){animation-delay:.55s;}
+.tb-brand h1:has(.tb-brand-icon:hover) .tb-thanks-list > span:nth-child(12),
+.tb-thanks:hover .tb-thanks-list > span:nth-child(12){animation-delay:.60s;}
 @keyframes thanks-fade-in{
   from{opacity:0;transform:translateY(-4px);}
   to{opacity:1;transform:translateY(0);}
