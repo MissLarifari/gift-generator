@@ -2,8 +2,21 @@
 
 A 3dxchat gift-message generator with live preview, code output, multi-language UI (EN/DE/FR/RU), and customizable templates.
 
-Prototype — by MissLarifari.
+By MissLarifari.
 Live: https://sophey.vodka/gift-generator/
+
+## Features
+
+- **Live preview** with click-to-edit lines and reorder/remove controls
+- **7 layouts** (Center, Inline, Compact, Framed, Minimal, Pyramid, Custom)
+- **Per-line ★ star toggle** for Pyramid layout (Deco Top / Top Line / Bottom Line)
+- **Themed template sections** — Sweet, Funny, Friends, Flirty, Dominant, Submissive, Flirty bold, Spicy, Voyeur, Aftercare, Funny / Chaotic, Friends / Roast, plus grouped **Vibes** (Goth / Dark, Drunk vibes, Soft / Cottagecore, Pride), **Holidays** (Christmas, Halloween, Easter, St Patricks, Valentine, Womens Day, 4th of July, Thanksgiving, Hanukkah, New Year), **Celebrations** (Wedding, Anniversary, Birthday)
+- **Auto-theming** — clicking a holiday/celebration template applies matching colors and clears deco/kaomoji so the byte budget stays under the 240 chars / 255 bytes limit
+- **Pride pastel rainbow** — main text gets a multi-color pastel gradient (capped at 3 segments to stay within the byte limit)
+- **Favorites** — star any template to pin it to the top
+- **Character + byte counter** with live warnings before you hit the 3dxchat limit
+- **Light & dark theme**
+- **Multi-language UI** — EN / DE / FR / RU
 
 ## Tech
 
@@ -23,10 +36,17 @@ Vanilla HTML/CSS/JS bundled by [Vite](https://vitejs.dev/). No framework, no bac
 ├── README.md
 │
 ├── public/                 # Static assets served as-is by Vite
-│   ├── app.js              # Main app logic + i18n
-│   ├── templates.js        # Template data + render
-│   ├── styles.css          # All styling
-│   ├── gift.png            # Gift image
+│   ├── js/
+│   │   ├── app.js          # Main app logic, i18n, theme functions
+│   │   ├── templates.js    # Template sections + render
+│   │   └── icons.js        # FontAwesome icon map + hydration
+│   ├── css/
+│   │   └── styles.css      # All styling (dark + light themes)
+│   ├── img/
+│   │   ├── gift.png        # Gift preview image
+│   │   └── flags/          # UI language flags
+│   ├── fontawesome/        # FA assets (self-hosted)
+│   ├── favicon.svg
 │   ├── _headers            # Netlify security headers
 │   └── _redirects          # Netlify redirect to sophey.vodka
 │

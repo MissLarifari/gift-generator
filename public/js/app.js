@@ -236,14 +236,12 @@ const I18N = {
     chars:'Chars', bytes:'Bytes',
     feedback_pre:'Feedback · ', feedback_post:' on Discord',
     howto_title:'How It Works',
-    howto_step1:'<b>Pick a layout</b> below — Center, Inline, Compact, Framed, Minimal or Pyramid. Each one arranges the lines differently.',
-    howto_step2:'<b>Edit each line.</b> A gift has six fields: <i>Deco top</i>, <i>Top line</i>, <i>Main text</i>, <i>Bottom line</i>, <i>Kaomoji</i> and <i>Deco bottom</i>. Type your own text or click a chip suggestion.',
-    howto_step3:'<b>Style each field</b> with the little color square next to the input — pick a color, a gradient, or toggle "no color" to save characters. Font toggle (Aa / αв / ꜱᴄ) switches normal, fancy or small caps.',
-    howto_step_reorder:'<b>Reorder or remove lines directly in the preview</b> — hover any line and use the <b>▲ / ▼</b> arrows to move it up or down, or the <b>✕</b> button to clear it. Works in Center, Framed, Minimal and Pyramid layouts. The generated code below updates instantly.',
-    howto_step4:'<b>Browse the templates</b> on the right — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday and more. One click fills all three text lines at once.',
-    howto_step5:'<b>Watch the counter</b> in the topbar. 3dxchat allows <b>240 chars / 255 bytes</b>. If it turns red, shorten text, drop a line, or remove a gradient.',
-    howto_step6:'<b>Copy the code</b> with the big button under the preview, then paste it in 3dxchat as a gift message. Done.',
-    howto_tip:'Tip — click any line in the live preview to jump straight to its input field.',
+    howto_step1:'<b>Pick a layout</b> — or choose <b>Custom</b> to write freely.',
+    howto_step2:'<b>Edit the text fields</b> on the left, or click a <b>template</b> on the right. ★ saves favorites.',
+    howto_step3:'<b>Style it</b> — click the color square for colors and gradients. Change fonts with Aa / αв / ꜱᴄ.',
+    howto_step_reorder:'<b>Reorder lines</b> in the preview — hover a line and use <b>▲ ▼</b> to move or <b>✕</b> to remove.',
+    howto_step6:'<b>Copy</b> the code and paste it in 3dxchat as a gift message. <b>Share</b> copies a link to your clipboard — that link contains your entire gift (text, colors, layout, fonts). Whoever opens it gets your gift loaded into their generator, ready to copy, edit, or share again.',
+    howto_tip:'Tip — click any line in the preview to edit it. The counter shows if your text fits.',
     layout:'Layout',
     layout_center:'Center', layout_inline:'Inline', layout_compact:'Compact',
     layout_framed:'Framed', layout_minimal:'Minimal', layout_pyramid:'Pyramid',
@@ -256,16 +254,15 @@ const I18N = {
     hearts:'Hearts', stars:'Stars', flowers:'Flowers', arrows_deco:'Arrows & Deco', misc:'Misc',
     ph_deco_top:'Deco top…', ph_top:'Top line…', ph_main:'Main text…',
     ph_bottom:'Bottom line…', ph_kao:'Kaomoji…', ph_deco_bottom:'Deco bottom…',
-    ph_search:'Search templates…',
     preview:'Preview', click_edit:'Click to edit', click_to_copy:'Click to copy',
     code:'Code', copy_code:'Copy Code', copied:'Copied!',
     tip_howto_title:'How It Works',
-    tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Gradients work best on the main text only.',
-    tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly.',
+    fav_empty:'Click ★ on any template to pin it here',
+    char_limit_tt:'3dxchat allows up to 240 characters and 255 bytes per gift message. Yellow = warning, red = over limit.',
+    tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Themed templates (Holidays, Celebrations, Vibes) apply matching colors automatically and clear deco lines to stay under the limit.',
+    tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly. In Pyramid layout, use the ★ checkbox on each line to wrap or unwrap it with stars.',
     disclaimer:'Disclaimer: This tool is provided as-is, without any guarantees. I am not responsible for any errors, bugs, or character limit issues. Use at your own risk. All texts are just suggestions.',
     disclaimer_short:'Tool without warranty — all texts are suggestions.',
-    prototype_badge:'PROTOTYPE',
-    prototype_thanks:'This is a prototype — thank you to everyone who uses it and supports me!',
     modal_color:'Color · ', gradient:'Gradient', color_1:'Color 1', color_2:'Color 2',
     apply:'Apply', cancel:'Cancel', no_color:'No Color Tag', saves_chars:'· saves chars',
     // dynamic optimize tips
@@ -283,7 +280,9 @@ const I18N = {
     opt_rm_kao:n=>`Remove Kaomoji — saves ~${n} chars`,
     opt_rm_dt:n=>`Remove Deco Top — saves ~${n} chars`,
     opt_rm_db:n=>`Remove Deco Bottom — saves ~${n} chars`,
+    opt_rm_font:(f,n)=>`Fancy font on ${f} adds ~${n} extra bytes — switch to normal to fit`,
     opt_remove:'remove',
+    opt_switch:'switch',
     fl_dekoTop:'Deco Top', fl_topText:'Top Line', fl_mainText:'Main Text',
     fl_bottomText:'Bottom Line', fl_kaomoji:'Kaomoji', fl_dekoBottom:'Deco Bottom',
   },
@@ -291,14 +290,12 @@ const I18N = {
     chars:'Zeichen', bytes:'Bytes',
     feedback_pre:'Feedback · ', feedback_post:' auf Discord',
     howto_title:'So funktioniert es',
-    howto_step1:'<b>Wähle ein Layout</b> unten — Zentriert, Inline, Kompakt, Rahmen, Minimal oder Pyramide. Jedes ordnet die Zeilen anders an.',
-    howto_step2:'<b>Bearbeite jede Zeile.</b> Ein Gift hat sechs Felder: <i>Deko oben</i>, <i>Obere Zeile</i>, <i>Haupttext</i>, <i>Untere Zeile</i>, <i>Kaomoji</i> und <i>Deko unten</i>. Schreib eigenen Text oder klick einen Vorschlag.',
-    howto_step3:'<b>Style jedes Feld</b> mit dem kleinen Farbquadrat neben dem Input — wähl eine Farbe, einen Verlauf, oder schalt "Kein Color-Tag" ein, um Zeichen zu sparen. Der Font-Toggle (Aa / αв / ꜱᴄ) wechselt zwischen normal, fancy und small caps.',
-    howto_step_reorder:'<b>Zeilen direkt in der Vorschau umsortieren oder entfernen</b> — fahr mit der Maus über eine Zeile und nutze die <b>▲ / ▼</b>-Pfeile, um sie nach oben oder unten zu verschieben, oder das <b>✕</b>, um sie zu leeren. Funktioniert in den Layouts Zentriert, Rahmen, Minimal und Pyramide. Der generierte Code unten aktualisiert sich sofort.',
-    howto_step4:'<b>Durchstöber die Vorlagen</b> rechts — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday und mehr. Ein Klick füllt alle drei Textzeilen auf einmal.',
-    howto_step5:'<b>Beobachte den Counter</b> in der Topbar. 3dxchat erlaubt <b>240 Zeichen / 255 Bytes</b>. Wird er rot, kürze den Text, lass eine Zeile weg oder entferne einen Verlauf.',
-    howto_step6:'<b>Kopiere den Code</b> mit dem großen Button unter der Vorschau und füg ihn als Gift-Nachricht in 3dxchat ein. Fertig.',
-    howto_tip:'Tipp — klick eine Zeile in der Live-Vorschau, um direkt zum passenden Feld zu springen.',
+    howto_step1:'<b>Wähle ein Layout</b> — oder <b>Eigenes</b> für komplett freies Schreiben.',
+    howto_step2:'<b>Bearbeite die Textfelder</b> links, oder klick eine <b>Vorlage</b> rechts. ★ speichert Favoriten.',
+    howto_step3:'<b>Style es</b> — klick das Farbquadrat für Farben und Verläufe. Schriftart wechseln mit Aa / αв / ꜱᴄ.',
+    howto_step_reorder:'<b>Zeilen umsortieren</b> in der Vorschau — fahr über eine Zeile und nutze <b>▲ ▼</b> zum Verschieben oder <b>✕</b> zum Entfernen.',
+    howto_step6:'<b>Kopiere</b> den Code und füg ihn in 3dxchat als Gift-Nachricht ein. <b>Share</b> kopiert dir einen Link in die Zwischenablage — der enthält dein komplettes Gift (Text, Farben, Layout, Schriftarten). Wer ihn öffnet, sieht dein Gift direkt in seinem Generator und kann es kopieren, bearbeiten oder selbst weitergeben.',
+    howto_tip:'Tipp — klick eine Zeile in der Vorschau, um sie zu bearbeiten. Der Counter zeigt, ob dein Text passt.',
     layout:'Layout',
     layout_center:'Zentriert', layout_inline:'Inline', layout_compact:'Kompakt',
     layout_framed:'Rahmen', layout_minimal:'Minimal', layout_pyramid:'Pyramide',
@@ -311,16 +308,15 @@ const I18N = {
     hearts:'Herzen', stars:'Sterne', flowers:'Blumen', arrows_deco:'Pfeile & Deko', misc:'Sonstige',
     ph_deco_top:'Deko oben…', ph_top:'Obere Zeile…', ph_main:'Haupttext…',
     ph_bottom:'Untere Zeile…', ph_kao:'Kaomoji…', ph_deco_bottom:'Deko unten…',
-    ph_search:'Vorlagen suchen…',
     preview:'Vorschau', click_edit:'Klicken zum Bearbeiten', click_to_copy:'Klicken zum Kopieren',
     code:'Code', copy_code:'Code kopieren', copied:'Kopiert!',
     tip_howto_title:'So funktioniert es',
-    tip_howto:'Verläufe und lange Deko-Zeilen brauchen viele Zeichen. Wird der Counter <span style="color:var(--red)">rot</span>, probier kürzeren Text, entferne Deko-Zeilen oder deaktiviere Verläufe. Verläufe funktionieren am besten nur beim Haupttext.',
-    tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt zum passenden Feld zu springen.',
+    fav_empty:'Klick ★ neben einer Vorlage, um sie hier zu speichern',
+    char_limit_tt:'3dxchat erlaubt max. 240 Zeichen und 255 Bytes pro Gift-Nachricht. Gelb = Warnung, Rot = überm Limit.',
+    tip_howto:'Verläufe und lange Deko-Zeilen brauchen viele Zeichen. Wird der Counter <span style="color:var(--red)">rot</span>, probier kürzeren Text, entferne Deko-Zeilen oder deaktiviere Verläufe. Themen-Vorlagen (Feiertage, Anlässe, Vibes) setzen automatisch passende Farben und leeren die Deko-Zeilen, damit du unterm Limit bleibst.',
+    tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt zum passenden Feld zu springen. Im Pyramid-Layout kannst du mit der ★-Checkbox pro Zeile entscheiden, ob die Sternchen drum kommen.',
     disclaimer:'Haftungsausschluss: Dieses Tool wird ohne Gewähr bereitgestellt. Ich übernehme keine Verantwortung für Fehler, Bugs oder Probleme mit dem Zeichenlimit. Benutzung auf eigene Gefahr. Alle Texte sind nur Vorschläge.',
     disclaimer_short:'Tool ohne Gewähr — alle Texte sind Vorschläge.',
-    prototype_badge:'PROTOTYP',
-    prototype_thanks:'Das ist ein Prototyp — danke an alle, die ihn nutzen und mich damit supporten!',
     modal_color:'Farbe · ', gradient:'Verlauf', color_1:'Farbe 1', color_2:'Farbe 2',
     apply:'Übernehmen', cancel:'Abbrechen', no_color:'Kein Color-Tag', saves_chars:'· spart Zeichen',
     opt_over:'Über dem Limit — kürze deine Nachricht',
@@ -337,7 +333,9 @@ const I18N = {
     opt_rm_kao:n=>`Kaomoji entfernen — spart ~${n} Zeichen`,
     opt_rm_dt:n=>`Deko oben entfernen — spart ~${n} Zeichen`,
     opt_rm_db:n=>`Deko unten entfernen — spart ~${n} Zeichen`,
+    opt_rm_font:(f,n)=>`Sonderschrift auf ${f} braucht ~${n} Extra-Bytes — wechsel zu Normal`,
     opt_remove:'entfernen',
+    opt_switch:'wechseln',
     fl_dekoTop:'Deko oben', fl_topText:'Obere Zeile', fl_mainText:'Haupttext',
     fl_bottomText:'Untere Zeile', fl_kaomoji:'Kaomoji', fl_dekoBottom:'Deko unten',
   },
@@ -345,14 +343,12 @@ const I18N = {
     chars:'Caractères', bytes:'Octets',
     feedback_pre:'Feedback · ', feedback_post:' sur Discord',
     howto_title:'Comment ça marche',
-    howto_step1:'<b>Choisis une disposition</b> en bas — Centré, En ligne, Compact, Encadré, Minimal ou Pyramide. Chacune arrange les lignes différemment.',
-    howto_step2:'<b>Modifie chaque ligne.</b> Un cadeau a six champs : <i>Déco haut</i>, <i>Ligne haut</i>, <i>Texte principal</i>, <i>Ligne bas</i>, <i>Kaomoji</i> et <i>Déco bas</i>. Tape ton propre texte ou clique une suggestion.',
-    howto_step3:'<b>Style chaque champ</b> avec le petit carré de couleur à côté du champ — choisis une couleur, un dégradé, ou active "Pas de couleur" pour économiser des caractères. Le toggle de police (Aa / αв / ꜱᴄ) bascule entre normal, fancy et petites majuscules.',
-    howto_step_reorder:'<b>Réordonne ou supprime les lignes directement dans l\'aperçu</b> — survole une ligne et utilise les flèches <b>▲ / ▼</b> pour la déplacer vers le haut ou le bas, ou le <b>✕</b> pour la vider. Fonctionne dans les dispositions Centré, Encadré, Minimal et Pyramide. Le code généré en dessous se met à jour immédiatement.',
-    howto_step4:'<b>Parcours les modèles</b> à droite — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday et plus. Un clic remplit les trois lignes de texte d\'un coup.',
-    howto_step5:'<b>Surveille le compteur</b> dans la topbar. 3dxchat permet <b>240 caractères / 255 octets</b>. S\'il devient rouge, raccourcis le texte, enlève une ligne ou retire un dégradé.',
-    howto_step6:'<b>Copie le code</b> avec le grand bouton sous l\'aperçu, puis colle-le dans 3dxchat comme message cadeau. C\'est fini.',
-    howto_tip:'Astuce — clique n\'importe quelle ligne dans l\'aperçu en direct pour sauter directement à son champ.',
+    howto_step1:'<b>Choisis une disposition</b> — ou <b>Perso</b> pour écrire librement.',
+    howto_step2:'<b>Modifie les champs</b> à gauche, ou clique un <b>modèle</b> à droite. ★ sauvegarde les favoris.',
+    howto_step3:'<b>Style</b> — clique le carré de couleur pour couleurs et dégradés. Change la police avec Aa / αв / ꜱᴄ.',
+    howto_step_reorder:'<b>Réordonne les lignes</b> dans l\'aperçu — survole une ligne et utilise <b>▲ ▼</b> pour déplacer ou <b>✕</b> pour supprimer.',
+    howto_step6:'<b>Copie</b> le code et colle-le dans 3dxchat comme message cadeau. <b>Share</b> copie un lien dans ton presse-papiers — il contient tout ton cadeau (texte, couleurs, mise en page, polices). Celui qui l\'ouvre voit ton cadeau directement dans son générateur, prêt à copier, modifier ou repartager.',
+    howto_tip:'Astuce — clique une ligne dans l\'aperçu pour la modifier. Le compteur montre si ton texte rentre.',
     layout:'Disposition',
     layout_center:'Centré', layout_inline:'En ligne', layout_compact:'Compact',
     layout_framed:'Encadré', layout_minimal:'Minimal', layout_pyramid:'Pyramide',
@@ -365,16 +361,15 @@ const I18N = {
     hearts:'Cœurs', stars:'Étoiles', flowers:'Fleurs', arrows_deco:'Flèches & déco', misc:'Divers',
     ph_deco_top:'Déco haut…', ph_top:'Ligne haut…', ph_main:'Texte principal…',
     ph_bottom:'Ligne bas…', ph_kao:'Kaomoji…', ph_deco_bottom:'Déco bas…',
-    ph_search:'Rechercher des modèles…',
     preview:'Aperçu', click_edit:'Cliquer pour modifier', click_to_copy:'Cliquer pour copier',
     code:'Code', copy_code:'Copier le code', copied:'Copié !',
     tip_howto_title:'Comment ça marche',
-    tip_howto:'Les dégradés et les longues lignes de déco utilisent beaucoup de caractères. Si le compteur devient <span style="color:var(--red)">rouge</span>, essaie un texte plus court, retire des lignes de déco ou désactive les dégradés. Les dégradés marchent mieux uniquement sur le texte principal.',
-    tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier.',
+    fav_empty:'Clique ★ sur un modèle pour l\'épingler ici',
+    char_limit_tt:'3dxchat autorise max. 240 caractères et 255 octets par message cadeau. Jaune = attention, rouge = au-delà.',
+    tip_howto:'Les dégradés et les longues lignes de déco utilisent beaucoup de caractères. Si le compteur devient <span style="color:var(--red)">rouge</span>, essaie un texte plus court, retire des lignes de déco ou désactive les dégradés. Les modèles à thème (Fêtes, Célébrations, Vibes) appliquent automatiquement les bonnes couleurs et vident les lignes de déco pour rester sous la limite.',
+    tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier. Dans le layout Pyramid, utilise la case ★ sur chaque ligne pour activer ou désactiver les étoiles.',
     disclaimer:'Avertissement : Cet outil est fourni tel quel, sans garantie. Je ne suis pas responsable des erreurs, bugs ou problèmes de limite de caractères. Utilisation à tes propres risques. Tous les textes ne sont que des suggestions.',
     disclaimer_short:'Outil sans garantie — tous les textes sont des suggestions.',
-    prototype_badge:'PROTOTYPE',
-    prototype_thanks:'Ceci est un prototype — merci à tous ceux qui l\'utilisent et me soutiennent !',
     modal_color:'Couleur · ', gradient:'Dégradé', color_1:'Couleur 1', color_2:'Couleur 2',
     apply:'Appliquer', cancel:'Annuler', no_color:'Pas de couleur', saves_chars:'· économise des caractères',
     opt_over:'Au-dessus de la limite — raccourcis ton message',
@@ -391,7 +386,9 @@ const I18N = {
     opt_rm_kao:n=>`Retirer Kaomoji — économise ~${n} caractères`,
     opt_rm_dt:n=>`Retirer Déco haut — économise ~${n} caractères`,
     opt_rm_db:n=>`Retirer Déco bas — économise ~${n} caractères`,
+    opt_rm_font:(f,n)=>`Police spéciale sur ${f} ajoute ~${n} octets en plus — passe à Normal`,
     opt_remove:'retirer',
+    opt_switch:'changer',
     fl_dekoTop:'Déco haut', fl_topText:'Ligne haut', fl_mainText:'Texte principal',
     fl_bottomText:'Ligne bas', fl_kaomoji:'Kaomoji', fl_dekoBottom:'Déco bas',
   },
@@ -399,14 +396,12 @@ const I18N = {
     chars:'Знаки', bytes:'Байты',
     feedback_pre:'Обратная связь · ', feedback_post:' в Discord',
     howto_title:'Как это работает',
-    howto_step1:'<b>Выбери макет</b> ниже — Центр, Строка, Компактный, Рамка, Минимал или Пирамида. Каждый располагает строки по-своему.',
-    howto_step2:'<b>Редактируй каждую строку.</b> У подарка шесть полей: <i>Декор сверху</i>, <i>Верхняя строка</i>, <i>Основной текст</i>, <i>Нижняя строка</i>, <i>Каомодзи</i> и <i>Декор снизу</i>. Введи свой текст или кликни по подсказке.',
-    howto_step3:'<b>Стилизуй каждое поле</b> маленьким цветным квадратом рядом с полем — выбери цвет, градиент или включи "Без цвета", чтобы сэкономить знаки. Переключатель шрифта (Aa / αв / ꜱᴄ) меняет обычный, фенси или малые прописные.',
-    howto_step_reorder:'<b>Меняй порядок или убирай строки прямо в предпросмотре</b> — наведи курсор на строку и используй стрелки <b>▲ / ▼</b>, чтобы переместить её вверх или вниз, или <b>✕</b>, чтобы очистить. Работает в макетах Центр, Рамка, Минимал и Пирамида. Код снизу обновляется мгновенно.',
-    howto_step4:'<b>Просмотри шаблоны</b> справа — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday и другие. Один клик заполняет все три строки сразу.',
-    howto_step5:'<b>Следи за счётчиком</b> в топбаре. 3dxchat позволяет <b>240 знаков / 255 байт</b>. Если он стал красным, сократи текст, убери строку или отключи градиент.',
-    howto_step6:'<b>Скопируй код</b> большой кнопкой под предпросмотром, затем вставь его в 3dxchat как сообщение подарка. Готово.',
-    howto_tip:'Совет — кликни по любой строке в живом предпросмотре, чтобы сразу перейти к её полю.',
+    howto_step1:'<b>Выбери макет</b> — или <b>Своё</b> для полной свободы.',
+    howto_step2:'<b>Редактируй поля</b> слева, или кликни <b>шаблон</b> справа. ★ сохраняет избранное.',
+    howto_step3:'<b>Стилизуй</b> — кликни цветной квадрат для цветов и градиентов. Меняй шрифт через Aa / αв / ꜱᴄ.',
+    howto_step_reorder:'<b>Переставляй строки</b> в предпросмотре — наведи на строку и используй <b>▲ ▼</b> для перемещения или <b>✕</b> для удаления.',
+    howto_step6:'<b>Скопируй</b> код и вставь его в 3dxchat как сообщение подарка. <b>Share</b> копирует ссылку в буфер обмена — в ней зашит весь твой подарок (текст, цвета, разметка, шрифты). Кто откроет ссылку, увидит твой подарок прямо в своём генераторе и сможет скопировать, изменить или поделиться им снова.',
+    howto_tip:'Совет — кликни строку в предпросмотре, чтобы её изменить. Счётчик показывает, влезает ли текст.',
     layout:'Макет',
     layout_center:'Центр', layout_inline:'Строка', layout_compact:'Компактный',
     layout_framed:'Рамка', layout_minimal:'Минимал', layout_pyramid:'Пирамида',
@@ -419,16 +414,15 @@ const I18N = {
     hearts:'Сердечки', stars:'Звёзды', flowers:'Цветы', arrows_deco:'Стрелки и декор', misc:'Разное',
     ph_deco_top:'Декор сверху…', ph_top:'Верхняя строка…', ph_main:'Основной текст…',
     ph_bottom:'Нижняя строка…', ph_kao:'Каомодзи…', ph_deco_bottom:'Декор снизу…',
-    ph_search:'Поиск шаблонов…',
     preview:'Предпросмотр', click_edit:'Нажми, чтобы редактировать', click_to_copy:'Нажми, чтобы скопировать',
     code:'Код', copy_code:'Скопировать код', copied:'Скопировано!',
     tip_howto_title:'Как это работает',
-    tip_howto:'Градиенты и длинные строки декора используют много знаков. Если счётчик стал <span style="color:var(--red)">красным</span>, попробуй сократить текст, убрать строки декора или отключить градиенты. Градиенты лучше работают только на основном тексте.',
-    tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую.',
+    fav_empty:'Нажми ★ на любом шаблоне, чтобы закрепить его здесь',
+    char_limit_tt:'3dxchat допускает до 240 знаков и 255 байт на сообщение подарка. Жёлтый = предупреждение, красный = за лимитом.',
+    tip_howto:'Градиенты и длинные строки декора используют много знаков. Если счётчик стал <span style="color:var(--red)">красным</span>, попробуй сократить текст, убрать строки декора или отключить градиенты. Тематические шаблоны (Праздники, Торжества, Вайбы) автоматически применяют подходящие цвета и очищают строки декора, чтобы остаться в пределах лимита.',
+    tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую. В макете Pyramid используй чекбокс ★ на каждой строке, чтобы включить или выключить звёздочки.',
     disclaimer:'Отказ от ответственности: этот инструмент предоставляется как есть, без каких-либо гарантий. Я не несу ответственности за ошибки, баги или проблемы с лимитом знаков. Используй на свой страх и риск. Все тексты — лишь предложения.',
     disclaimer_short:'Инструмент без гарантий — все тексты лишь предложения.',
-    prototype_badge:'ПРОТОТИП',
-    prototype_thanks:'Это прототип — спасибо всем, кто им пользуется и поддерживает меня!',
     modal_color:'Цвет · ', gradient:'Градиент', color_1:'Цвет 1', color_2:'Цвет 2',
     apply:'Применить', cancel:'Отмена', no_color:'Без цвета', saves_chars:'· экономит знаки',
     opt_over:'Превышен лимит — сократи сообщение',
@@ -445,7 +439,9 @@ const I18N = {
     opt_rm_kao:n=>`Убрать Каомодзи — экономит ~${n} знаков`,
     opt_rm_dt:n=>`Убрать Декор сверху — экономит ~${n} знаков`,
     opt_rm_db:n=>`Убрать Декор снизу — экономит ~${n} знаков`,
+    opt_rm_font:(f,n)=>`Спецшрифт на ${f} добавляет ~${n} лишних байтов — переключи на Обычный`,
     opt_remove:'убрать',
+    opt_switch:'сменить',
     fl_dekoTop:'Декор сверху', fl_topText:'Верхняя строка', fl_mainText:'Основной текст',
     fl_bottomText:'Нижняя строка', fl_kaomoji:'Каомодзи', fl_dekoBottom:'Декор снизу',
   }
@@ -484,25 +480,6 @@ function setUILang(lang){
   applyUILang();
 }
 function initUILang(){ applyUILang(); }
-function filterTpl(q) {
-  q = q.toLowerCase().trim();
-  document.querySelectorAll('.chip.t').forEach(c=>{
-    c.style.display = (!q || c.textContent.toLowerCase().includes(q)) ? '' : 'none';
-  });
-}
-
-// ── category filter ──
-let activeCat = null;
-function filterCategory(cat) {
-  if (activeCat === cat) { activeCat = null; } else { activeCat = cat; }
-  document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.toggle('on', b.dataset.cat === activeCat));
-  document.querySelectorAll('.col-right .sec').forEach(sec => {
-    if (!activeCat) { sec.style.display = ''; return; }
-    const label = sec.querySelector('.category-label');
-    sec.style.display = (label && label.textContent.toLowerCase().includes(activeCat.toLowerCase())) ? '' : 'none';
-  });
-}
-
 // ── favorites ──
 let favorites = [];
 try { favorites = JSON.parse(localStorage.getItem('giftFavs') || '[]'); } catch(e) { favorites = []; }
@@ -523,7 +500,11 @@ function isFav(main, top, bottom) {
 function renderFavPanel() {
   const panel = document.getElementById('favPanel');
   if (!panel) return;
-  if (!favorites.length) { panel.style.display = 'none'; return; }
+  if (!favorites.length) {
+    panel.style.display = '';
+    panel.querySelector('.chips').innerHTML = `<span class="fav-empty">${t('fav_empty')}</span>`;
+    return;
+  }
   panel.style.display = '';
   const chips = favorites.map(key => {
     const [main, top, bottom] = key.split('|');
@@ -542,6 +523,8 @@ function removeFav(key) {
 // ── layout ──
 let userHasEdited = false;
 let currentLayout = 'center';
+const pyramidStars = { dekoTop: true, topText: true, bottomText: true };
+function setPyramidStars(field, on){ pushUndo(); pyramidStars[field] = on; generate(); }
 const layoutDefaults = {
   center:  {dekoTop:'· ily ·←', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:'.. ･ ✦ ･ ..'},
   inline:  {dekoTop:'❀', topText:'you are', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:'.. ✦ ..'},
@@ -603,7 +586,14 @@ function applyLayout(lm) {
   }
   if(currentLayout==='minimal') return ord.filter(f=>f==='mainText'||f==='kaomoji').map(f=>lm[f]).filter(Boolean).join('\n');
   if(currentLayout==='pyramid'){
-    const pyrFmt={dekoTop:t=>'* '+t+' *',topText:t=>'　　* '+t+' *',bottomText:t=>'　　　　　　　　　　* '+t+' *',mainText:t=>t,kaomoji:t=>t};
+    const wrap = (indent, t, field) => pyramidStars[field] ? `${indent}* ${t} *` : `${indent}${t}`;
+    const pyrFmt={
+      dekoTop:    t => wrap('', t, 'dekoTop'),
+      topText:    t => wrap('　　', t, 'topText'),
+      bottomText: t => wrap('　　　　　　　　　　', t, 'bottomText'),
+      mainText:   t => t,
+      kaomoji:    t => t,
+    };
     const lines=[];
     ord.forEach(f=>{if(pyrFmt[f]&&lm[f]) lines.push(pyrFmt[f](lm[f]));});
     return lines.join('\n');
@@ -669,6 +659,26 @@ function gradientText(text,c1,c2){
   const r1=hexToRgb(c1),r2=hexToRgb(c2);
   if(words.length===1){const w=words[0];if(w.length<=2)return`<color=${c1}>${w}</color>`;const t=Math.ceil(w.length/3);const p=[w.slice(0,t),w.slice(t,t*2),w.slice(t*2)].filter(x=>x);return p.map((x,i)=>{const f=i/(p.length-1)||0;return`<color=${rgbToHex(r1.r+(r2.r-r1.r)*f,r1.g+(r2.g-r1.g)*f,r1.b+(r2.b-r1.b)*f)}>${x}</color>`;}).join('');}
   return words.map((w,i)=>{const f=i/(words.length-1);return`<color=${rgbToHex(r1.r+(r2.r-r1.r)*f,r1.g+(r2.g-r1.g)*f,r1.b+(r2.b-r1.b)*f)}>${w}</color>`;}).join(' ');
+}
+// pastel rainbow — for Pride. limits to 3 segments to stay under byte cap.
+const PRIDE_PALETTE=['#ffadad','#ffd6a5','#fdffb6','#caffbf','#a0c4ff','#bdb2ff'];
+function rainbowText(text){
+  const pick=n=>Array.from({length:n},(_,i)=>PRIDE_PALETTE[Math.round(i*(PRIDE_PALETTE.length-1)/(n-1||1))]);
+  const words=text.split(' ').filter(w=>w.length>0);
+  if(!words.length) return text;
+  if(words.length===1){
+    const w=words[0]; if(w.length<=2) return `<color=${PRIDE_PALETTE[0]}>${w}</color>`;
+    const t=Math.ceil(w.length/3);
+    const parts=[w.slice(0,t),w.slice(t,t*2),w.slice(t*2)].filter(Boolean);
+    const cols=pick(parts.length);
+    return parts.map((x,i)=>`<color=${cols[i]}>${x}</color>`).join('');
+  }
+  const n=Math.min(words.length,3);
+  const cols=pick(n);
+  // group words into n buckets so we cap color tags at 3
+  return words.map((w,i)=>{const b=Math.min(Math.floor(i*n/words.length),n-1);return{w,b};})
+    .reduce((acc,{w,b})=>{const last=acc[acc.length-1];if(last&&last.b===b){last.ws.push(w);}else{acc.push({b,ws:[w]});}return acc;},[])
+    .map(({b,ws})=>`<color=${cols[b]}>${ws.join(' ')}</color>`).join(' ');
 }
 // ── custom layout editor ──
 function ceApplyFont(style) {
@@ -857,7 +867,7 @@ function ceRenderPreview(code) {
   }).join('');
 }
 
-function colorTag(text,field){const g=grads[field];if(g?.on)return gradientText(text,g.c1,g.c2);if(noColor[field])return text;return`<color=${colors[field]}>${text}</color>`;}
+function colorTag(text,field){const g=grads[field];if(g?.rainbow)return rainbowText(text);if(g?.on)return gradientText(text,g.c1,g.c2);if(noColor[field])return text;return`<color=${colors[field]}>${text}</color>`;}
 
 // ── fonts ──
 const FM={'a':'α','b':'в','c':'¢','d':'∂','e':'є','f':'f','g':'g','h':'н','i':'ι','j':'נ','k':'к','l':'ℓ','m':'м','n':'η','o':'σ','p':'ρ','q':'q','r':'я','s':'ѕ','t':'т','u':'υ','v':'ν','w':'ω','x':'χ','y':'у','z':'z'};
@@ -900,7 +910,27 @@ function copySymbol(sym){
   toast._tid = setTimeout(() => toast.classList.remove('show'), 1800);
 }
 function setField(id,val){pushUndo();userHasEdited=true;document.getElementById(id).value=val;generate();}
-function setSpruch(main,top,bottom){pushUndo();userHasEdited=true;document.getElementById('mainText').value=main;document.getElementById('topText').value=top;document.getElementById('bottomText').value=bottom;generate();}
+let lastWasThemed = false;
+const DEFAULT_COLORS = { mainText:'#ff71b8', topText:'#8f8f8f', bottomText:'#8f8f8f' };
+function resetThemeColors(){
+  grads.mainText = { on:false, rainbow:false, c1:'#ff71b8', c2:'#b388ff' };
+  colors.mainText = DEFAULT_COLORS.mainText;
+  colors.topText = DEFAULT_COLORS.topText;
+  colors.bottomText = DEFAULT_COLORS.bottomText;
+  document.getElementById('btn_mainText').style.background = DEFAULT_COLORS.mainText;
+  document.getElementById('btn_topText').style.background = DEFAULT_COLORS.topText;
+  document.getElementById('btn_bottomText').style.background = DEFAULT_COLORS.bottomText;
+}
+function setSpruch(main,top,bottom){
+  pushUndo(); userHasEdited=true;
+  // if previous click was a themed template, revert to defaults so colors don't bleed across
+  if (lastWasThemed) { resetThemeColors(); lastWasThemed = false; }
+  if (grads.mainText) grads.mainText.rainbow=false;
+  document.getElementById('mainText').value=main;
+  document.getElementById('topText').value=top;
+  document.getElementById('bottomText').value=bottom;
+  generate();
+}
 function setBday(main,top,bottom){
   setSpruch(main,top,bottom);
   grads.mainText={on:true,c1:'#FFD700',c2:'#FF8C00'};
@@ -908,6 +938,49 @@ function setBday(main,top,bottom){
   document.getElementById('btn_mainText').style.background='linear-gradient(to right,#FFD700,#FF8C00)';
   document.getElementById('btn_topText').style.background='#FFD700';
   document.getElementById('btn_bottomText').style.background='#FFB300';
+  lastWasThemed = true;
+  generate();
+}
+function applyTheme(main,top,bottom,cMain,cTop,cBot){
+  setSpruch(main,top,bottom);
+  // clear deco + kaomoji to free byte budget for the themed text
+  ['dekoTop','dekoBottom','kaomoji'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  grads.mainText={on:false,c1:cMain,c2:cMain};
+  colors.mainText=cMain;colors.topText=cTop;colors.bottomText=cBot;
+  document.getElementById('btn_mainText').style.background=cMain;
+  document.getElementById('btn_topText').style.background=cTop;
+  document.getElementById('btn_bottomText').style.background=cBot;
+  lastWasThemed = true;
+  generate();
+}
+function setXmas(main,top,bottom){       applyTheme(main,top,bottom,'#ef4444','#16a34a','#f59e0b'); }
+function setHalloween(main,top,bottom){  applyTheme(main,top,bottom,'#fb923c','#a855f7','#7c3aed'); }
+function setEaster(main,top,bottom){     applyTheme(main,top,bottom,'#f9a8d4','#fde047','#86efac'); }
+function setValentine(main,top,bottom){  applyTheme(main,top,bottom,'#ff4d6d','#ff8fb3','#fbcfe8'); }
+function setWomansDay(main,top,bottom){  applyTheme(main,top,bottom,'#c084fc','#ec4899','#d8b4fe'); }
+function setJuly4(main,top,bottom){      applyTheme(main,top,bottom,'#ef4444','#1e40af','#3b82f6'); }
+function setHanukkah(main,top,bottom){   applyTheme(main,top,bottom,'#3b82f6','#e2e8f0','#93c5fd'); }
+function setStPatricks(main,top,bottom){ applyTheme(main,top,bottom,'#16a34a','#f59e0b','#4ade80'); }
+function setNewYear(main,top,bottom){    applyTheme(main,top,bottom,'#fbbf24','#cbd5e1','#fde047'); }
+function setWedding(main,top,bottom){    applyTheme(main,top,bottom,'#d4af37','#e8b4b8','#f5e6d3'); }
+function setSub(main,top,bottom){        applyTheme(main,top,bottom,'#ec4899','#6b21a8','#831843'); }
+function setAftercare(main,top,bottom){  applyTheme(main,top,bottom,'#fcd34d','#fbcfe8','#ddd6fe'); }
+function setGoth(main,top,bottom){       applyTheme(main,top,bottom,'#a855f7','#6b7280','#831843'); }
+function setDrunk(main,top,bottom){      applyTheme(main,top,bottom,'#f59e0b','#be185d','#fbbf24'); }
+function setSoft(main,top,bottom){       applyTheme(main,top,bottom,'#86efac','#fbcfe8','#fde68a'); }
+function setThanksgiving(main,top,bottom){ applyTheme(main,top,bottom,'#d97706','#92400e','#fbbf24'); }
+function setAnniv(main,top,bottom){      applyTheme(main,top,bottom,'#e8b4b8','#d4af37','#f9d5e5'); }
+function setPride(main,top,bottom){
+  setSpruch(main,top,bottom);
+  ['dekoTop','dekoBottom','kaomoji'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  // rainbow + fancy font would overflow the byte limit — force normal font on text fields
+  ['topText','mainText','bottomText'].forEach(f=>{ fieldFonts[f]='normal'; });
+  grads.mainText={on:true,rainbow:true,c1:'#ffadad',c2:'#bdb2ff'};
+  colors.topText='#f9a8d4';colors.bottomText='#a0c4ff';
+  document.getElementById('btn_mainText').style.background='linear-gradient(to right,#ffadad,#ffd6a5,#fdffb6,#caffbf,#a0c4ff,#bdb2ff)';
+  document.getElementById('btn_topText').style.background='#f9a8d4';
+  document.getElementById('btn_bottomText').style.background='#a0c4ff';
+  lastWasThemed = true;
   generate();
 }
 function setKaoMode(on){
@@ -975,7 +1048,11 @@ function resetAll(){
   // reset colors to defaults
   Object.assign(colors, {dekoTop:'#555555',topText:'#8f8f8f',mainText:'#ff71b8',bottomText:'#8f8f8f',kaomoji:'#ffd84d',dekoBottom:'#5c5c7a'});
   Object.keys(noColor).forEach(f => noColor[f] = false);
-  Object.keys(grads).forEach(f => { grads[f].on = false; grads[f].c1 = '#ff71b8'; grads[f].c2 = '#b388ff'; });
+  Object.keys(grads).forEach(f => { grads[f].on = false; grads[f].rainbow = false; grads[f].c1 = '#ff71b8'; grads[f].c2 = '#b388ff'; });
+  // reset theme tracking + per-field pyramid stars
+  lastWasThemed = false;
+  Object.keys(pyramidStars).forEach(f => { pyramidStars[f] = true; });
+  ['dekoTopStars','topStars','bottomStars'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = true; });
   // update color buttons
   ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f => {
     const btn = document.getElementById('btn_' + f);
@@ -1057,10 +1134,15 @@ function generate(){
 
   updateOptimizeTips(chars,bytes,lm,{dekoTop,topText,mainText:main,bottomText:bottom,kaomoji,dekoBottom});
 
-  // per-field char costs
+  // per-field char costs + clear-button sync
   Object.entries(lm).forEach(([f, v]) => {
     const badge = document.getElementById('fc_' + f);
     if (badge) badge.textContent = v ? v.length : 0;
+  });
+  FIELDS.forEach(f => {
+    const inp = document.getElementById(f);
+    const clr = inp?.nextElementSibling;
+    if (clr?.classList.contains('field-clear')) clr.classList.toggle('has-val', (inp.value||'').length > 0);
   });
 
   // font tooltips
@@ -1160,10 +1242,11 @@ function generate(){
       s.onmouseenter=()=>s.style.background='rgba(255,255,255,.05)';s.onmouseleave=()=>s.style.background='';s.onclick=()=>pvClick(fid);
       d.appendChild(s);return d;
     };
+    const star=(t,field)=>pyramidStars[field]?'* '+t+' *':t;
     const buildPyramidLine={
-      dekoTop:    ()=> dekoTop ? mkPL('* '+applyFont(dekoTop,fieldFonts.dekoTop)+' *',`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop','0') : null,
-      topText:    ()=> topText ? mkPL('* '+applyFont(topText,fieldFonts.topText)+' *',`color:${colors.topText};font-size:${st/14}rem`,'topText','2rem') : null,
-      bottomText: ()=> bottom ? mkPL('* '+applyFont(bottom,fieldFonts.bottomText)+' *',`color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText','7.5rem') : null,
+      dekoTop:    ()=> dekoTop ? mkPL(star(applyFont(dekoTop,fieldFonts.dekoTop),'dekoTop'),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop','0') : null,
+      topText:    ()=> topText ? mkPL(star(applyFont(topText,fieldFonts.topText),'topText'),`color:${colors.topText};font-size:${st/14}rem`,'topText','2rem') : null,
+      bottomText: ()=> bottom ? mkPL(star(applyFont(bottom,fieldFonts.bottomText),'bottomText'),`color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText','7.5rem') : null,
       mainText:   ()=>{
         if(!main) return null;
         const d=document.createElement('div');d.style.cssText='text-align:center;margin-top:8px;margin-bottom:3px;';
@@ -1215,10 +1298,27 @@ function updateOptimizeTips(chars,bytes,lm,raw){
   const panel=document.getElementById('optimizeTips');
   const header=document.getElementById('optHeader');
   const list=document.getElementById('optList');
-  if(chars<185){panel.style.display='none';return;}
+  const isOver=chars>240||bytes>255;
+  const isWarn=chars>210||bytes>230;
+  if(chars<185&&bytes<200){panel.style.display='none';return;}
   panel.style.display='block';
-  panel.className='opt-panel '+(chars>240?'over-state':chars>210?'warn-state':'');
+  panel.className='opt-panel '+(isOver?'over-state':isWarn?'warn-state':'');
   const tips=[];
+  const enc=new TextEncoder();
+
+  // ── font byte overhead analysis ──
+  Object.entries(fieldFonts).forEach(([field,font])=>{
+    if(font==='normal') return;
+    const text=raw[field]||'';
+    if(!text) return;
+    const normalBytes=enc.encode(text).length;
+    const styledBytes=enc.encode(applyFont(text,font)).length;
+    const overhead=styledBytes-normalBytes;
+    if(overhead>3){
+      if(bytes>220) tips.push({lvl:'action',field:field,fontAction:true,msg:t('opt_rm_font',fieldLabel(field),overhead)});
+      else tips.push({lvl:'warn',msg:t('opt_rm_font',fieldLabel(field),overhead)});
+    }
+  });
 
   // gradient overhead analysis
   Object.entries(grads).forEach(([field,g])=>{
@@ -1252,10 +1352,10 @@ function updateOptimizeTips(chars,bytes,lm,raw){
   if(raw.dekoTop&&raw.dekoTop.length>8&&/(.)\1{2,}/.test(raw.dekoTop)) tips.push({lvl:'tip',msg:t('opt_dup_deko')});
 
   // layout suggestion
-  if(chars>220&&currentLayout!=='minimal'&&currentLayout!=='compact') tips.push({lvl:'tip',msg:t('opt_layout')});
+  if((chars>220||bytes>240)&&currentLayout!=='minimal'&&currentLayout!=='compact') tips.push({lvl:'tip',msg:t('opt_layout')});
 
   // ── ACTION tips: one-click removal to save space ──
-  if(chars>210){
+  if(chars>210||bytes>230){
     if(raw.kaomoji){
       const save=lm.kaomoji?lm.kaomoji.length+1:raw.kaomoji.length;
       tips.push({lvl:'action',field:'kaomoji',msg:t('opt_rm_kao', save)});
@@ -1271,9 +1371,9 @@ function updateOptimizeTips(chars,bytes,lm,raw){
   }
 
   // render header
-  const headerIcon = chars>240 ? icon('ban') : chars>210 ? icon('warning') : icon('lightbulb');
-  header.innerHTML = `<span class="opt-header-icon">${headerIcon}</span><span>${chars>240?t('opt_over'):chars>210?t('opt_warn'):t('opt_info')}</span>`;
-  header.style.color=chars>240?'var(--red)':chars>210?'var(--orange)':'var(--subtle)';
+  const headerIcon = isOver ? icon('ban') : isWarn ? icon('warning') : icon('lightbulb');
+  header.innerHTML = `<span class="opt-header-icon">${headerIcon}</span><span>${isOver?t('opt_over'):isWarn?t('opt_warn'):t('opt_info')}</span>`;
+  header.style.color=isOver?'var(--red)':isWarn?'var(--orange)':'var(--subtle)';
 
   // render list
   list.innerHTML='';
@@ -1282,11 +1382,16 @@ function updateOptimizeTips(chars,bytes,lm,raw){
     if(tip.lvl==='action'){
       item.className='opt-item opt-act';
       item.style.color='var(--pink)';
-      item.innerHTML=`<span class="opt-icon">${icon('xmark')}</span><span>${tip.msg}</span><span class="opt-act-btn">${t('opt_remove')}</span>`;
-      item.onclick=()=>{
-        if(tip.field==='kaomoji') setKaoMode(false);
-        else { setField(tip.field,''); generate(); }
-      };
+      if(tip.fontAction){
+        item.innerHTML=`<span class="opt-icon">${icon('font')}</span><span>${tip.msg}</span><span class="opt-act-btn">${t('opt_switch')}</span>`;
+        item.onclick=()=>{ setFontStyle(tip.field,'normal'); };
+      } else {
+        item.innerHTML=`<span class="opt-icon">${icon('xmark')}</span><span>${tip.msg}</span><span class="opt-act-btn">${t('opt_remove')}</span>`;
+        item.onclick=()=>{
+          if(tip.field==='kaomoji') setKaoMode(false);
+          else { setField(tip.field,''); generate(); }
+        };
+      }
     } else {
       item.className='opt-item';
       const ic = tip.lvl==='warn' ? icon('warning') : tip.lvl==='info' ? icon('arrow-right') : '<span style="display:inline-block;width:.6em;text-align:center">·</span>';
@@ -1356,13 +1461,20 @@ function toggleTheme() {
   theme = theme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', theme);
   try { localStorage.setItem('theme', theme); } catch(e) {}
-  const icon = document.querySelector('#themeBtn .fa-icon');
-  if (icon) icon.setAttribute('data-icon', theme === 'dark' ? 'sun' : 'moon');
-  if (typeof hydrateIcons === 'function') hydrateIcons(document.getElementById('themeBtn'));
+  const ic = document.querySelector('#themeBtn .fa-icon');
+  if (ic) {
+    ic.classList.remove('fa-sun', 'fa-moon');
+    ic.classList.add(theme === 'dark' ? 'fa-sun' : 'fa-moon');
+    ic.setAttribute('data-icon', theme === 'dark' ? 'sun' : 'moon');
+  }
 }
 
 // apply on load
-if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+if (theme === 'light') {
+  document.documentElement.setAttribute('data-theme', 'light');
+  const ic = document.querySelector('#themeBtn .fa-icon');
+  if (ic) ic.setAttribute('data-icon', 'moon');
+}
 
 // ── keyboard shortcuts ──
 document.addEventListener('keydown', function(e) {
@@ -1395,13 +1507,70 @@ document.querySelectorAll('input[type="text"],input[type="number"]').forEach(el=
 // save state after every generate — debounced to avoid thrashing
 const _saveDebounced = debounce(saveGiftState, 200);
 
+// ── field clear buttons ──
+FIELDS.forEach(f => {
+  const input = document.getElementById(f);
+  if (!input) return;
+  const row = input.closest('.row');
+  if (!row) return;
+  const btn = document.createElement('span');
+  btn.className = 'field-clear';
+  btn.textContent = '✕';
+  btn.onclick = (e) => { e.stopPropagation(); setField(f, ''); };
+  row.insertBefore(btn, input.nextSibling);
+  // show/hide based on value
+  const sync = () => btn.classList.toggle('has-val', input.value.length > 0);
+  input.addEventListener('input', sync);
+  sync();
+});
+
 // custom editor sync
 document.getElementById('ceTextarea')?.addEventListener('input', ceSync);
 
-// ── init: restore saved state, then generate ──
+// keyboard shortcuts — Ctrl/Cmd + S (share), Ctrl/Cmd + Shift + C (copy code), Ctrl/Cmd + Z handled natively in inputs
+document.addEventListener('keydown', e => {
+  const mod = e.ctrlKey || e.metaKey;
+  if (!mod) return;
+  const tag = (e.target?.tagName || '').toLowerCase();
+  const inField = tag === 'input' || tag === 'textarea';
+  // Ctrl+S → Share
+  if (e.key === 's' && !e.shiftKey) {
+    e.preventDefault();
+    if (typeof shareGift === 'function') shareGift();
+    return;
+  }
+  // Ctrl+Shift+C → Copy code (avoid clashing with browser default copy)
+  if (e.key === 'C' && e.shiftKey) {
+    e.preventDefault();
+    if (typeof copyCode === 'function') copyCode();
+    return;
+  }
+  // Ctrl+Z when NOT in an input → undo (so it doesn't interfere with text-editing undo)
+  if (e.key === 'z' && !inField && !e.shiftKey) {
+    e.preventDefault();
+    if (typeof undo === 'function') undo();
+  }
+});
+
+// restore section open/closed states from localStorage
+document.querySelectorAll('.sec[id]').forEach(sec => {
+  try {
+    const saved = localStorage.getItem('sec_' + sec.id);
+    if (saved === null) return;
+    const head = sec.querySelector('.sec-head');
+    const body = sec.querySelector('.sec-body');
+    if (!head || !body) return;
+    if (saved === '1') { head.classList.add('open'); body.classList.add('open'); }
+    else { head.classList.remove('open'); body.classList.remove('open'); }
+  } catch(e) {}
+});
+// initial favorites render so the empty-state hint shows
+renderFavPanel();
+
+// ── init: fresh load every F5, only restore from shared URL (#g=…) ──
+try { localStorage.removeItem('giftState'); } catch(e) {}
 const hadURLState = loadFromURL();
-const hadSavedState = hadURLState || restoreGiftState();
-if (hadSavedState) {
+if (hadURLState) {
   userHasEdited = true;
 } else {
   // fresh load — fill fields with the default layout's demo texts
@@ -1409,5 +1578,3 @@ if (hadSavedState) {
   if (d) ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f => document.getElementById(f).value = d[f]);
 }
 generate();
-// first save (so even the default state is stored)
-if (!hadSavedState) saveGiftState();

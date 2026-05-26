@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Gift Generator · 3dxchat</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
 <!-- Fontawesome Free (self-hosted, no external CDN) -->
 <link rel="stylesheet" href="/fontawesome/css/fontawesome.min.css"/>
 <link rel="stylesheet" href="/fontawesome/css/solid.min.css"/>
@@ -17,7 +18,6 @@
 <div class="topbar">
   <div class="tb-brand">
     <h1><i class="fa-icon tb-brand-icon" data-icon="gift"></i> Gift Generator</h1>
-    <span class="tb-proto" data-i18n="prototype_badge" title="Prototype — work in progress">PROTOTYPE</span>
     <span class="tb-trust tb-trust-notrack" title="No tracking, no analytics, no cookies, no external scripts."><i class="fa-icon" data-icon="shield-halved"></i> No Tracking</span>
     <div class="tb-brand-sep"></div>
     <span class="tb-brand-sub">
@@ -25,7 +25,7 @@
       <span class="by-sep"> · by </span><a href="https://sophey.vodka/lari" target="_blank">MissLarifari</a>
     </span>
   </div>
-  <div class="tb-counter" id="counterBar">
+  <div class="tb-counter" id="counterBar" data-i18n-title="char_limit_tt" title="3dxchat allows up to 240 characters and 255 bytes per gift message. Yellow = warning, red = over limit.">
     <span class="tb-counter-label" data-i18n="chars">Chars</span>
     <span class="cv ok" id="charCount">0</span>
     <span class="tb-sep">/</span>
@@ -48,9 +48,6 @@
   </div>
 </div>
 
-<!-- proto notice (under topbar) -->
-<div class="proto-notice"><i class="fa-icon proto-notice-icon" data-icon="heart"></i> <span data-i18n="prototype_thanks">This is a prototype — thank you to everyone who uses it and supports me!</span></div>
-
 <!-- app -->
 <div class="app">
 
@@ -59,54 +56,46 @@
 
   <!-- How it works -->
   <div class="sec" id="sec-howto">
-    <div class="sec-head open" onclick="toggleSec(this)">
+    <div class="sec-head" onclick="toggleSec(this)">
       <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="info"></i> <span data-i18n="howto_title">How It Works</span></span>
       <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body open">
+    <div class="sec-body">
       <div class="sec-inner">
         <div class="howto">
           <div class="howto-row">
             <span class="howto-step">1</span>
-            <div data-i18n-html="howto_step1"><b>Pick a layout</b> below — center, inline, compact, framed, minimal or pyramid. Each one arranges the lines differently.</div>
+            <div data-i18n-html="howto_step1"><b>Pick a layout</b> — or choose <b>Custom</b> to write freely.</div>
           </div>
           <div class="howto-row">
             <span class="howto-step">2</span>
-            <div data-i18n-html="howto_step2"><b>Edit each line.</b> A gift has six fields: <i>Deco top</i>, <i>Top line</i>, <i>Main text</i>, <i>Bottom line</i>, <i>Kaomoji</i> and <i>Deco bottom</i>. Type your own text or click a chip suggestion.</div>
+            <div data-i18n-html="howto_step2"><b>Edit the text fields</b> on the left, or click a <b>template</b> on the right. ★ saves favorites.</div>
           </div>
           <div class="howto-row">
             <span class="howto-step">3</span>
-            <div data-i18n-html="howto_step3"><b>Style each field</b> with the little color square next to the input — pick a color, a gradient, or toggle "no color" to save characters. Font toggle (Aa / αв / ꜱᴄ) switches normal, fancy or small caps.</div>
+            <div data-i18n-html="howto_step3"><b>Style it</b> — click the color square for colors and gradients. Change fonts with Aa / αв / ꜱᴄ.</div>
           </div>
           <div class="howto-row howto-row--highlight">
             <span class="howto-step">4</span>
-            <div data-i18n-html="howto_step_reorder"><b>Reorder or remove lines directly in the preview</b> — hover any line and use the <b>▲ / ▼</b> arrows to move it up or down, or the <b>✕</b> button to clear it. Works in Center, Framed, Minimal and Pyramid layouts. The generated code below updates instantly.</div>
+            <div data-i18n-html="howto_step_reorder"><b>Reorder lines</b> in the preview — hover a line and use <b>▲ ▼</b> to move or <b>✕</b> to remove.</div>
           </div>
           <div class="howto-row">
             <span class="howto-step">5</span>
-            <div data-i18n-html="howto_step4"><b>Browse the templates</b> on the right — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday and more. One click fills all three text lines at once.</div>
+            <div data-i18n-html="howto_step6"><b>Copy</b> the code and paste it in 3dxchat as a gift message. <b>Share</b> creates a link for others.</div>
           </div>
-          <div class="howto-row">
-            <span class="howto-step">6</span>
-            <div data-i18n-html="howto_step5"><b>Watch the counter</b> in the topbar. 3dxchat allows <b>240 chars / 255 bytes</b>. If it turns red, shorten text, drop a line, or remove a gradient.</div>
-          </div>
-          <div class="howto-row">
-            <span class="howto-step">7</span>
-            <div data-i18n-html="howto_step6"><b>Copy the code</b> with the big button under the preview, then paste it in 3dxchat as a gift message. Done.</div>
-          </div>
-          <div class="howto-tip"><i class="fa-icon" data-icon="lightbulb"></i> <span data-i18n="howto_tip">Tip — click any line in the live preview to jump straight to its input field.</span></div>
+          <div class="howto-tip"><i class="fa-icon" data-icon="lightbulb"></i> <span data-i18n="howto_tip">Tip — click any line in the preview to edit it. The counter shows if your text fits.</span></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Layout -->
-  <div class="sec">
-    <div class="sec-head open" onclick="toggleSec(this)">
+  <div class="sec" id="sec-layout">
+    <div class="sec-head" onclick="toggleSec(this)">
       <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="layout"></i> <span data-i18n="layout">Layout</span></span>
       <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body open">
+    <div class="sec-body">
       <div class="sec-inner">
         <div class="layout-grid">
           <div class="lbtn on" id="lay_center"  onclick="setLayout('center')"  data-i18n="layout_center">Center</div>
@@ -122,12 +111,12 @@
   </div>
 
   <!-- Deco top -->
-  <div class="sec">
-    <div class="sec-head open" onclick="toggleSec(this)">
+  <div class="sec" id="sec-decoTop">
+    <div class="sec-head" onclick="toggleSec(this)">
       <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="star"></i> <span data-i18n="deco_top">Deco Top</span></span>
       <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body open">
+    <div class="sec-body">
       <div class="sec-inner">
         <div class="field">
           <div class="chips">
@@ -170,6 +159,9 @@
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
             <input type="number" id="sizeDekoTop" value="12"/>
+            <label title="Pyramid layout: wrap line in * X *" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle);margin-left:6px;">
+              <input type="checkbox" id="dekoTopStars" checked onchange="setPyramidStars('dekoTop',this.checked)"/> ★
+            </label>
             <span class="fc-badge" id="fc_dekoTop" title="Chars used">0</span>
           </div>
         </div>
@@ -178,12 +170,12 @@
   </div>
 
   <!-- Top line -->
-  <div class="sec">
-    <div class="sec-head open" onclick="toggleSec(this)">
+  <div class="sec" id="sec-topText">
+    <div class="sec-head" onclick="toggleSec(this)">
       <span class="sec-title" data-i18n="top_line">Top Line</span>
       <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body open">
+    <div class="sec-body">
       <div class="sec-inner">
         <div class="field">
           <div class="row">
@@ -192,10 +184,13 @@
           </div>
           <div class="meta" style="margin-bottom:.4rem">
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="topBold" onchange="generate()" style="width:auto;margin:0"/> <b data-i18n="bold">Bold</b>
+              <input type="checkbox" id="topBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
             </label>
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="topItalic" onchange="generate()" style="width:auto;margin:0"/> <i data-i18n="italic">Italic</i>
+              <input type="checkbox" id="topItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
+            </label>
+            <label title="Pyramid layout: wrap line in * X *" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="topStars" checked onchange="setPyramidStars('topText',this.checked)"/> ★
             </label>
           </div>
           <div class="meta">
@@ -215,12 +210,12 @@
   </div>
 
   <!-- Main text -->
-  <div class="sec">
-    <div class="sec-head open" onclick="toggleSec(this)">
+  <div class="sec" id="sec-mainText">
+    <div class="sec-head" onclick="toggleSec(this)">
       <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="asterisk"></i> <span data-i18n="main_text">Main Text</span></span>
       <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body open">
+    <div class="sec-body">
       <div class="sec-inner">
         <div class="field">
           <div class="row">
@@ -229,10 +224,10 @@
           </div>
           <div class="meta" style="margin-bottom:.4rem">
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="mainBold" onchange="generate()" style="width:auto;margin:0"/> <b data-i18n="bold">Bold</b>
+              <input type="checkbox" id="mainBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
             </label>
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="mainItalic" onchange="generate()" style="width:auto;margin:0"/> <i data-i18n="italic">Italic</i>
+              <input type="checkbox" id="mainItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
             </label>
           </div>
           <div class="meta">
@@ -252,12 +247,12 @@
   </div>
 
   <!-- Bottom line -->
-  <div class="sec">
-    <div class="sec-head open" onclick="toggleSec(this)">
+  <div class="sec" id="sec-bottomText">
+    <div class="sec-head" onclick="toggleSec(this)">
       <span class="sec-title" data-i18n="bottom_line">Bottom Line</span>
       <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body open">
+    <div class="sec-body">
       <div class="sec-inner">
         <div class="field">
           <div class="row">
@@ -266,10 +261,13 @@
           </div>
           <div class="meta" style="margin-bottom:.4rem">
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="bottomBold" onchange="generate()" style="width:auto;margin:0"/> <b data-i18n="bold">Bold</b>
+              <input type="checkbox" id="bottomBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
             </label>
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="bottomItalic" onchange="generate()" style="width:auto;margin:0"/> <i data-i18n="italic">Italic</i>
+              <input type="checkbox" id="bottomItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
+            </label>
+            <label title="Pyramid layout: wrap line in * X *" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="bottomStars" checked onchange="setPyramidStars('bottomText',this.checked)"/> ★
             </label>
           </div>
           <div class="meta">
@@ -289,12 +287,12 @@
   </div>
 
   <!-- Kaomoji / Emoji -->
-  <div class="sec">
-    <div class="sec-head open" onclick="toggleSec(this)">
+  <div class="sec" id="sec-kaomoji">
+    <div class="sec-head" onclick="toggleSec(this)">
       <span class="sec-title"><span class="sec-title-icon">(◕‿◕)</span> <span data-i18n="kaomoji">Kaomoji</span></span>
       <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body open">
+    <div class="sec-body">
       <div class="sec-inner">
         <div class="kao-toggle">
           <span class="chip on" id="kao_on"  onclick="setKaoMode(true)"><i class="fa-icon" data-icon="check"></i> <span data-i18n="with_kao">With</span></span>
@@ -347,12 +345,12 @@
   </div>
 
   <!-- Deco bottom -->
-  <div class="sec">
-    <div class="sec-head open" onclick="toggleSec(this)">
+  <div class="sec" id="sec-decoBottom">
+    <div class="sec-head" onclick="toggleSec(this)">
       <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="star"></i> <span data-i18n="deco_bottom">Deco Bottom</span></span>
       <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body open">
+    <div class="sec-body">
       <div class="sec-inner">
         <div class="field">
           <div class="chips">
@@ -580,20 +578,6 @@
 
 <!-- ── RIGHT: templates ── -->
 <div class="col col-right">
-  <div class="tpl-search">
-    <span class="tpl-search-icon"><i class="fa-icon" data-icon="search"></i></span>
-    <input type="text" id="tplSearch" placeholder="search templates…" oninput="filterTpl(this.value)" data-i18n-ph="ph_search"/>
-  </div>
-  <div class="cat-filters">
-    <span class="cat-filter-btn" data-cat="Sweet" onclick="filterCategory('Sweet')">Sweet</span>
-    <span class="cat-filter-btn" data-cat="Funny" onclick="filterCategory('Funny')">Funny</span>
-    <span class="cat-filter-btn" data-cat="Friends" onclick="filterCategory('Friends')">Friends</span>
-    <span class="cat-filter-btn" data-cat="Flirty" onclick="filterCategory('Flirty')">Flirty</span>
-    <span class="cat-filter-btn" data-cat="Dominant" onclick="filterCategory('Dominant')">Dom</span>
-    <span class="cat-filter-btn" data-cat="Spicy" onclick="filterCategory('Spicy')">Spicy</span>
-    <span class="cat-filter-btn" data-cat="Roast" onclick="filterCategory('Roast')">Roast</span>
-    <span class="cat-filter-btn" data-cat="Birthday" onclick="filterCategory('Birthday')">Bday</span>
-  </div>
   <div id="favPanel" style="display:none" class="fav-panel">
     <div class="fav-header"><i class="fa-icon" data-icon="heart"></i> Favorites</div>
     <div class="chips"></div>
@@ -606,7 +590,12 @@
 </div><!-- /app -->
 
 <!-- global footer -->
-<footer class="page-footer" data-i18n="disclaimer">Disclaimer: This tool is provided as-is, without any guarantees. I am not responsible for any errors, bugs, or character limit issues. Use at your own risk. All texts are just suggestions.</footer>
+<footer class="page-footer">
+  <details>
+    <summary data-i18n="disclaimer_short">Tool without warranty — all texts are suggestions.</summary>
+    <p data-i18n="disclaimer">Disclaimer: This tool is provided as-is, without any guarantees. I am not responsible for any errors, bugs, or character limit issues. Use at your own risk. All texts are just suggestions.</p>
+  </details>
+</footer>
 
 <!-- color modal -->
 <div class="modal-bg" id="colorModal">
