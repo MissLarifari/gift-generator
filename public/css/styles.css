@@ -841,19 +841,19 @@ input[type="checkbox"]:focus-visible{
 
 /* ── light theme ── */
 [data-theme="light"]{
-  /* dim/soft surfaces — significantly darker than typical "light" themes */
-  --bg:#bcc1cc;          /* outer page — muted slate, not white */
-  --s1:#c8ccd6;          /* main column surface — comfortably dim */
-  --s2:#b4b9c4;          /* secondary panels — slightly darker than columns */
-  --s3:#a8aebb;          /* sunken / input bg */
-  --b1:#8a90a0;          /* clearly visible borders */
-  --b2:#737888;
-  --text:#15182a;        /* near-black text for max contrast on dim bg */
-  --muted:#4a4f60;
-  --subtle:#2e3344;
-  /* accents — saturated enough to read on the dim bg */
-  --pink:#b8327a;--purple:#5a35cc;--gold:#7a6300;
-  --green:#236923;--red:#a82020;--orange:#8f4f00;
+  /* dim mode — 4 brightness steps down from previous "light" theme */
+  --bg:#6e7382;          /* outer page — medium slate, not bright at all */
+  --s1:#7a8090;          /* main column surface */
+  --s2:#646977;          /* secondary panels */
+  --s3:#585d6b;          /* sunken / input bg */
+  --b1:#454a55;          /* dark borders for clear separation */
+  --b2:#363a44;
+  --text:#0d1020;        /* deep near-black for contrast on dim grey */
+  --muted:#1e2235;
+  --subtle:#15182a;
+  /* accents pushed dark so they sit on the mid-grey without glowing */
+  --pink:#921e5e;--purple:#4523a3;--gold:#574500;
+  --green:#1a4f1a;--red:#831616;--orange:#6a3800;
 }
 [data-theme="light"] body{background:var(--bg);}
 [data-theme="light"] .topbar{
@@ -870,7 +870,7 @@ input[type="checkbox"]:focus-visible{
 [data-theme="light"] .pv-popup{background:#1a1a2a;} /* keep preview dark like the game */
 [data-theme="light"] .ce-preview-popup{background:#1a1a2a;}
 [data-theme="light"] .code-box{
-  background:#9ea4b0;color:#15182a;
+  background:#4f5462;color:#e0e3eb;
   border:1px solid var(--b1);
 }
 [data-theme="light"] .preview-wrap{background:var(--s2);border-color:var(--b1);}
