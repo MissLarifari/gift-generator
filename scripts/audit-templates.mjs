@@ -14,9 +14,30 @@ if (!m) throw new Error('Could not locate TEMPLATES object in templates.js');
 const TEMPLATES = eval('(' + m[1].replace(/;\s*$/, '') + ')');
 
 // ── mirror constants from app.js ──
-const DEFAULT_KAO    = '(❀◡❀)';
-const DEFAULT_DEKO_T = '· ily ·←';
-const DEFAULT_DEKO_B = '.. ･ ✦ ･ ..';
+const DEFAULT_DECOS = { dekoTop:'· ily ·←', kaomoji:'(❀◡❀)', dekoBottom:'.. ･ ✦ ･ ..' };
+
+// Per-theme deco/kaomoji presets — must stay in sync with app.js
+const THEME_DECOS = {
+  setBday:        { dekoTop:'· ✦ ✦ ✦ ·', kaomoji:'\\(°◡°)/',  dekoBottom:'.. ✦ · ✦ ..' },
+  setXmas:        { dekoTop:'· ❄ ✦ ❄ ·', kaomoji:'(◕‿◕)❄',     dekoBottom:'.. ❄ · ❄ ..' },
+  setHalloween:   { dekoTop:'· ✦ ◯ ✦ ·', kaomoji:'(◕ω◕)',      dekoBottom:'.. ◯ ✦ ◯ ..' },
+  setEaster:      { dekoTop:'· ✿ ✦ ✿ ·', kaomoji:'(◕ω◕)♡',     dekoBottom:'.. ✿ · ✿ ..' },
+  setValentine:   { dekoTop:'· ♡ ✦ ♡ ·', kaomoji:'(˘◡˘)♡',     dekoBottom:'.. ♡ · ♡ ..' },
+  setWomansDay:   { dekoTop:'· ✿ ♥ ✿ ·', kaomoji:'(◕‿◕)♥',     dekoBottom:'.. ✿ · ✿ ..' },
+  setJuly4:       { dekoTop:'· ★ ✦ ★ ·', kaomoji:'(★‿★)',      dekoBottom:'.. ★ · ★ ..' },
+  setHanukkah:    { dekoTop:'· ✦ ✡ ✦ ·', kaomoji:'(◕‿◕)',      dekoBottom:'.. ✡ · ✡ ..' },
+  setStPatricks:  { dekoTop:'· ☘ ✦ ☘ ·', kaomoji:'(◕‿◕)☘',     dekoBottom:'.. ☘ · ☘ ..' },
+  setNewYear:     { dekoTop:'· ★ ✦ ★ ·', kaomoji:'\\(°◡°)/',   dekoBottom:'.. ★ · ★ ..' },
+  setWedding:     { dekoTop:'· ❀ ✦ ❀ ·', kaomoji:'(◡‿◡)♡',     dekoBottom:'.. ❀ · ❀ ..' },
+  setSub:         { dekoTop:'· ♡ ✦ ♡ ·', kaomoji:'(◡ω◡)♡',     dekoBottom:'.. ♡ · ♡ ..' },
+  setAftercare:   { dekoTop:'· ✦ ♡ ✦ ·', kaomoji:'(´◡`)♡',     dekoBottom:'.. ♡ ✦ ♡ ..' },
+  setGoth:        { dekoTop:'· ☾ ✦ ☾ ·', kaomoji:'(◉ω◉)',      dekoBottom:'.. ☾ · ☾ ..' },
+  setDrunk:       { dekoTop:'· ✦ ✿ ✦ ·', kaomoji:'(￣▽￣)~*',    dekoBottom:'.. ✿ · ✿ ..' },
+  setSoft:        { dekoTop:'· ✿ ✦ ✿ ·', kaomoji:'(◡‿◡)',      dekoBottom:'.. ✿ · ✿ ..' },
+  setThanksgiving:{ dekoTop:'· ✦ ♥ ✦ ·', kaomoji:'(◕‿◕)♥',     dekoBottom:'.. ♥ · ♥ ..' },
+  setAnniv:       { dekoTop:'· ♡ ∞ ♡ ·', kaomoji:'(◕‿◕)♡',     dekoBottom:'.. ♡ · ♡ ..' },
+  setPride:       { dekoTop:'· ✦ ❤ ✦ ·', kaomoji:'(✿◕‿◕)',     dekoBottom:'.. ✦ ❤ ✦ ..' },
+};
 
 // Default per-field colors used by setSpruch (no theme applied):
 const DEFAULT_COLORS = {
@@ -64,24 +85,28 @@ function gradientText(text, c1, c2){
 // ── per-setFn behaviour: what state does each set up before generate()? ──
 // Each returns { colors, grads, decoTop, decoBottom, kaomoji, mainBold, mainItalic }
 function stateForSetFn(name, main, top, bottom) {
+  // Helper: returns deco fields for the given setter
+  const decosFor = (fn) => THEME_DECOS[fn] || DEFAULT_DECOS;
+
   // Default state (matches resetAll / fresh page in center layout)
   const base = {
     colors: { ...DEFAULT_COLORS },
     mainGrad: null,           // null = no gradient, otherwise {c1, c2, rainbow}
-    decoTop:    DEFAULT_DEKO_T,
-    decoBottom: DEFAULT_DEKO_B,
-    kaomoji:    DEFAULT_KAO,
+    decoTop:    DEFAULT_DECOS.dekoTop,
+    decoBottom: DEFAULT_DECOS.dekoBottom,
+    kaomoji:    DEFAULT_DECOS.kaomoji,
   };
 
   // setSpruch / default — keeps defaults
   if (!name || name === 'setSpruch') return base;
 
-  // setBday — keeps deco/kaomoji, adds gold gradient to main + colored top/bot
+  // setBday — bday-themed deco + gold gradient on main + colored top/bot
   if (name === 'setBday') {
+    const d = decosFor('setBday');
     return {
-      ...base,
-      colors: { ...base.colors, topText: '#FFD700', bottomText: '#FFB300' },
+      colors: { ...DEFAULT_COLORS, topText: '#FFD700', bottomText: '#FFB300' },
       mainGrad: { c1: '#FFD700', c2: '#FF8C00' },
+      decoTop: d.dekoTop, decoBottom: d.dekoBottom, kaomoji: d.kaomoji,
     };
   }
 
@@ -107,18 +132,21 @@ function stateForSetFn(name, main, top, bottom) {
   };
   if (themeColors[name]) {
     const [cMain, cTop, cBot] = themeColors[name];
+    const d = decosFor(name);
     return {
-      ...base,
       colors: { ...DEFAULT_COLORS, mainText: cMain, topText: cTop, bottomText: cBot },
+      mainGrad: null,
+      decoTop: d.dekoTop, decoBottom: d.dekoBottom, kaomoji: d.kaomoji,
     };
   }
 
-  // setPride — KEEPS decos, rainbow gradient on main, colored top/bot
+  // setPride — pride-themed deco + rainbow gradient on main
   if (name === 'setPride') {
+    const d = decosFor('setPride');
     return {
-      ...base,
       colors: { ...DEFAULT_COLORS, topText: '#f9a8d4', bottomText: '#a0c4ff' },
       mainGrad: { c1: '#ffadad', c2: '#bdb2ff', rainbow: true },
+      decoTop: d.dekoTop, decoBottom: d.dekoBottom, kaomoji: d.kaomoji,
     };
   }
 

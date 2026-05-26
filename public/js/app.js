@@ -1040,6 +1040,31 @@ function resetThemeColors(){
   document.getElementById('btn_topText').style.background = DEFAULT_COLORS.topText;
   document.getElementById('btn_bottomText').style.background = DEFAULT_COLORS.bottomText;
 }
+// ── per-theme deco/kaomoji presets ──
+// Each themed setter passes its own deco-set to setSpruch so the supporting
+// lines actually MATCH the theme instead of inheriting the romantic
+// "ily" + pink-heart kaomoji defaults. Sizes stay small enough to leave
+// room for the actual message text inside the 240/255 budget.
+const DECO_BDAY        = { dekoTop:'· ✦ ✦ ✦ ·', kaomoji:'\\(°◡°)/',  dekoBottom:'.. ✦ · ✦ ..' };
+const DECO_XMAS        = { dekoTop:'· ❄ ✦ ❄ ·', kaomoji:'(◕‿◕)❄',     dekoBottom:'.. ❄ · ❄ ..' };
+const DECO_HALLOWEEN   = { dekoTop:'· ✦ ◯ ✦ ·', kaomoji:'(◕ω◕)',      dekoBottom:'.. ◯ ✦ ◯ ..' };
+const DECO_EASTER      = { dekoTop:'· ✿ ✦ ✿ ·', kaomoji:'(◕ω◕)♡',     dekoBottom:'.. ✿ · ✿ ..' };
+const DECO_VALENTINE   = { dekoTop:'· ♡ ✦ ♡ ·', kaomoji:'(˘◡˘)♡',     dekoBottom:'.. ♡ · ♡ ..' };
+const DECO_WOMANS      = { dekoTop:'· ✿ ♥ ✿ ·', kaomoji:'(◕‿◕)♥',     dekoBottom:'.. ✿ · ✿ ..' };
+const DECO_JULY4       = { dekoTop:'· ★ ✦ ★ ·', kaomoji:'(★‿★)',      dekoBottom:'.. ★ · ★ ..' };
+const DECO_HANUKKAH    = { dekoTop:'· ✦ ✡ ✦ ·', kaomoji:'(◕‿◕)',      dekoBottom:'.. ✡ · ✡ ..' };
+const DECO_STPAT       = { dekoTop:'· ☘ ✦ ☘ ·', kaomoji:'(◕‿◕)☘',     dekoBottom:'.. ☘ · ☘ ..' };
+const DECO_NEWYEAR     = { dekoTop:'· ★ ✦ ★ ·', kaomoji:'\\(°◡°)/',   dekoBottom:'.. ★ · ★ ..' };
+const DECO_WEDDING     = { dekoTop:'· ❀ ✦ ❀ ·', kaomoji:'(◡‿◡)♡',     dekoBottom:'.. ❀ · ❀ ..' };
+const DECO_SUB         = { dekoTop:'· ♡ ✦ ♡ ·', kaomoji:'(◡ω◡)♡',     dekoBottom:'.. ♡ · ♡ ..' };
+const DECO_AFTERCARE   = { dekoTop:'· ✦ ♡ ✦ ·', kaomoji:'(´◡`)♡',     dekoBottom:'.. ♡ ✦ ♡ ..' };
+const DECO_GOTH        = { dekoTop:'· ☾ ✦ ☾ ·', kaomoji:'(◉ω◉)',      dekoBottom:'.. ☾ · ☾ ..' };
+const DECO_DRUNK       = { dekoTop:'· ✦ ✿ ✦ ·', kaomoji:'(￣▽￣)~*',    dekoBottom:'.. ✿ · ✿ ..' };
+const DECO_SOFT        = { dekoTop:'· ✿ ✦ ✿ ·', kaomoji:'(◡‿◡)',      dekoBottom:'.. ✿ · ✿ ..' };
+const DECO_THANKSGIV   = { dekoTop:'· ✦ ♥ ✦ ·', kaomoji:'(◕‿◕)♥',     dekoBottom:'.. ♥ · ♥ ..' };
+const DECO_ANNIV       = { dekoTop:'· ♡ ∞ ♡ ·', kaomoji:'(◕‿◕)♡',     dekoBottom:'.. ♡ · ♡ ..' };
+const DECO_PRIDE       = { dekoTop:'· ✦ ❤ ✦ ·', kaomoji:'(✿◕‿◕)',     dekoBottom:'.. ✦ ❤ ✦ ..' };
+
 // Auto-trim default decoration lines + kaomoji whenever applying a template
 // would overflow 240 chars / 255 bytes. We strip in this order:
 //   kaomoji → dekoBottom → dekoTop
@@ -1061,24 +1086,23 @@ function trimDecoToFit(){
   }
 }
 
-// Restore deco lines + kaomoji to the current layout's defaults so that each
-// template click starts from a fresh preset (avoids a previously-trimmed
-// long template leaving empty decos for the next short one).
-function restoreDefaultDecos(){
-  const d = (typeof layoutDefaults !== 'undefined') && layoutDefaults[currentLayout];
-  if (!d) return;
+// Apply a deco/kaomoji preset to the form fields. Called by every template
+// setter so each click starts from a coherent, theme-matching base instead
+// of inheriting whatever was left over from the previous template.
+function applyDecos(decos){
+  const d = decos || ((typeof layoutDefaults !== 'undefined') && layoutDefaults[currentLayout]) || {};
   ['dekoTop','dekoBottom','kaomoji'].forEach(f => {
     const el = document.getElementById(f);
     if (el) el.value = d[f] || '';
   });
 }
 
-function setSpruch(main,top,bottom){
+function setSpruch(main,top,bottom,decos){
   pushUndo(); userHasEdited=true;
   // if previous click was a themed template, revert to defaults so colors don't bleed across
   if (lastWasThemed) { resetThemeColors(); lastWasThemed = false; }
   if (grads.mainText) grads.mainText.rainbow=false;
-  restoreDefaultDecos();
+  applyDecos(decos);                       // theme-aware decos, layout defaults if none given
   document.getElementById('mainText').value=main;
   document.getElementById('topText').value=top;
   document.getElementById('bottomText').value=bottom;
@@ -1086,7 +1110,7 @@ function setSpruch(main,top,bottom){
   trimDecoToFit();
 }
 function setBday(main,top,bottom){
-  setSpruch(main,top,bottom);
+  setSpruch(main,top,bottom,DECO_BDAY);
   grads.mainText={on:true,c1:'#FFD700',c2:'#FF8C00'};
   colors.topText='#FFD700';colors.bottomText='#FFB300';
   document.getElementById('btn_mainText').style.background='linear-gradient(to right,#FFD700,#FF8C00)';
@@ -1096,11 +1120,8 @@ function setBday(main,top,bottom){
   generate();
   trimDecoToFit();
 }
-function applyTheme(main,top,bottom,cMain,cTop,cBot){
-  setSpruch(main,top,bottom);
-  // Keep deco + kaomoji so themed templates stay visually consistent with
-  // the non-themed ones (6 lines). trimDecoToFit below only strips them
-  // when the result genuinely exceeds the 240/255 limit.
+function applyTheme(main,top,bottom,cMain,cTop,cBot,decos){
+  setSpruch(main,top,bottom,decos);
   grads.mainText={on:false,c1:cMain,c2:cMain};
   colors.mainText=cMain;colors.topText=cTop;colors.bottomText=cBot;
   document.getElementById('btn_mainText').style.background=cMain;
@@ -1110,25 +1131,25 @@ function applyTheme(main,top,bottom,cMain,cTop,cBot){
   generate();
   trimDecoToFit();
 }
-function setXmas(main,top,bottom){       applyTheme(main,top,bottom,'#ef4444','#16a34a','#f59e0b'); }
-function setHalloween(main,top,bottom){  applyTheme(main,top,bottom,'#fb923c','#a855f7','#7c3aed'); }
-function setEaster(main,top,bottom){     applyTheme(main,top,bottom,'#f9a8d4','#fde047','#86efac'); }
-function setValentine(main,top,bottom){  applyTheme(main,top,bottom,'#ff4d6d','#ff8fb3','#fbcfe8'); }
-function setWomansDay(main,top,bottom){  applyTheme(main,top,bottom,'#c084fc','#ec4899','#d8b4fe'); }
-function setJuly4(main,top,bottom){      applyTheme(main,top,bottom,'#ef4444','#1e40af','#3b82f6'); }
-function setHanukkah(main,top,bottom){   applyTheme(main,top,bottom,'#3b82f6','#e2e8f0','#93c5fd'); }
-function setStPatricks(main,top,bottom){ applyTheme(main,top,bottom,'#16a34a','#f59e0b','#4ade80'); }
-function setNewYear(main,top,bottom){    applyTheme(main,top,bottom,'#fbbf24','#cbd5e1','#fde047'); }
-function setWedding(main,top,bottom){    applyTheme(main,top,bottom,'#d4af37','#e8b4b8','#f5e6d3'); }
-function setSub(main,top,bottom){        applyTheme(main,top,bottom,'#ec4899','#6b21a8','#831843'); }
-function setAftercare(main,top,bottom){  applyTheme(main,top,bottom,'#fcd34d','#fbcfe8','#ddd6fe'); }
-function setGoth(main,top,bottom){       applyTheme(main,top,bottom,'#a855f7','#6b7280','#831843'); }
-function setDrunk(main,top,bottom){      applyTheme(main,top,bottom,'#f59e0b','#be185d','#fbbf24'); }
-function setSoft(main,top,bottom){       applyTheme(main,top,bottom,'#86efac','#fbcfe8','#fde68a'); }
-function setThanksgiving(main,top,bottom){ applyTheme(main,top,bottom,'#d97706','#92400e','#fbbf24'); }
-function setAnniv(main,top,bottom){      applyTheme(main,top,bottom,'#e8b4b8','#d4af37','#f9d5e5'); }
+function setXmas(main,top,bottom){         applyTheme(main,top,bottom,'#ef4444','#16a34a','#f59e0b', DECO_XMAS); }
+function setHalloween(main,top,bottom){    applyTheme(main,top,bottom,'#fb923c','#a855f7','#7c3aed', DECO_HALLOWEEN); }
+function setEaster(main,top,bottom){       applyTheme(main,top,bottom,'#f9a8d4','#fde047','#86efac', DECO_EASTER); }
+function setValentine(main,top,bottom){    applyTheme(main,top,bottom,'#ff4d6d','#ff8fb3','#fbcfe8', DECO_VALENTINE); }
+function setWomansDay(main,top,bottom){    applyTheme(main,top,bottom,'#c084fc','#ec4899','#d8b4fe', DECO_WOMANS); }
+function setJuly4(main,top,bottom){        applyTheme(main,top,bottom,'#ef4444','#1e40af','#3b82f6', DECO_JULY4); }
+function setHanukkah(main,top,bottom){     applyTheme(main,top,bottom,'#3b82f6','#e2e8f0','#93c5fd', DECO_HANUKKAH); }
+function setStPatricks(main,top,bottom){   applyTheme(main,top,bottom,'#16a34a','#f59e0b','#4ade80', DECO_STPAT); }
+function setNewYear(main,top,bottom){      applyTheme(main,top,bottom,'#fbbf24','#cbd5e1','#fde047', DECO_NEWYEAR); }
+function setWedding(main,top,bottom){      applyTheme(main,top,bottom,'#d4af37','#e8b4b8','#f5e6d3', DECO_WEDDING); }
+function setSub(main,top,bottom){          applyTheme(main,top,bottom,'#ec4899','#6b21a8','#831843', DECO_SUB); }
+function setAftercare(main,top,bottom){    applyTheme(main,top,bottom,'#fcd34d','#fbcfe8','#ddd6fe', DECO_AFTERCARE); }
+function setGoth(main,top,bottom){         applyTheme(main,top,bottom,'#a855f7','#6b7280','#831843', DECO_GOTH); }
+function setDrunk(main,top,bottom){        applyTheme(main,top,bottom,'#f59e0b','#be185d','#fbbf24', DECO_DRUNK); }
+function setSoft(main,top,bottom){         applyTheme(main,top,bottom,'#86efac','#fbcfe8','#fde68a', DECO_SOFT); }
+function setThanksgiving(main,top,bottom){ applyTheme(main,top,bottom,'#d97706','#92400e','#fbbf24', DECO_THANKSGIV); }
+function setAnniv(main,top,bottom){        applyTheme(main,top,bottom,'#e8b4b8','#d4af37','#f9d5e5', DECO_ANNIV); }
 function setPride(main,top,bottom){
-  setSpruch(main,top,bottom);
+  setSpruch(main,top,bottom,DECO_PRIDE);
   // rainbow + fancy font would overflow the byte limit — force normal font on text fields
   ['topText','mainText','bottomText'].forEach(f=>{ fieldFonts[f]='normal'; });
   grads.mainText={on:true,rainbow:true,c1:'#ffadad',c2:'#bdb2ff'};
