@@ -22,3 +22,9 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# playwright / testing
+.playwright-cli/
+
+# screenshots (root only, not public/img/)
+/*.png

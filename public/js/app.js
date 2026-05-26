@@ -1,7 +1,233 @@
+// ── debounce helper ──
+function debounce(fn, ms) {
+  let tid;
+  return function(...args) { clearTimeout(tid); tid = setTimeout(() => fn.apply(this, args), ms); };
+}
+
+// ── undo / redo ──
+const UNDO_STACK = [];
+const REDO_STACK = [];
+const MAX_UNDO = 20;
+
+function captureState() {
+  const s = {};
+  FIELDS.forEach(f => s[f] = document.getElementById(f).value);
+  SIZE_IDS.forEach(id => s[id] = document.getElementById(id).value);
+  CHECK_IDS.forEach(id => { const el = document.getElementById(id); if (el) s[id] = el.checked; });
+  s._col = JSON.stringify(colors);
+  s._grad = JSON.stringify(grads);
+  s._nc = JSON.stringify(noColor);
+  s._ff = JSON.stringify(fieldFonts);
+  s._lay = currentLayout;
+  s._lo = lineOrder.slice();
+  s._kao = document.getElementById('kaoSection')?.style.display !== 'none';
+  return s;
+}
+
+function applyState(s) {
+  FIELDS.forEach(f => { const el = document.getElementById(f); if (el && s[f] != null) el.value = s[f]; });
+  SIZE_IDS.forEach(id => { const el = document.getElementById(id); if (el && s[id] != null) el.value = s[id]; });
+  CHECK_IDS.forEach(id => { const el = document.getElementById(id); if (el && s[id] != null) el.checked = s[id]; });
+  if (s._col) Object.assign(colors, JSON.parse(s._col));
+  if (s._grad) { const g = JSON.parse(s._grad); Object.keys(g).forEach(f => { if(grads[f]) Object.assign(grads[f], g[f]); }); }
+  if (s._nc) Object.assign(noColor, JSON.parse(s._nc));
+  if (s._ff) {
+    Object.assign(fieldFonts, JSON.parse(s._ff));
+    Object.keys(fieldFonts).forEach(f => {
+      ['normal','fancy','smallcaps','thai'].forEach(st => {
+        const el = document.getElementById('font_' + f + '_' + st);
+        if (el) el.classList.toggle('on', fieldFonts[f] === st);
+      });
+    });
+  }
+  FIELDS.forEach(f => {
+    const btn = document.getElementById('btn_' + f);
+    if (!btn) return;
+    const g = grads[f];
+    btn.style.background = g.on ? `linear-gradient(to right,${g.c1},${g.c2})` : colors[f];
+  });
+  if (s._lay) {
+    currentLayout = s._lay;
+    document.querySelectorAll('[id^="lay_"]').forEach(el => el.classList.remove('on'));
+    const b = document.getElementById('lay_' + s._lay);
+    if (b) b.classList.add('on');
+  }
+  if (s._lo) lineOrder = s._lo.slice();
+  if (s._kao != null) {
+    document.getElementById('kaoSection').style.display = s._kao ? '' : 'none';
+    document.getElementById('kao_on')?.classList.toggle('on', s._kao);
+    document.getElementById('kao_off')?.classList.toggle('on', !s._kao);
+  }
+  generate();
+}
+
+function pushUndo() {
+  UNDO_STACK.push(captureState());
+  if (UNDO_STACK.length > MAX_UNDO) UNDO_STACK.shift();
+  REDO_STACK.length = 0;
+  updateUndoBtns();
+}
+
+function undo() {
+  if (!UNDO_STACK.length) return;
+  REDO_STACK.push(captureState());
+  applyState(UNDO_STACK.pop());
+  updateUndoBtns();
+}
+
+function redo() {
+  if (!REDO_STACK.length) return;
+  UNDO_STACK.push(captureState());
+  applyState(REDO_STACK.pop());
+  updateUndoBtns();
+}
+
+function updateUndoBtns() {
+  const u = document.getElementById('undoBtn'), r = document.getElementById('redoBtn');
+  if (u) u.classList.toggle('disabled', !UNDO_STACK.length);
+  if (r) r.classList.toggle('disabled', !REDO_STACK.length);
+}
+
 // ── ui helpers ──
 function toggleSec(head) {
   head.classList.toggle('open');
   head.nextElementSibling.classList.toggle('open');
+  // persist open/closed state for sections with an id
+  const sec = head.closest('.sec');
+  if (sec && sec.id) {
+    const isOpen = head.classList.contains('open');
+    try { localStorage.setItem('sec_' + sec.id, isOpen ? '1' : '0'); } catch(e) {}
+  }
+}
+
+// restore saved section states on load
+function restoreSectionStates() {
+  document.querySelectorAll('.sec[id]').forEach(sec => {
+    try {
+      const saved = localStorage.getItem('sec_' + sec.id);
+      if (saved === null) return;          // no preference saved yet
+      const head = sec.querySelector('.sec-head');
+      const body = sec.querySelector('.sec-body');
+      if (!head || !body) return;
+      const wantOpen = saved === '1';
+      const isOpen   = head.classList.contains('open');
+      if (wantOpen !== isOpen) {
+        head.classList.toggle('open');
+        body.classList.toggle('open');
+      }
+    } catch(e) {}
+  });
+}
+
+// ── auto-save: persist entire gift state ──
+const FIELDS = ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'];
+const SIZE_IDS = ['sizeDekoTop','sizeTopText','fontSize','sizeBottomText','sizeKaomoji','sizeDekoBottom'];
+const CHECK_IDS = ['mainBold','mainItalic','topBold','topItalic','bottomBold','bottomItalic'];
+
+function saveGiftState() {
+  try {
+    const state = {
+      texts: {},
+      sizes: {},
+      checks: {},
+      colors: Object.assign({}, colors),
+      grads: JSON.parse(JSON.stringify(grads)),
+      noColor: Object.assign({}, noColor),
+      fieldFonts: Object.assign({}, fieldFonts),
+      layout: currentLayout,
+      lineOrder: lineOrder.slice(),
+      kaoOn: document.getElementById('kaoSection').style.display !== 'none',
+    };
+    FIELDS.forEach(f => state.texts[f] = document.getElementById(f).value);
+    SIZE_IDS.forEach(id => state.sizes[id] = document.getElementById(id).value);
+    CHECK_IDS.forEach(id => { const el = document.getElementById(id); if (el) state.checks[id] = el.checked; });
+    localStorage.setItem('giftState', JSON.stringify(state));
+  } catch(e) {}
+}
+
+function restoreGiftState() {
+  try {
+    const raw = localStorage.getItem('giftState');
+    if (!raw) return false;
+    const state = JSON.parse(raw);
+
+    // texts
+    if (state.texts) FIELDS.forEach(f => {
+      const el = document.getElementById(f);
+      if (el && state.texts[f] != null) el.value = state.texts[f];
+    });
+
+    // sizes
+    if (state.sizes) SIZE_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && state.sizes[id] != null) el.value = state.sizes[id];
+    });
+
+    // checkboxes (bold/italic)
+    if (state.checks) CHECK_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && state.checks[id] != null) el.checked = state.checks[id];
+    });
+
+    // colors
+    if (state.colors) Object.assign(colors, state.colors);
+    if (state.noColor) Object.assign(noColor, state.noColor);
+    if (state.grads) {
+      Object.keys(state.grads).forEach(f => {
+        if (grads[f]) Object.assign(grads[f], state.grads[f]);
+      });
+    }
+
+    // update color buttons to reflect restored state
+    FIELDS.forEach(f => {
+      const btn = document.getElementById('btn_' + f);
+      if (!btn) return;
+      const g = grads[f];
+      btn.style.background = g.on ? `linear-gradient(to right,${g.c1},${g.c2})` : colors[f];
+    });
+
+    // font styles
+    if (state.fieldFonts) {
+      Object.assign(fieldFonts, state.fieldFonts);
+      Object.keys(fieldFonts).forEach(f => {
+        ['normal','fancy','smallcaps','thai'].forEach(s => {
+          const el = document.getElementById('font_' + f + '_' + s);
+          if (el) el.classList.toggle('on', fieldFonts[f] === s);
+        });
+      });
+      if (fieldFonts.mainText) currentFontStyle = fieldFonts.mainText;
+    }
+
+    // layout
+    if (state.layout && layoutDefaults[state.layout]) {
+      currentLayout = state.layout;
+      document.querySelectorAll('[id^="lay_"]').forEach(el => el.classList.remove('on'));
+      const layBtn = document.getElementById('lay_' + state.layout);
+      if (layBtn) layBtn.classList.add('on');
+    }
+
+    // line order
+    if (state.lineOrder && Array.isArray(state.lineOrder)) {
+      lineOrder = state.lineOrder.slice();
+    }
+
+    // kaomoji on/off
+    if (state.kaoOn != null) {
+      document.getElementById('kaoSection').style.display = state.kaoOn ? '' : 'none';
+      document.getElementById('kao_on').classList.toggle('on', state.kaoOn);
+      document.getElementById('kao_off').classList.toggle('on', !state.kaoOn);
+    }
+
+    // if ALL text fields are empty, treat as no real saved state
+    // (stale data from old resetAll that cleared everything)
+    const allEmpty = FIELDS.every(f => !document.getElementById(f).value.trim());
+    if (allEmpty) {
+      try { localStorage.removeItem('giftState'); } catch(e2) {}
+      return false;
+    }
+
+    return true;
+  } catch(e) { return false; }
 }
 
 // ── i18n ──
@@ -17,34 +243,35 @@ const I18N = {
     howto_step4:'<b>Browse the templates</b> on the right — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday and more. One click fills all three text lines at once.',
     howto_step5:'<b>Watch the counter</b> in the topbar. 3dxchat allows <b>240 chars / 255 bytes</b>. If it turns red, shorten text, drop a line, or remove a gradient.',
     howto_step6:'<b>Copy the code</b> with the big button under the preview, then paste it in 3dxchat as a gift message. Done.',
-    howto_tip:'💡 Tip — click any line in the live preview to jump straight to its input field.',
+    howto_tip:'Tip — click any line in the live preview to jump straight to its input field.',
     layout:'Layout',
     layout_center:'Center', layout_inline:'Inline', layout_compact:'Compact',
     layout_framed:'Framed', layout_minimal:'Minimal', layout_pyramid:'Pyramid',
-    reset_all:'↺ Reset All',
+    layout_custom:'Custom',
+    reset_all:'Reset All',
     deco_top:'Deco Top', top_line:'Top Line', main_text:'Main Text',
     bottom_line:'Bottom Line', kaomoji:'Kaomoji', deco_bottom:'Deco Bottom', symbols:'Symbols',
     plus_symbol:'+ Symbol', size:'Size', bold:'Bold', italic:'Italic',
-    cute:'Cute', ascii:'ASCII', with_kao:'✦ With', without_kao:'✕ Without',
+    cute:'Cute', ascii:'ASCII', with_kao:'With', without_kao:'Without',
     hearts:'Hearts', stars:'Stars', flowers:'Flowers', arrows_deco:'Arrows & Deco', misc:'Misc',
     ph_deco_top:'Deco top…', ph_top:'Top line…', ph_main:'Main text…',
     ph_bottom:'Bottom line…', ph_kao:'Kaomoji…', ph_deco_bottom:'Deco bottom…',
     ph_search:'Search templates…',
     preview:'Preview', click_edit:'Click to edit', click_to_copy:'Click to copy',
-    code:'Code', copy_code:'📋 Copy Code', copied:'✓ Copied!',
-    tip_howto_title:'💡 How It Works',
+    code:'Code', copy_code:'Copy Code', copied:'Copied!',
+    tip_howto_title:'How It Works',
     tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Gradients work best on the main text only.',
     tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly.',
     disclaimer:'Disclaimer: This tool is provided as-is, without any guarantees. I am not responsible for any errors, bugs, or character limit issues. Use at your own risk. All texts are just suggestions.',
     disclaimer_short:'Tool without warranty — all texts are suggestions.',
     prototype_badge:'PROTOTYPE',
-    prototype_thanks:'💛 This is a prototype — thank you to everyone who uses it and supports me!',
+    prototype_thanks:'This is a prototype — thank you to everyone who uses it and supports me!',
     modal_color:'Color · ', gradient:'Gradient', color_1:'Color 1', color_2:'Color 2',
-    apply:'✓ Apply', cancel:'Cancel', no_color:'No Color Tag', saves_chars:'· saves chars',
+    apply:'Apply', cancel:'Cancel', no_color:'No Color Tag', saves_chars:'· saves chars',
     // dynamic optimize tips
-    opt_over:'⛔ Over the limit — shorten your message',
-    opt_warn:'⚠ Getting long — optimization hints',
-    opt_info:'💡 Optimization hints',
+    opt_over:'Over the limit — shorten your message',
+    opt_warn:'Getting long — optimization hints',
+    opt_info:'Optimization hints',
     opt_grad:(f,o,w)=>`Gradient on ${f} adds ~${o} extra chars (${w} word${w>1?'s':''})`,
     opt_longest:(f,n)=>`${f} is your longest section — ${n} chars`,
     opt_deko_top_long:'Deco Top is very long — try shortening it',
@@ -71,33 +298,34 @@ const I18N = {
     howto_step4:'<b>Durchstöber die Vorlagen</b> rechts — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday und mehr. Ein Klick füllt alle drei Textzeilen auf einmal.',
     howto_step5:'<b>Beobachte den Counter</b> in der Topbar. 3dxchat erlaubt <b>240 Zeichen / 255 Bytes</b>. Wird er rot, kürze den Text, lass eine Zeile weg oder entferne einen Verlauf.',
     howto_step6:'<b>Kopiere den Code</b> mit dem großen Button unter der Vorschau und füg ihn als Gift-Nachricht in 3dxchat ein. Fertig.',
-    howto_tip:'💡 Tipp — klick eine Zeile in der Live-Vorschau, um direkt zum passenden Feld zu springen.',
+    howto_tip:'Tipp — klick eine Zeile in der Live-Vorschau, um direkt zum passenden Feld zu springen.',
     layout:'Layout',
     layout_center:'Zentriert', layout_inline:'Inline', layout_compact:'Kompakt',
     layout_framed:'Rahmen', layout_minimal:'Minimal', layout_pyramid:'Pyramide',
-    reset_all:'↺ Alles zurücksetzen',
+    layout_custom:'Eigenes',
+    reset_all:'Alles zurücksetzen',
     deco_top:'Deko oben', top_line:'Obere Zeile', main_text:'Haupttext',
     bottom_line:'Untere Zeile', kaomoji:'Kaomoji', deco_bottom:'Deko unten', symbols:'Symbole',
     plus_symbol:'+ Symbol', size:'Größe', bold:'Fett', italic:'Kursiv',
-    cute:'Süß', ascii:'ASCII', with_kao:'✦ Mit', without_kao:'✕ Ohne',
+    cute:'Süß', ascii:'ASCII', with_kao:'Mit', without_kao:'Ohne',
     hearts:'Herzen', stars:'Sterne', flowers:'Blumen', arrows_deco:'Pfeile & Deko', misc:'Sonstige',
     ph_deco_top:'Deko oben…', ph_top:'Obere Zeile…', ph_main:'Haupttext…',
     ph_bottom:'Untere Zeile…', ph_kao:'Kaomoji…', ph_deco_bottom:'Deko unten…',
     ph_search:'Vorlagen suchen…',
     preview:'Vorschau', click_edit:'Klicken zum Bearbeiten', click_to_copy:'Klicken zum Kopieren',
-    code:'Code', copy_code:'📋 Code kopieren', copied:'✓ Kopiert!',
-    tip_howto_title:'💡 So funktioniert es',
+    code:'Code', copy_code:'Code kopieren', copied:'Kopiert!',
+    tip_howto_title:'So funktioniert es',
     tip_howto:'Verläufe und lange Deko-Zeilen brauchen viele Zeichen. Wird der Counter <span style="color:var(--red)">rot</span>, probier kürzeren Text, entferne Deko-Zeilen oder deaktiviere Verläufe. Verläufe funktionieren am besten nur beim Haupttext.',
     tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt zum passenden Feld zu springen.',
     disclaimer:'Haftungsausschluss: Dieses Tool wird ohne Gewähr bereitgestellt. Ich übernehme keine Verantwortung für Fehler, Bugs oder Probleme mit dem Zeichenlimit. Benutzung auf eigene Gefahr. Alle Texte sind nur Vorschläge.',
     disclaimer_short:'Tool ohne Gewähr — alle Texte sind Vorschläge.',
     prototype_badge:'PROTOTYP',
-    prototype_thanks:'💛 Das ist ein Prototyp — danke an alle, die ihn nutzen und mich damit supporten!',
+    prototype_thanks:'Das ist ein Prototyp — danke an alle, die ihn nutzen und mich damit supporten!',
     modal_color:'Farbe · ', gradient:'Verlauf', color_1:'Farbe 1', color_2:'Farbe 2',
-    apply:'✓ Übernehmen', cancel:'Abbrechen', no_color:'Kein Color-Tag', saves_chars:'· spart Zeichen',
-    opt_over:'⛔ Über dem Limit — kürze deine Nachricht',
-    opt_warn:'⚠ Wird lang — Optimierungs-Tipps',
-    opt_info:'💡 Optimierungs-Tipps',
+    apply:'Übernehmen', cancel:'Abbrechen', no_color:'Kein Color-Tag', saves_chars:'· spart Zeichen',
+    opt_over:'Über dem Limit — kürze deine Nachricht',
+    opt_warn:'Wird lang — Optimierungs-Tipps',
+    opt_info:'Optimierungs-Tipps',
     opt_grad:(f,o,w)=>`Verlauf auf ${f} bringt ~${o} Extra-Zeichen (${w} Wort${w>1?'e':''})`,
     opt_longest:(f,n)=>`${f} ist dein längster Abschnitt — ${n} Zeichen`,
     opt_deko_top_long:'Deko oben ist sehr lang — probier es zu kürzen',
@@ -124,33 +352,34 @@ const I18N = {
     howto_step4:'<b>Parcours les modèles</b> à droite — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday et plus. Un clic remplit les trois lignes de texte d\'un coup.',
     howto_step5:'<b>Surveille le compteur</b> dans la topbar. 3dxchat permet <b>240 caractères / 255 octets</b>. S\'il devient rouge, raccourcis le texte, enlève une ligne ou retire un dégradé.',
     howto_step6:'<b>Copie le code</b> avec le grand bouton sous l\'aperçu, puis colle-le dans 3dxchat comme message cadeau. C\'est fini.',
-    howto_tip:'💡 Astuce — clique n\'importe quelle ligne dans l\'aperçu en direct pour sauter directement à son champ.',
+    howto_tip:'Astuce — clique n\'importe quelle ligne dans l\'aperçu en direct pour sauter directement à son champ.',
     layout:'Disposition',
     layout_center:'Centré', layout_inline:'En ligne', layout_compact:'Compact',
     layout_framed:'Encadré', layout_minimal:'Minimal', layout_pyramid:'Pyramide',
-    reset_all:'↺ Tout réinitialiser',
+    layout_custom:'Perso',
+    reset_all:'Tout réinitialiser',
     deco_top:'Déco haut', top_line:'Ligne haut', main_text:'Texte principal',
     bottom_line:'Ligne bas', kaomoji:'Kaomoji', deco_bottom:'Déco bas', symbols:'Symboles',
     plus_symbol:'+ Symbole', size:'Taille', bold:'Gras', italic:'Italique',
-    cute:'Mignon', ascii:'ASCII', with_kao:'✦ Avec', without_kao:'✕ Sans',
+    cute:'Mignon', ascii:'ASCII', with_kao:'Avec', without_kao:'Sans',
     hearts:'Cœurs', stars:'Étoiles', flowers:'Fleurs', arrows_deco:'Flèches & déco', misc:'Divers',
     ph_deco_top:'Déco haut…', ph_top:'Ligne haut…', ph_main:'Texte principal…',
     ph_bottom:'Ligne bas…', ph_kao:'Kaomoji…', ph_deco_bottom:'Déco bas…',
     ph_search:'Rechercher des modèles…',
     preview:'Aperçu', click_edit:'Cliquer pour modifier', click_to_copy:'Cliquer pour copier',
-    code:'Code', copy_code:'📋 Copier le code', copied:'✓ Copié !',
-    tip_howto_title:'💡 Comment ça marche',
+    code:'Code', copy_code:'Copier le code', copied:'Copié !',
+    tip_howto_title:'Comment ça marche',
     tip_howto:'Les dégradés et les longues lignes de déco utilisent beaucoup de caractères. Si le compteur devient <span style="color:var(--red)">rouge</span>, essaie un texte plus court, retire des lignes de déco ou désactive les dégradés. Les dégradés marchent mieux uniquement sur le texte principal.',
     tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier.',
     disclaimer:'Avertissement : Cet outil est fourni tel quel, sans garantie. Je ne suis pas responsable des erreurs, bugs ou problèmes de limite de caractères. Utilisation à tes propres risques. Tous les textes ne sont que des suggestions.',
     disclaimer_short:'Outil sans garantie — tous les textes sont des suggestions.',
     prototype_badge:'PROTOTYPE',
-    prototype_thanks:'💛 Ceci est un prototype — merci à tous ceux qui l\'utilisent et me soutiennent !',
+    prototype_thanks:'Ceci est un prototype — merci à tous ceux qui l\'utilisent et me soutiennent !',
     modal_color:'Couleur · ', gradient:'Dégradé', color_1:'Couleur 1', color_2:'Couleur 2',
-    apply:'✓ Appliquer', cancel:'Annuler', no_color:'Pas de couleur', saves_chars:'· économise des caractères',
-    opt_over:'⛔ Au-dessus de la limite — raccourcis ton message',
-    opt_warn:'⚠ Devient long — conseils d\'optimisation',
-    opt_info:'💡 Conseils d\'optimisation',
+    apply:'Appliquer', cancel:'Annuler', no_color:'Pas de couleur', saves_chars:'· économise des caractères',
+    opt_over:'Au-dessus de la limite — raccourcis ton message',
+    opt_warn:'Devient long — conseils d\'optimisation',
+    opt_info:'Conseils d\'optimisation',
     opt_grad:(f,o,w)=>`Dégradé sur ${f} ajoute ~${o} caractères en plus (${w} mot${w>1?'s':''})`,
     opt_longest:(f,n)=>`${f} est ta plus longue section — ${n} caractères`,
     opt_deko_top_long:'Déco haut est très longue — essaie de la raccourcir',
@@ -177,33 +406,34 @@ const I18N = {
     howto_step4:'<b>Просмотри шаблоны</b> справа — Sweet, Funny, Flirty, Dominant, Spicy, Roast, Birthday и другие. Один клик заполняет все три строки сразу.',
     howto_step5:'<b>Следи за счётчиком</b> в топбаре. 3dxchat позволяет <b>240 знаков / 255 байт</b>. Если он стал красным, сократи текст, убери строку или отключи градиент.',
     howto_step6:'<b>Скопируй код</b> большой кнопкой под предпросмотром, затем вставь его в 3dxchat как сообщение подарка. Готово.',
-    howto_tip:'💡 Совет — кликни по любой строке в живом предпросмотре, чтобы сразу перейти к её полю.',
+    howto_tip:'Совет — кликни по любой строке в живом предпросмотре, чтобы сразу перейти к её полю.',
     layout:'Макет',
     layout_center:'Центр', layout_inline:'Строка', layout_compact:'Компактный',
     layout_framed:'Рамка', layout_minimal:'Минимал', layout_pyramid:'Пирамида',
-    reset_all:'↺ Сбросить всё',
+    layout_custom:'Своё',
+    reset_all:'Сбросить всё',
     deco_top:'Декор сверху', top_line:'Верхняя строка', main_text:'Основной текст',
     bottom_line:'Нижняя строка', kaomoji:'Каомодзи', deco_bottom:'Декор снизу', symbols:'Символы',
     plus_symbol:'+ Символ', size:'Размер', bold:'Жирный', italic:'Курсив',
-    cute:'Милые', ascii:'ASCII', with_kao:'✦ С', without_kao:'✕ Без',
+    cute:'Милые', ascii:'ASCII', with_kao:'С', without_kao:'Без',
     hearts:'Сердечки', stars:'Звёзды', flowers:'Цветы', arrows_deco:'Стрелки и декор', misc:'Разное',
     ph_deco_top:'Декор сверху…', ph_top:'Верхняя строка…', ph_main:'Основной текст…',
     ph_bottom:'Нижняя строка…', ph_kao:'Каомодзи…', ph_deco_bottom:'Декор снизу…',
     ph_search:'Поиск шаблонов…',
     preview:'Предпросмотр', click_edit:'Нажми, чтобы редактировать', click_to_copy:'Нажми, чтобы скопировать',
-    code:'Код', copy_code:'📋 Скопировать код', copied:'✓ Скопировано!',
-    tip_howto_title:'💡 Как это работает',
+    code:'Код', copy_code:'Скопировать код', copied:'Скопировано!',
+    tip_howto_title:'Как это работает',
     tip_howto:'Градиенты и длинные строки декора используют много знаков. Если счётчик стал <span style="color:var(--red)">красным</span>, попробуй сократить текст, убрать строки декора или отключить градиенты. Градиенты лучше работают только на основном тексте.',
     tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую.',
     disclaimer:'Отказ от ответственности: этот инструмент предоставляется как есть, без каких-либо гарантий. Я не несу ответственности за ошибки, баги или проблемы с лимитом знаков. Используй на свой страх и риск. Все тексты — лишь предложения.',
     disclaimer_short:'Инструмент без гарантий — все тексты лишь предложения.',
     prototype_badge:'ПРОТОТИП',
-    prototype_thanks:'💛 Это прототип — спасибо всем, кто им пользуется и поддерживает меня!',
+    prototype_thanks:'Это прототип — спасибо всем, кто им пользуется и поддерживает меня!',
     modal_color:'Цвет · ', gradient:'Градиент', color_1:'Цвет 1', color_2:'Цвет 2',
-    apply:'✓ Применить', cancel:'Отмена', no_color:'Без цвета', saves_chars:'· экономит знаки',
-    opt_over:'⛔ Превышен лимит — сократи сообщение',
-    opt_warn:'⚠ Становится длинным — советы по оптимизации',
-    opt_info:'💡 Советы по оптимизации',
+    apply:'Применить', cancel:'Отмена', no_color:'Без цвета', saves_chars:'· экономит знаки',
+    opt_over:'Превышен лимит — сократи сообщение',
+    opt_warn:'Становится длинным — советы по оптимизации',
+    opt_info:'Советы по оптимизации',
     opt_grad:(f,o,w)=>`Градиент на ${f} добавляет ~${o} лишних знаков (${w} слов${w===1?'о':w<5?'а':''})`,
     opt_longest:(f,n)=>`${f} — твоя самая длинная секция, ${n} знаков`,
     opt_deko_top_long:'Декор сверху очень длинный — попробуй сократить',
@@ -261,7 +491,56 @@ function filterTpl(q) {
   });
 }
 
+// ── category filter ──
+let activeCat = null;
+function filterCategory(cat) {
+  if (activeCat === cat) { activeCat = null; } else { activeCat = cat; }
+  document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.toggle('on', b.dataset.cat === activeCat));
+  document.querySelectorAll('.col-right .sec').forEach(sec => {
+    if (!activeCat) { sec.style.display = ''; return; }
+    const label = sec.querySelector('.category-label');
+    sec.style.display = (label && label.textContent.toLowerCase().includes(activeCat.toLowerCase())) ? '' : 'none';
+  });
+}
+
+// ── favorites ──
+let favorites = [];
+try { favorites = JSON.parse(localStorage.getItem('giftFavs') || '[]'); } catch(e) { favorites = []; }
+
+function toggleFav(main, top, bottom, el) {
+  const key = main + '|' + top + '|' + bottom;
+  const idx = favorites.indexOf(key);
+  if (idx >= 0) { favorites.splice(idx, 1); el.classList.remove('fav-on'); }
+  else { favorites.push(key); el.classList.add('fav-on'); }
+  try { localStorage.setItem('giftFavs', JSON.stringify(favorites)); } catch(e) {}
+  renderFavPanel();
+}
+
+function isFav(main, top, bottom) {
+  return favorites.includes(main + '|' + top + '|' + bottom);
+}
+
+function renderFavPanel() {
+  const panel = document.getElementById('favPanel');
+  if (!panel) return;
+  if (!favorites.length) { panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  const chips = favorites.map(key => {
+    const [main, top, bottom] = key.split('|');
+    return `<span class="chip t fav-chip" onclick="setSpruch('${esc(main)}','${esc(top)}','${esc(bottom)}')">${esc(main)}<span class="fav-rm" onclick="event.stopPropagation();removeFav('${esc(key)}')">×</span></span>`;
+  }).join('');
+  panel.querySelector('.chips').innerHTML = chips;
+}
+
+function removeFav(key) {
+  const idx = favorites.indexOf(key);
+  if (idx >= 0) favorites.splice(idx, 1);
+  try { localStorage.setItem('giftFavs', JSON.stringify(favorites)); } catch(e) {}
+  renderFavPanel();
+}
+
 // ── layout ──
+let userHasEdited = false;
 let currentLayout = 'center';
 const layoutDefaults = {
   center:  {dekoTop:'· ily ·←', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:'.. ･ ✦ ･ ..'},
@@ -269,14 +548,46 @@ const layoutDefaults = {
   compact: {dekoTop:'· · ·', topText:'wollt nur sagen', mainText:'danke dir', bottomText:'für alles', kaomoji:'(˘³˘)♥', dekoBottom:'· · ·'},
   framed:  {dekoTop:'❀ · ❀ · ❀', topText:'du bist mein', mainText:'liebling', bottomText:'· kein scherz ·', kaomoji:'', dekoBottom:''},
   minimal: {dekoTop:'', topText:'', mainText:'nur wir', bottomText:'', kaomoji:'(❀◡❀)', dekoBottom:''},
-  pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:''}
+  pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:''},
+  custom: {dekoTop:'', topText:'', mainText:'', bottomText:'', kaomoji:'', dekoBottom:''}
 };
 function setLayout(layout) {
+  pushUndo();
   currentLayout = layout;
   document.querySelectorAll('[id^="lay_"]').forEach(el=>el.classList.remove('on'));
   document.getElementById('lay_'+layout).classList.add('on');
-  const d = layoutDefaults[layout];
-  ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f=>document.getElementById(f).value=d[f]);
+
+  // toggle custom editor visibility
+  const ce = document.getElementById('customEditor');
+  const ob = document.getElementById('outputBox');
+  const pvWrap = document.querySelector('.pv-popup');
+  const codeLabel = document.querySelector('.code-label');
+  const pvLabel = document.querySelector('.pv-label');
+  if (layout === 'custom') {
+    ce.style.display = '';
+    ob.style.display = 'none';
+    pvWrap.style.display = 'none';
+    if (codeLabel) codeLabel.style.display = 'none';
+    if (pvLabel) pvLabel.style.display = 'none';
+    // hide optimization tips from previous layout
+    const optPanel = document.getElementById('optimizeTips');
+    if (optPanel) optPanel.style.display = 'none';
+    // keep whatever the user typed; don't auto-fill from old layout
+    const ta = document.getElementById('ceTextarea');
+    ceSync();
+    return;
+  } else {
+    ce.style.display = 'none';
+    ob.style.display = '';
+    pvWrap.style.display = '';
+    if (codeLabel) codeLabel.style.display = '';
+    if (pvLabel) pvLabel.style.display = '';
+  }
+
+  if (!userHasEdited) {
+    const d = layoutDefaults[layout];
+    if (d) ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f=>document.getElementById(f).value=d[f]);
+  }
   if(typeof lineOrder!=='undefined') lineOrder=DEFAULT_ORDER.slice();
   generate();
 }
@@ -339,6 +650,7 @@ function updateGradUI(){const on=document.getElementById('useGrad').checked;docu
 function updateNoColorUI(){const off=document.getElementById('useNoColor').checked;document.getElementById('useGrad').disabled=off;document.getElementById('gradSection').style.opacity=off?'0.25':(document.getElementById('useGrad').checked?'1':'0.4');}
 function applyColor(){
   if(!currentField) return;
+  pushUndo();
   noColor[currentField]=document.getElementById('useNoColor').checked;
   const g=grads[currentField]; g.on=document.getElementById('useGrad').checked;
   g.c1=document.getElementById('grad1').value; g.c2=document.getElementById('grad2').value;
@@ -358,17 +670,206 @@ function gradientText(text,c1,c2){
   if(words.length===1){const w=words[0];if(w.length<=2)return`<color=${c1}>${w}</color>`;const t=Math.ceil(w.length/3);const p=[w.slice(0,t),w.slice(t,t*2),w.slice(t*2)].filter(x=>x);return p.map((x,i)=>{const f=i/(p.length-1)||0;return`<color=${rgbToHex(r1.r+(r2.r-r1.r)*f,r1.g+(r2.g-r1.g)*f,r1.b+(r2.b-r1.b)*f)}>${x}</color>`;}).join('');}
   return words.map((w,i)=>{const f=i/(words.length-1);return`<color=${rgbToHex(r1.r+(r2.r-r1.r)*f,r1.g+(r2.g-r1.g)*f,r1.b+(r2.b-r1.b)*f)}>${w}</color>`;}).join(' ');
 }
+// ── custom layout editor ──
+function ceApplyFont(style) {
+  const ta = document.getElementById('ceTextarea');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  if (s === e) return;
+  const sel = ta.value.substring(s, e);
+  const converted = applyFont(sel, style);
+  ta.value = ta.value.substring(0, s) + converted + ta.value.substring(e);
+  ta.selectionStart = s;
+  ta.selectionEnd = s + converted.length;
+  ta.focus();
+  ceSync();
+}
+
+function ceWrap(tag) {
+  const ta = document.getElementById('ceTextarea');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  if (s === e) return; // no selection
+  const sel = ta.value.substring(s, e);
+  const wrapped = '<' + tag + '>' + sel + '</' + tag + '>';
+  ta.value = ta.value.substring(0, s) + wrapped + ta.value.substring(e);
+  ta.selectionStart = s;
+  ta.selectionEnd = s + wrapped.length;
+  ta.focus();
+  ceSync();
+}
+
+function ceSetSize(sz) {
+  document.getElementById('ceSize').value = sz;
+  ceWrapSize();
+}
+
+function ceWrapSize() {
+  const ta = document.getElementById('ceTextarea');
+  const sz = document.getElementById('ceSize').value;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  if (s === e) return;
+  const sel = ta.value.substring(s, e);
+  const wrapped = '<size=' + sz + '>' + sel + '</size>';
+  ta.value = ta.value.substring(0, s) + wrapped + ta.value.substring(e);
+  ta.selectionStart = s;
+  ta.selectionEnd = s + wrapped.length;
+  ta.focus();
+  ceSync();
+}
+
+function ceWrapColor() {
+  const ta = document.getElementById('ceTextarea');
+  const col = document.getElementById('ceColor').value;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  if (s === e) return;
+  const sel = ta.value.substring(s, e);
+  const wrapped = '<color=' + col + '>' + sel + '</color>';
+  ta.value = ta.value.substring(0, s) + wrapped + ta.value.substring(e);
+  ta.selectionStart = s;
+  ta.selectionEnd = s + wrapped.length;
+  ta.focus();
+  ceSync();
+}
+
+function ceWrapGradient() {
+  const ta = document.getElementById('ceTextarea');
+  const c1 = document.getElementById('ceGrad1').value;
+  const c2 = document.getElementById('ceGrad2').value;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  if (s === e) return;
+  const sel = ta.value.substring(s, e);
+  // split selected text into words and apply gradient colors
+  const words = sel.split(' ').filter(w => w.length > 0);
+  if (!words.length) return;
+  const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
+  let wrapped;
+  if (words.length === 1) {
+    wrapped = '<color=' + c1 + '>' + words[0] + '</color>';
+  } else {
+    wrapped = words.map((w, i) => {
+      const f = i / (words.length - 1);
+      const hex = rgbToHex(r1.r+(r2.r-r1.r)*f, r1.g+(r2.g-r1.g)*f, r1.b+(r2.b-r1.b)*f);
+      return '<color=' + hex + '>' + w + '</color>';
+    }).join(' ');
+  }
+  ta.value = ta.value.substring(0, s) + wrapped + ta.value.substring(e);
+  ta.selectionStart = s;
+  ta.selectionEnd = s + wrapped.length;
+  ta.focus();
+  ceSync();
+}
+
+function ceSync() {
+  const code = document.getElementById('ceTextarea').value;
+  document.getElementById('outputBox').textContent = code;
+  // update counters
+  const chars = code.length, bytes = new TextEncoder().encode(code).length;
+  const cc = document.getElementById('charCount'), bc = document.getElementById('byteCount');
+  cc.textContent = chars; bc.textContent = bytes;
+  cc.className = 'cv ' + (chars > 240 ? 'over-v' : chars > 210 ? 'warn-v' : 'ok');
+  bc.className = 'cv ' + (bytes > 255 ? 'over-v' : bytes > 230 ? 'warn-v' : 'ok');
+  const bar = document.getElementById('counterBar');
+  bar.className = 'tb-counter ' + (chars > 240 || bytes > 255 ? 'over' : chars > 210 || bytes > 230 ? 'warn' : '');
+  // render live preview
+  ceRenderPreview(code);
+  // optimization tips for custom mode
+  ceUpdateTips(chars, bytes, code);
+  // save state
+  if (typeof _saveDebounced === 'function') _saveDebounced();
+}
+
+function ceUpdateTips(chars, bytes, code) {
+  const panel = document.getElementById('optimizeTips');
+  const header = document.getElementById('optHeader');
+  const list = document.getElementById('optList');
+  if (chars < 185) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  panel.className = 'opt-panel ' + (chars > 240 ? 'over-state' : chars > 210 ? 'warn-state' : '');
+  const tips = [];
+
+  // count tag overhead
+  const tagMatches = code.match(/<\/?(?:color(?:=[^>]*)?|size(?:=[^>]*)?|b|i)>/gi);
+  const tagChars = tagMatches ? tagMatches.join('').length : 0;
+  const textChars = chars - tagChars;
+  if (tagChars > 0) {
+    tips.push({lvl:'info', msg: 'Tags use <b>' + tagChars + '</b> chars — text uses <b>' + textChars + '</b> chars'});
+  }
+
+  // count gradient color tags
+  const colorTags = code.match(/<color=[^>]*>/gi);
+  if (colorTags && colorTags.length > 3) {
+    tips.push({lvl:'warn', msg: colorTags.length + ' color tags — gradients use lots of chars'});
+  }
+
+  // count lines
+  const lines = code.split('\n').filter(l => l.trim());
+  if (lines.length > 4 && chars > 210) {
+    tips.push({lvl:'tip', msg: 'Try fewer lines to save space (' + lines.length + ' lines)'});
+  }
+
+  // over limit
+  if (chars > 240) tips.push({lvl:'warn', msg: '<b>' + (chars - 240) + '</b> chars over the 240 limit!'});
+  if (bytes > 255) tips.push({lvl:'warn', msg: '<b>' + (bytes - 255) + '</b> bytes over the 255 limit!'});
+
+  // header
+  const headerIcon = chars > 240 ? icon('ban') : chars > 210 ? icon('warning') : icon('lightbulb');
+  header.innerHTML = '<span class="opt-header-icon">' + headerIcon + '</span><span>' + (chars > 240 ? t('opt_over') : chars > 210 ? t('opt_warn') : t('opt_info')) + '</span>';
+  header.style.color = chars > 240 ? 'var(--red)' : chars > 210 ? 'var(--orange)' : 'var(--subtle)';
+
+  // render tips
+  list.innerHTML = '';
+  tips.forEach(tip => {
+    const item = document.createElement('div');
+    item.className = 'opt-item';
+    const ic = tip.lvl === 'warn' ? icon('warning') : tip.lvl === 'info' ? icon('arrow-right') : '<span style="display:inline-block;width:.6em;text-align:center">·</span>';
+    const col = tip.lvl === 'warn' ? 'var(--orange)' : tip.lvl === 'info' ? 'var(--purple)' : 'var(--muted)';
+    item.style.color = col;
+    item.innerHTML = '<span class="opt-icon">' + ic + '</span><span>' + tip.msg + '</span>';
+    list.appendChild(item);
+  });
+  if (typeof hydrateIcons === 'function') { hydrateIcons(header); hydrateIcons(list); }
+}
+
+function ceEsc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function ceRenderPreview(code) {
+  const pv = document.getElementById('cePreviewContent');
+  if (!pv) return;
+  const lines = code.split('\n');
+  pv.innerHTML = lines.map(line => {
+    if (!line.trim()) return '<div class="ce-line">&nbsp;</div>';
+    let html = ceEsc(line);
+    // <size=N>…</size> → scaled span
+    html = html.replace(/&lt;size=(\d+)&gt;([\s\S]*?)&lt;\/size&gt;/gi, (_, sz, inner) => {
+      const rem = Math.max(0.5, parseInt(sz) / 14);
+      return '<span style="font-size:' + rem + 'rem">' + inner + '</span>';
+    });
+    // <color=#HEX>…</color> → colored span
+    html = html.replace(/&lt;color=(#[0-9a-fA-F]{3,8})&gt;([\s\S]*?)&lt;\/color&gt;/gi, (_, col, inner) => {
+      return '<span style="color:' + col + '">' + inner + '</span>';
+    });
+    // <b>…</b>
+    html = html.replace(/&lt;b&gt;([\s\S]*?)&lt;\/b&gt;/gi, (_, inner) => '<b>' + inner + '</b>');
+    // <i>…</i>
+    html = html.replace(/&lt;i&gt;([\s\S]*?)&lt;\/i&gt;/gi, (_, inner) => '<i>' + inner + '</i>');
+    return '<div class="ce-line">' + html + '</div>';
+  }).join('');
+}
+
 function colorTag(text,field){const g=grads[field];if(g?.on)return gradientText(text,g.c1,g.c2);if(noColor[field])return text;return`<color=${colors[field]}>${text}</color>`;}
 
 // ── fonts ──
 const FM={'a':'α','b':'в','c':'¢','d':'∂','e':'є','f':'f','g':'g','h':'н','i':'ι','j':'נ','k':'к','l':'ℓ','m':'м','n':'η','o':'σ','p':'ρ','q':'q','r':'я','s':'ѕ','t':'т','u':'υ','v':'ν','w':'ω','x':'χ','y':'у','z':'z'};
 const SM={'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'};
-function applyFont(text,style){if(style==='fancy')return text.split('').map(c=>FM[c.toLowerCase()]||c).join('');if(style==='smallcaps')return text.split('').map(c=>SM[c.toLowerCase()]||c).join('');return text;}
+const TM={'a':'ล','b':'в','c':'¢','d':'∂','e':'э','f':'ƒ','g':'φ','h':'ђ','i':'เ','j':'נ','k':'к','l':'ℓ','m':'м','n':'и','o':'๏','p':'ק','q':'ợ','r':'я','s':'ร','t':'†','u':'µ','v':'√','w':'ω','x':'җ','y':'ý','z':'ž'};
+function applyFont(text,style){if(style==='fancy')return text.split('').map(c=>FM[c.toLowerCase()]||c).join('');if(style==='smallcaps')return text.split('').map(c=>SM[c.toLowerCase()]||c).join('');if(style==='thai')return text.split('').map(c=>TM[c.toLowerCase()]||c).join('');return text;}
 function setFontStyle(field,style){
+  pushUndo();
   fieldFonts[field]=style;
   if(field==='mainText') currentFontStyle=style;
   // remove active from all 3 variants for this field
-  ['normal','fancy','smallcaps'].forEach(function(s){
+  ['normal','fancy','smallcaps','thai'].forEach(function(s){
     var el=document.getElementById('font_'+field+'_'+s);
     if(el) el.classList.remove('on');
   });
@@ -380,9 +881,26 @@ function setFontStyle(field,style){
 
 // ── field helpers ──
 function insertIntoField(id,sym){const el=document.getElementById(id);const s=el.selectionStart,e=el.selectionEnd;el.value=el.value.slice(0,s)+sym+el.value.slice(e);el.selectionStart=el.selectionEnd=s+sym.length;el.focus();generate();}
-function copySymbol(sym){navigator.clipboard?.writeText(sym).catch(()=>{});const fb=document.getElementById('copyFeedback');fb.textContent='✓ '+sym;setTimeout(()=>fb.textContent='',1800);}
-function setField(id,val){document.getElementById(id).value=val;generate();}
-function setSpruch(main,top,bottom){document.getElementById('mainText').value=main;document.getElementById('topText').value=top;document.getElementById('bottomText').value=bottom;generate();}
+function copySymbol(sym){
+  navigator.clipboard?.writeText(sym).catch(()=>{});
+  // show toast
+  let toast = document.getElementById('copyToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'copyToast';
+    toast.className = 'copy-toast';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = icon('check') + ' <span>Copied: <b>' + sym + '</b></span>';
+  if (typeof hydrateIcons === 'function') hydrateIcons(toast);
+  toast.classList.remove('show');
+  void toast.offsetWidth; // force reflow
+  toast.classList.add('show');
+  clearTimeout(toast._tid);
+  toast._tid = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+function setField(id,val){pushUndo();userHasEdited=true;document.getElementById(id).value=val;generate();}
+function setSpruch(main,top,bottom){pushUndo();userHasEdited=true;document.getElementById('mainText').value=main;document.getElementById('topText').value=top;document.getElementById('bottomText').value=bottom;generate();}
 function setBday(main,top,bottom){
   setSpruch(main,top,bottom);
   grads.mainText={on:true,c1:'#FFD700',c2:'#FF8C00'};
@@ -393,6 +911,7 @@ function setBday(main,top,bottom){
   generate();
 }
 function setKaoMode(on){
+  pushUndo();
   document.getElementById('kaoSection').style.display=on?'':'none';
   document.getElementById('kao_on').classList.toggle('on',on);
   document.getElementById('kao_off').classList.toggle('on',!on);
@@ -441,14 +960,54 @@ function focusField(id){
   },50);
 }
 function resetAll(){
-  ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f=>document.getElementById(f).value='');
+  pushUndo();
+  userHasEdited=false;
+  // if in custom mode, switch back to center first
+  const resetLayout = (currentLayout === 'custom') ? 'center' : currentLayout;
+  const d = layoutDefaults[resetLayout];
+  ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f=>document.getElementById(f).value=d?d[f]:'');
   ['fontSize','sizeDekoTop','sizeTopText','sizeBottomText','sizeKaomoji','sizeDekoBottom'].forEach((f,i)=>document.getElementById(f).value=[60,12,14,14,16,12][i]);
   ['mainBold','mainItalic','topBold','topItalic','bottomBold','bottomItalic'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
   currentFontStyle='normal';
   Object.keys(fieldFonts).forEach(f=>fieldFonts[f]='normal');
   document.querySelectorAll('[id^="font_"]').forEach(el=>el.classList.remove('on'));
   ['dekoTop','topText','mainText','bottomText','dekoBottom'].forEach(function(f){var el=document.getElementById('font_'+f+'_normal');if(el)el.classList.add('on');});
+  // reset colors to defaults
+  Object.assign(colors, {dekoTop:'#555555',topText:'#8f8f8f',mainText:'#ff71b8',bottomText:'#8f8f8f',kaomoji:'#ffd84d',dekoBottom:'#5c5c7a'});
+  Object.keys(noColor).forEach(f => noColor[f] = false);
+  Object.keys(grads).forEach(f => { grads[f].on = false; grads[f].c1 = '#ff71b8'; grads[f].c2 = '#b388ff'; });
+  // update color buttons
+  ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f => {
+    const btn = document.getElementById('btn_' + f);
+    if (btn) btn.style.background = colors[f];
+  });
+  // reset kaomoji mode
+  document.getElementById('kaoSection').style.display = '';
+  document.getElementById('kao_on').classList.add('on');
+  document.getElementById('kao_off').classList.remove('on');
   lineOrder=DEFAULT_ORDER.slice();
+  // clear custom editor
+  const ceTa = document.getElementById('ceTextarea');
+  if (ceTa) { ceTa.value = ''; }
+  const cePv = document.getElementById('cePreviewContent');
+  if (cePv) { cePv.innerHTML = ''; }
+  // clear saved state
+  try { localStorage.removeItem('giftState'); } catch(e) {}
+  // switch back to center layout
+  if (currentLayout === 'custom') {
+    currentLayout = 'center';
+    document.querySelectorAll('[id^="lay_"]').forEach(el=>el.classList.remove('on'));
+    document.getElementById('lay_center').classList.add('on');
+    const ce = document.getElementById('customEditor');
+    if (ce) ce.style.display = 'none';
+    document.getElementById('outputBox').style.display = '';
+    const pvWrap = document.querySelector('.pv-popup');
+    if (pvWrap) pvWrap.style.display = '';
+    const codeLabel = document.querySelector('.code-label');
+    if (codeLabel) codeLabel.style.display = '';
+    const pvLabel = document.querySelector('.pv-label');
+    if (pvLabel) pvLabel.style.display = '';
+  }
   generate();
 }
 
@@ -465,6 +1024,8 @@ function moveLine(field,dir){
 
 // ── main generate ──
 function generate(){
+  // skip auto-generate in custom mode
+  if (currentLayout === 'custom') return;
   const v=f=>document.getElementById(f).value;
   const dekoTop=v('dekoTop'),topText=v('topText'),main=v('mainText'),bottom=v('bottomText'),kaomoji=v('kaomoji'),dekoBottom=v('dekoBottom');
   const size=v('fontSize');
@@ -495,6 +1056,22 @@ function generate(){
   bar.className='tb-counter '+(chars>240||bytes>255?'over':chars>210||bytes>230?'warn':'');
 
   updateOptimizeTips(chars,bytes,lm,{dekoTop,topText,mainText:main,bottomText:bottom,kaomoji,dekoBottom});
+
+  // per-field char costs
+  Object.entries(lm).forEach(([f, v]) => {
+    const badge = document.getElementById('fc_' + f);
+    if (badge) badge.textContent = v ? v.length : 0;
+  });
+
+  // font tooltips
+  FIELDS.forEach(f => {
+    const text = document.getElementById(f)?.value || 'abc';
+    const preview = text.substring(0, 20);
+    ['normal','fancy','smallcaps','thai'].forEach(s => {
+      const btn = document.getElementById('font_' + f + '_' + s);
+      if (btn) btn.title = applyFont(preview, s);
+    });
+  });
 
   // preview
   const pms=Math.max(0.8,parseInt(size)/20)+'rem';
@@ -528,13 +1105,14 @@ function generate(){
     el.classList.add('has-reorder');
     el.style.position='relative';
     const ctrl=document.createElement('div');ctrl.className='pv-reorder';
-    const up=document.createElement('span');up.className='pv-arr';up.textContent='▲';up.title='move up';
+    const up=document.createElement('span');up.className='pv-arr';up.innerHTML=icon('chevron-up');up.title='move up';
     if(idx===0) up.classList.add('disabled');
     else up.onclick=(e)=>{e.stopPropagation();swapInOrder(field,visibleList[idx-1]);};
-    const dn=document.createElement('span');dn.className='pv-arr';dn.textContent='▼';dn.title='move down';
+    const dn=document.createElement('span');dn.className='pv-arr';dn.innerHTML=icon('chevron-down');dn.title='move down';
     if(idx===visibleList.length-1) dn.classList.add('disabled');
     else dn.onclick=(e)=>{e.stopPropagation();swapInOrder(field,visibleList[idx+1]);};
-    const rm=document.createElement('span');rm.className='pv-arr pv-arr-rm';rm.textContent='✕';rm.title='remove line';
+    const rm=document.createElement('span');rm.className='pv-arr pv-arr-rm';rm.innerHTML=icon('xmark');rm.title='remove line';
+    if(typeof hydrateIcons==='function'){hydrateIcons(up);hydrateIcons(dn);hydrateIcons(rm);}
     rm.onclick=(e)=>{e.stopPropagation();if(field==='kaomoji'){setKaoMode(false);}else{setField(field,'');}};
     ctrl.appendChild(up);ctrl.appendChild(dn);ctrl.appendChild(rm);
     el.appendChild(ctrl);
@@ -614,13 +1192,21 @@ function generate(){
     builtLines.forEach(({field,el},idx)=>attachReorder(el,field,visiblePyr,idx));
     card.insertBefore(wrap,pDT);
   }
+
+  // auto-save state (debounced to avoid localStorage thrashing)
+  if (typeof _saveDebounced === 'function') _saveDebounced();
 }
 
 function copyCode(){
   const text=document.getElementById('outputBox').textContent;
   navigator.clipboard?.writeText(text).then(()=>{flashCopy();}).catch(()=>{legacyCopy(text);});
   function legacyCopy(t){const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0;';document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');document.body.removeChild(ta);flashCopy();}
-  function flashCopy(){const btn=document.querySelector('.btn-copy');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copy_code'),2000);}
+  function flashCopy(){
+    const btn=document.querySelector('.btn-copy');
+    const lbl=btn.querySelector('span[data-i18n]');
+    if(lbl){lbl.textContent=t('copied');setTimeout(()=>lbl.textContent=t('copy_code'),2000);}
+    else {btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copy_code'),2000);}
+  }
 }
 
 // ── optimization tips ──
@@ -685,7 +1271,8 @@ function updateOptimizeTips(chars,bytes,lm,raw){
   }
 
   // render header
-  header.textContent=chars>240?t('opt_over'):chars>210?t('opt_warn'):t('opt_info');
+  const headerIcon = chars>240 ? icon('ban') : chars>210 ? icon('warning') : icon('lightbulb');
+  header.innerHTML = `<span class="opt-header-icon">${headerIcon}</span><span>${chars>240?t('opt_over'):chars>210?t('opt_warn'):t('opt_info')}</span>`;
   header.style.color=chars>240?'var(--red)':chars>210?'var(--orange)':'var(--subtle)';
 
   // render list
@@ -695,21 +1282,132 @@ function updateOptimizeTips(chars,bytes,lm,raw){
     if(tip.lvl==='action'){
       item.className='opt-item opt-act';
       item.style.color='var(--pink)';
-      item.innerHTML=`<span class="opt-icon">✕</span><span>${tip.msg}</span><span class="opt-act-btn">${t('opt_remove')}</span>`;
+      item.innerHTML=`<span class="opt-icon">${icon('xmark')}</span><span>${tip.msg}</span><span class="opt-act-btn">${t('opt_remove')}</span>`;
       item.onclick=()=>{
         if(tip.field==='kaomoji') setKaoMode(false);
         else { setField(tip.field,''); generate(); }
       };
     } else {
       item.className='opt-item';
-      const icon=tip.lvl==='warn'?'⚠':tip.lvl==='info'?'→':'·';
+      const ic = tip.lvl==='warn' ? icon('warning') : tip.lvl==='info' ? icon('arrow-right') : '<span style="display:inline-block;width:.6em;text-align:center">·</span>';
       const col=tip.lvl==='warn'?'var(--orange)':tip.lvl==='info'?'var(--purple)':'var(--muted)';
       item.style.color=col;
-      item.innerHTML=`<span class="opt-icon">${icon}</span><span>${tip.msg}</span>`;
+      item.innerHTML=`<span class="opt-icon">${ic}</span><span>${tip.msg}</span>`;
     }
     list.appendChild(item);
   });
+  if(typeof hydrateIcons==='function'){hydrateIcons(header);hydrateIcons(list);}
 }
 
-document.querySelectorAll('input[type="text"],input[type="number"]').forEach(el=>el.addEventListener('input',generate));
+// ── URL sharing ──
+function shareGift() {
+  const state = {
+    t: {}, s: {}, c: {}, col: colors, gr: grads, nc: noColor, ff: fieldFonts,
+    lay: currentLayout, lo: lineOrder,
+    kao: document.getElementById('kaoSection')?.style.display !== 'none'
+  };
+  FIELDS.forEach(f => state.t[f] = document.getElementById(f).value);
+  SIZE_IDS.forEach(id => state.s[id] = document.getElementById(id).value);
+  CHECK_IDS.forEach(id => { const el = document.getElementById(id); if (el) state.c[id] = el.checked; });
+  const hash = '#g=' + btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  history.replaceState(null, '', hash);
+  navigator.clipboard?.writeText(location.href).then(() => {
+    const btn = document.getElementById('shareBtn');
+    if (btn) { const orig = btn.innerHTML; btn.innerHTML = '<i class="fa-icon" data-icon="check"></i> Link copied!'; if(typeof hydrateIcons==='function') hydrateIcons(btn); setTimeout(() => { btn.innerHTML = orig; if(typeof hydrateIcons==='function') hydrateIcons(btn); }, 2000); }
+  });
+}
+
+function loadFromURL() {
+  const h = location.hash;
+  if (!h.startsWith('#g=')) return false;
+  try {
+    const state = JSON.parse(decodeURIComponent(escape(atob(h.slice(3)))));
+    if (state.t) FIELDS.forEach(f => { const el = document.getElementById(f); if (el && state.t[f] != null) el.value = state.t[f]; });
+    if (state.s) SIZE_IDS.forEach(id => { const el = document.getElementById(id); if (el && state.s[id] != null) el.value = state.s[id]; });
+    if (state.c) CHECK_IDS.forEach(id => { const el = document.getElementById(id); if (el && state.c[id] != null) el.checked = state.c[id]; });
+    if (state.col) Object.assign(colors, state.col);
+    if (state.nc) Object.assign(noColor, state.nc);
+    if (state.gr) Object.keys(state.gr).forEach(f => { if(grads[f]) Object.assign(grads[f], state.gr[f]); });
+    FIELDS.forEach(f => { const btn = document.getElementById('btn_' + f); if(!btn) return; const g=grads[f]; btn.style.background = g.on ? `linear-gradient(to right,${g.c1},${g.c2})` : colors[f]; });
+    if (state.ff) {
+      Object.assign(fieldFonts, state.ff);
+      Object.keys(fieldFonts).forEach(f => { ['normal','fancy','smallcaps','thai'].forEach(s => { const el = document.getElementById('font_'+f+'_'+s); if(el) el.classList.toggle('on', fieldFonts[f]===s); }); });
+    }
+    if (state.lay) {
+      currentLayout = state.lay;
+      document.querySelectorAll('[id^="lay_"]').forEach(el => el.classList.remove('on'));
+      const b = document.getElementById('lay_' + state.lay); if(b) b.classList.add('on');
+    }
+    if (state.lo) lineOrder = state.lo.slice();
+    if (state.kao != null) {
+      document.getElementById('kaoSection').style.display = state.kao ? '' : 'none';
+      document.getElementById('kao_on')?.classList.toggle('on', state.kao);
+      document.getElementById('kao_off')?.classList.toggle('on', !state.kao);
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+// ── theme ──
+let theme = 'dark';
+try { theme = localStorage.getItem('theme') || 'dark'; } catch(e) {}
+
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem('theme', theme); } catch(e) {}
+  const icon = document.querySelector('#themeBtn .fa-icon');
+  if (icon) icon.setAttribute('data-icon', theme === 'dark' ? 'sun' : 'moon');
+  if (typeof hydrateIcons === 'function') hydrateIcons(document.getElementById('themeBtn'));
+}
+
+// apply on load
+if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+
+// ── keyboard shortcuts ──
+document.addEventListener('keydown', function(e) {
+  // Ctrl+Z = undo
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+    e.preventDefault(); undo();
+  }
+  // Ctrl+Y or Ctrl+Shift+Z = redo
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+    e.preventDefault(); redo();
+  }
+  // Ctrl+Shift+C = copy code (when not in input)
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+    e.preventDefault(); copyCode();
+  }
+  // Escape = close modal
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+});
+
+// ── debounced generate for input events (80ms) ──
+const generateDebounced = debounce(generate, 80);
+document.querySelectorAll('input[type="text"],input[type="number"]').forEach(el=>{
+  el.addEventListener('input',generateDebounced);
+  el.addEventListener('input',()=>{ userHasEdited=true; });
+});
+// save state after every generate — debounced to avoid thrashing
+const _saveDebounced = debounce(saveGiftState, 200);
+
+// custom editor sync
+document.getElementById('ceTextarea')?.addEventListener('input', ceSync);
+
+// ── init: restore saved state, then generate ──
+const hadURLState = loadFromURL();
+const hadSavedState = hadURLState || restoreGiftState();
+if (hadSavedState) {
+  userHasEdited = true;
+} else {
+  // fresh load — fill fields with the default layout's demo texts
+  const d = layoutDefaults[currentLayout];
+  if (d) ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f => document.getElementById(f).value = d[f]);
+}
 generate();
+// first save (so even the default state is stored)
+if (!hadSavedState) saveGiftState();

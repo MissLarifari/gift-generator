@@ -3,17 +3,22 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>🎁 Gift Generator · 3dxchat</title>
-<link rel="stylesheet" href="/styles.css"/>
+<title>Gift Generator · 3dxchat</title>
+<!-- Fontawesome Free (self-hosted, no external CDN) -->
+<link rel="stylesheet" href="/fontawesome/css/fontawesome.min.css"/>
+<link rel="stylesheet" href="/fontawesome/css/solid.min.css"/>
+<link rel="stylesheet" href="/fontawesome/css/brands.min.css"/>
+<link rel="stylesheet" href="/css/styles.css"/>
+<script src="/js/icons.js"></script>
 </head>
 <body>
 
 <!-- topbar -->
 <div class="topbar">
   <div class="tb-brand">
-    <h1>🎁 Gift Generator</h1>
+    <h1><i class="fa-icon tb-brand-icon" data-icon="gift"></i> Gift Generator</h1>
     <span class="tb-proto" data-i18n="prototype_badge" title="Prototype — work in progress">PROTOTYPE</span>
-    <span class="tb-trust tb-trust-notrack" title="No tracking, no analytics, no cookies, no external scripts.">🛡️ No Tracking</span>
+    <span class="tb-trust tb-trust-notrack" title="No tracking, no analytics, no cookies, no external scripts."><i class="fa-icon" data-icon="shield-halved"></i> No Tracking</span>
     <div class="tb-brand-sep"></div>
     <span class="tb-brand-sub">
       for <a href="https://3dxchat.com/" target="_blank">3dxchat.com</a>
@@ -31,17 +36,20 @@
     <span class="tb-sep">/</span>
     <span class="tb-counter-label">255</span>
   </div>
-  <span class="tb-feedback"><span data-i18n="feedback_pre">Feedback · </span><a href="https://discord.com/users/1167838697157308528" target="_blank" rel="noopener">xlari</a><span data-i18n="feedback_post"> on Discord</span></span>
-  <div class="ui-lang">
-    <span class="ui-lang-tab on" data-lang="en" onclick="setUILang('en')">🇬🇧 EN</span>
-    <span class="ui-lang-tab"    data-lang="de" onclick="setUILang('de')">🇩🇪 DE</span>
-    <span class="ui-lang-tab"    data-lang="fr" onclick="setUILang('fr')">🇫🇷 FR</span>
-    <span class="ui-lang-tab"    data-lang="ru" onclick="setUILang('ru')">🇷🇺 RU</span>
+  <div class="tb-right">
+    <span class="tb-feedback"><span data-i18n="feedback_pre">Feedback · </span><a href="https://discord.com/users/1167838697157308528" target="_blank" rel="noopener"><i class="fa-icon fa-brands fa-discord" aria-hidden="true"></i> xlari</a><span data-i18n="feedback_post"> on Discord</span></span>
+    <button class="tb-theme" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"><i class="fa-icon" data-icon="sun"></i></button>
+    <div class="ui-lang">
+      <span class="ui-lang-tab on" data-lang="en" onclick="setUILang('en')"><img class="flag" src="/img/flags/gb.svg" alt=""/> EN</span>
+      <span class="ui-lang-tab"    data-lang="de" onclick="setUILang('de')"><img class="flag" src="/img/flags/de.svg" alt=""/> DE</span>
+      <span class="ui-lang-tab"    data-lang="fr" onclick="setUILang('fr')"><img class="flag" src="/img/flags/fr.svg" alt=""/> FR</span>
+      <span class="ui-lang-tab"    data-lang="ru" onclick="setUILang('ru')"><img class="flag" src="/img/flags/ru.svg" alt=""/> RU</span>
+    </div>
   </div>
 </div>
 
 <!-- proto notice (under topbar) -->
-<div class="proto-notice" data-i18n="prototype_thanks">💛 This is a prototype — thank you to everyone who uses it and supports me!</div>
+<div class="proto-notice"><i class="fa-icon proto-notice-icon" data-icon="heart"></i> <span data-i18n="prototype_thanks">This is a prototype — thank you to everyone who uses it and supports me!</span></div>
 
 <!-- app -->
 <div class="app">
@@ -50,10 +58,10 @@
 <div class="col col-left">
 
   <!-- How it works -->
-  <div class="sec">
+  <div class="sec" id="sec-howto">
     <div class="sec-head open" onclick="toggleSec(this)">
-      <span class="sec-title"><span class="sec-title-icon">ⓘ</span> <span data-i18n="howto_title">How It Works</span></span>
-      <span class="sec-arrow">▼</span>
+      <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="info"></i> <span data-i18n="howto_title">How It Works</span></span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
     <div class="sec-body open">
       <div class="sec-inner">
@@ -86,9 +94,7 @@
             <span class="howto-step">7</span>
             <div data-i18n-html="howto_step6"><b>Copy the code</b> with the big button under the preview, then paste it in 3dxchat as a gift message. Done.</div>
           </div>
-          <div class="howto-tip" data-i18n="howto_tip">
-            💡 Tip — click any line in the live preview to jump straight to its input field.
-          </div>
+          <div class="howto-tip"><i class="fa-icon" data-icon="lightbulb"></i> <span data-i18n="howto_tip">Tip — click any line in the live preview to jump straight to its input field.</span></div>
         </div>
       </div>
     </div>
@@ -97,8 +103,8 @@
   <!-- Layout -->
   <div class="sec">
     <div class="sec-head open" onclick="toggleSec(this)">
-      <span class="sec-title"><span class="sec-title-icon">⊞</span> <span data-i18n="layout">Layout</span></span>
-      <span class="sec-arrow">▼</span>
+      <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="layout"></i> <span data-i18n="layout">Layout</span></span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
     <div class="sec-body open">
       <div class="sec-inner">
@@ -109,6 +115,7 @@
           <div class="lbtn"    id="lay_framed"  onclick="setLayout('framed')"  data-i18n="layout_framed">Framed</div>
           <div class="lbtn"    id="lay_minimal" onclick="setLayout('minimal')" data-i18n="layout_minimal">Minimal</div>
           <div class="lbtn"    id="lay_pyramid" onclick="setLayout('pyramid')" data-i18n="layout_pyramid">Pyramid</div>
+          <div class="lbtn"    id="lay_custom"  onclick="setLayout('custom')"  data-i18n="layout_custom">Custom</div>
         </div>
       </div>
     </div>
@@ -116,11 +123,11 @@
 
   <!-- Deco top -->
   <div class="sec">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <span class="sec-title"><span class="sec-title-icon">✦</span> <span data-i18n="deco_top">Deco Top</span></span>
-      <span class="sec-arrow">▼</span>
+    <div class="sec-head open" onclick="toggleSec(this)">
+      <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="star"></i> <span data-i18n="deco_top">Deco Top</span></span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body">
+    <div class="sec-body open">
       <div class="sec-inner">
         <div class="field">
           <div class="chips">
@@ -151,7 +158,7 @@
             <span class="chip" onclick="insertIntoField('dekoTop','ꕥ')">ꕥ</span>
           </div>
           <div class="row">
-            <input type="text" id="dekoTop" value="· ily ·←" oninput="generate()" placeholder="deco top…" data-i18n-ph="ph_deco_top"/>
+            <input type="text" id="dekoTop" value="· ily ·←" placeholder="deco top…" data-i18n-ph="ph_deco_top"/>
             <div class="cbtn" id="btn_dekoTop" style="background:#555" onclick="openModal('dekoTop')"></div>
           </div>
           <div class="meta">
@@ -159,9 +166,11 @@
               <span class="chip on"  id="font_dekoTop_normal"    onclick="setFontStyle('dekoTop','normal')">Aa</span>
               <span class="chip"     id="font_dekoTop_fancy"     onclick="setFontStyle('dekoTop','fancy')">αв</span>
               <span class="chip"     id="font_dekoTop_smallcaps" onclick="setFontStyle('dekoTop','smallcaps')">ꜱᴄ</span>
+              <span class="chip"     id="font_dekoTop_thai"      onclick="setFontStyle('dekoTop','thai')">ล†</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeDekoTop" value="12" oninput="generate()"/>
+            <input type="number" id="sizeDekoTop" value="12"/>
+            <span class="fc-badge" id="fc_dekoTop" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -170,15 +179,15 @@
 
   <!-- Top line -->
   <div class="sec">
-    <div class="sec-head" onclick="toggleSec(this)">
+    <div class="sec-head open" onclick="toggleSec(this)">
       <span class="sec-title" data-i18n="top_line">Top Line</span>
-      <span class="sec-arrow">▼</span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body">
+    <div class="sec-body open">
       <div class="sec-inner">
         <div class="field">
           <div class="row">
-            <input type="text" id="topText" value=".. stop being .." oninput="generate()" placeholder="top line…" data-i18n-ph="ph_top"/>
+            <input type="text" id="topText" value=".. stop being .." placeholder="top line…" data-i18n-ph="ph_top"/>
             <div class="cbtn" id="btn_topText" style="background:#8f8f8f" onclick="openModal('topText')"></div>
           </div>
           <div class="meta" style="margin-bottom:.4rem">
@@ -194,9 +203,11 @@
               <span class="chip on" id="font_topText_normal"    onclick="setFontStyle('topText','normal')">Aa</span>
               <span class="chip"    id="font_topText_fancy"     onclick="setFontStyle('topText','fancy')">αв</span>
               <span class="chip"    id="font_topText_smallcaps" onclick="setFontStyle('topText','smallcaps')">ꜱᴄ</span>
+              <span class="chip"    id="font_topText_thai"      onclick="setFontStyle('topText','thai')">ล†</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeTopText" value="14" oninput="generate()"/>
+            <input type="number" id="sizeTopText" value="14"/>
+            <span class="fc-badge" id="fc_topText" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -205,15 +216,15 @@
 
   <!-- Main text -->
   <div class="sec">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <span class="sec-title"><span class="sec-title-icon">✶</span> <span data-i18n="main_text">Main Text</span></span>
-      <span class="sec-arrow">▼</span>
+    <div class="sec-head open" onclick="toggleSec(this)">
+      <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="asterisk"></i> <span data-i18n="main_text">Main Text</span></span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body">
+    <div class="sec-body open">
       <div class="sec-inner">
         <div class="field">
           <div class="row">
-            <input type="text" id="mainText" value="so cute" oninput="generate()" placeholder="main text…" data-i18n-ph="ph_main"/>
+            <input type="text" id="mainText" value="so cute" placeholder="main text…" data-i18n-ph="ph_main"/>
             <div class="cbtn" id="btn_mainText" style="background:var(--pink)" onclick="openModal('mainText')"></div>
           </div>
           <div class="meta" style="margin-bottom:.4rem">
@@ -229,9 +240,11 @@
               <span class="chip on" id="font_mainText_normal"    onclick="setFontStyle('mainText','normal')">Aa</span>
               <span class="chip"    id="font_mainText_fancy"     onclick="setFontStyle('mainText','fancy')">αв</span>
               <span class="chip"    id="font_mainText_smallcaps" onclick="setFontStyle('mainText','smallcaps')">ꜱᴄ</span>
+              <span class="chip"    id="font_mainText_thai"      onclick="setFontStyle('mainText','thai')">ล†</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="fontSize" value="60" oninput="generate()"/>
+            <input type="number" id="fontSize" value="60"/>
+            <span class="fc-badge" id="fc_mainText" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -240,15 +253,15 @@
 
   <!-- Bottom line -->
   <div class="sec">
-    <div class="sec-head" onclick="toggleSec(this)">
+    <div class="sec-head open" onclick="toggleSec(this)">
       <span class="sec-title" data-i18n="bottom_line">Bottom Line</span>
-      <span class="sec-arrow">▼</span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body">
+    <div class="sec-body open">
       <div class="sec-inner">
         <div class="field">
           <div class="row">
-            <input type="text" id="bottomText" value=".. i cant handle it .." oninput="generate()" placeholder="bottom line…" data-i18n-ph="ph_bottom"/>
+            <input type="text" id="bottomText" value=".. i cant handle it .." placeholder="bottom line…" data-i18n-ph="ph_bottom"/>
             <div class="cbtn" id="btn_bottomText" style="background:#8f8f8f" onclick="openModal('bottomText')"></div>
           </div>
           <div class="meta" style="margin-bottom:.4rem">
@@ -264,9 +277,11 @@
               <span class="chip on" id="font_bottomText_normal"    onclick="setFontStyle('bottomText','normal')">Aa</span>
               <span class="chip"    id="font_bottomText_fancy"     onclick="setFontStyle('bottomText','fancy')">αв</span>
               <span class="chip"    id="font_bottomText_smallcaps" onclick="setFontStyle('bottomText','smallcaps')">ꜱᴄ</span>
+              <span class="chip"    id="font_bottomText_thai"      onclick="setFontStyle('bottomText','thai')">ล†</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeBottomText" value="14" oninput="generate()"/>
+            <input type="number" id="sizeBottomText" value="14"/>
+            <span class="fc-badge" id="fc_bottomText" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -275,15 +290,15 @@
 
   <!-- Kaomoji / Emoji -->
   <div class="sec">
-    <div class="sec-head" onclick="toggleSec(this)">
+    <div class="sec-head open" onclick="toggleSec(this)">
       <span class="sec-title"><span class="sec-title-icon">(◕‿◕)</span> <span data-i18n="kaomoji">Kaomoji</span></span>
-      <span class="sec-arrow">▼</span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body">
+    <div class="sec-body open">
       <div class="sec-inner">
         <div class="kao-toggle">
-          <span class="chip on" id="kao_on"  onclick="setKaoMode(true)"  data-i18n="with_kao">✦ With</span>
-          <span class="chip danger" id="kao_off" onclick="setKaoMode(false)" data-i18n="without_kao">✕ Without</span>
+          <span class="chip on" id="kao_on"  onclick="setKaoMode(true)"><i class="fa-icon" data-icon="check"></i> <span data-i18n="with_kao">With</span></span>
+          <span class="chip danger" id="kao_off" onclick="setKaoMode(false)"><i class="fa-icon" data-icon="xmark"></i> <span data-i18n="without_kao">Without</span></span>
         </div>
         <div id="kaoSection">
           <div class="sym-label" data-i18n="cute">Cute</div>
@@ -318,12 +333,13 @@
             <span class="chip" onclick="setField('kaomoji','(*^▽^*)')">*^▽^*</span>
           </div>
           <div class="row" style="margin-top:.4rem">
-            <input type="text" id="kaomoji" value="(❀◡❀)" oninput="generate()" placeholder="kaomoji…" data-i18n-ph="ph_kao"/>
+            <input type="text" id="kaomoji" value="(❀◡❀)" placeholder="kaomoji…" data-i18n-ph="ph_kao"/>
             <div class="cbtn" id="btn_kaomoji" style="background:var(--gold)" onclick="openModal('kaomoji')"></div>
           </div>
           <div class="meta">
             <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeKaomoji" value="16" oninput="generate()"/>
+            <input type="number" id="sizeKaomoji" value="16"/>
+            <span class="fc-badge" id="fc_kaomoji" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -332,11 +348,11 @@
 
   <!-- Deco bottom -->
   <div class="sec">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <span class="sec-title"><span class="sec-title-icon">✦</span> <span data-i18n="deco_bottom">Deco Bottom</span></span>
-      <span class="sec-arrow">▼</span>
+    <div class="sec-head open" onclick="toggleSec(this)">
+      <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="star"></i> <span data-i18n="deco_bottom">Deco Bottom</span></span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
-    <div class="sec-body">
+    <div class="sec-body open">
       <div class="sec-inner">
         <div class="field">
           <div class="chips">
@@ -366,7 +382,7 @@
             <span class="chip" onclick="insertIntoField('dekoBottom','ꕥ')">ꕥ</span>
           </div>
           <div class="row">
-            <input type="text" id="dekoBottom" value=".. ･ ✦ ･ .." oninput="generate()" placeholder="deco bottom…" data-i18n-ph="ph_deco_bottom"/>
+            <input type="text" id="dekoBottom" value=".. ･ ✦ ･ .." placeholder="deco bottom…" data-i18n-ph="ph_deco_bottom"/>
             <div class="cbtn" id="btn_dekoBottom" style="background:#5c5c7a" onclick="openModal('dekoBottom')"></div>
           </div>
           <div class="meta">
@@ -374,9 +390,11 @@
               <span class="chip on" id="font_dekoBottom_normal"    onclick="setFontStyle('dekoBottom','normal')">Aa</span>
               <span class="chip"    id="font_dekoBottom_fancy"     onclick="setFontStyle('dekoBottom','fancy')">αв</span>
               <span class="chip"    id="font_dekoBottom_smallcaps" onclick="setFontStyle('dekoBottom','smallcaps')">ꜱᴄ</span>
+              <span class="chip"    id="font_dekoBottom_thai"      onclick="setFontStyle('dekoBottom','thai')">ล†</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeDekoBottom" value="12" oninput="generate()"/>
+            <input type="number" id="sizeDekoBottom" value="12"/>
+            <span class="fc-badge" id="fc_dekoBottom" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -386,8 +404,8 @@
   <!-- Symbols -->
   <div class="sec">
     <div class="sec-head" onclick="toggleSec(this)">
-      <span class="sec-title"><span class="sec-title-icon">✿</span> <span data-i18n="symbols">Symbols</span></span>
-      <span class="sec-arrow">▼</span>
+      <span class="sec-title"><i class="fa-icon sec-title-icon" data-icon="asterisk"></i> <span data-i18n="symbols">Symbols</span></span>
+      <span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
     </div>
     <div class="sec-body">
       <div class="sec-inner">
@@ -455,7 +473,7 @@
       <div class="pv-popup-head">
         <span class="pv-popup-uname">Sophey</span>
         <span class="pv-popup-backbtn">Back To Profile</span>
-        <span class="pv-popup-closex">✕</span>
+        <span class="pv-popup-closex"><i class="fa-icon" data-icon="xmark"></i></span>
       </div>
       <div class="pv-popup-tabs">
         <span class="pv-popup-tab">Message</span>
@@ -472,7 +490,7 @@
         </div>
         <div class="pv-popup-sep"></div>
       <div class="pv-gift-img">
-        <img src="/gift.png" alt=""/>
+        <img src="/img/gift.png" alt=""/>
       </div>
 
       <div id="pvDekoTop"    class="pvc" onclick="pvClick('dekoTop')"    style="font-size:11px;letter-spacing:4px;color:#777;margin-top:6px"></div>
@@ -485,13 +503,77 @@
     </div><!-- /pv-popup -->
     <div class="code-label" data-i18n="code">Code</div>
     <div class="code-box" id="outputBox" onclick="copyCode()" title="click to copy" data-i18n-title="click_to_copy"></div>
+    <!-- Custom layout preview + editor -->
+    <div class="custom-editor" id="customEditor" style="display:none">
+      <div class="ce-preview-label">Preview</div>
+      <div class="pv-popup ce-preview-popup">
+        <div class="pv-popup-head">
+          <span class="pv-popup-uname">Sophey</span>
+          <span class="pv-popup-backbtn">Back To Profile</span>
+          <span class="pv-popup-closex"><i class="fa-icon" data-icon="xmark"></i></span>
+        </div>
+        <div class="pv-popup-tabs">
+          <span class="pv-popup-tab">Message</span>
+          <span class="pv-popup-tab">Gallery ( )</span>
+          <span class="pv-popup-tab on">Gifts ( )</span>
+          <span class="pv-popup-tab">Send Gift</span>
+          <span class="pv-popup-tab">Unfriend</span>
+          <span class="pv-popup-tab">Report</span>
+        </div>
+        <div class="pv-card">
+          <div class="pv-popup-sender">
+            <div class="pv-popup-sender-name">MissLarifari</div>
+            <div class="pv-popup-sender-date">May, 24 2026</div>
+          </div>
+          <div class="pv-popup-sep"></div>
+          <div class="pv-gift-img"><img src="/img/gift.png" alt=""/></div>
+          <div id="cePreviewContent" class="ce-preview-content"></div>
+        </div>
+      </div>
+      <div class="ce-code-label">Code <span class="ce-code-hint">— select text, then use toolbar to format</span></div>
+      <div class="ce-toolbar">
+        <div class="ce-toolbar-group">
+          <button class="ce-btn" onclick="ceWrap('b')" title="Bold"><b>B</b></button>
+          <button class="ce-btn" onclick="ceWrap('i')" title="Italic"><i>I</i></button>
+        </div>
+        <div class="ce-toolbar-group">
+          <label class="ce-label">Font</label>
+          <button class="ce-btn ce-font-btn" onclick="ceApplyFont('fancy')" title="Fancy (αв¢∂є)">αв</button>
+          <button class="ce-btn ce-font-btn" onclick="ceApplyFont('smallcaps')" title="Small Caps (ꜱᴄ)">ꜱᴄ</button>
+          <button class="ce-btn ce-font-btn" onclick="ceApplyFont('thai')" title="Thai-Mix (ล†)">ล†</button>
+        </div>
+        <div class="ce-toolbar-group">
+          <label class="ce-label">Size</label>
+          <button class="ce-btn ce-size-preset" onclick="ceSetSize(12)" title="Klein (12)">S</button>
+          <button class="ce-btn ce-size-preset" onclick="ceSetSize(20)" title="Mittel (20)">M</button>
+          <button class="ce-btn ce-size-preset" onclick="ceSetSize(40)" title="Groß (40)">L</button>
+          <input type="number" id="ceSize" value="14" min="1" max="200" class="ce-size" title="Manual size"/>
+          <button class="ce-btn" onclick="ceWrapSize()" title="Apply size">Apply</button>
+        </div>
+        <div class="ce-toolbar-group">
+          <label class="ce-label">Color</label>
+          <input type="color" id="ceColor" value="#ff71b8" class="ce-color"/>
+          <button class="ce-btn" onclick="ceWrapColor()" title="Apply color">Apply</button>
+        </div>
+        <div class="ce-toolbar-group">
+          <label class="ce-label">Gradient</label>
+          <input type="color" id="ceGrad1" value="#ff71b8" class="ce-color"/>
+          <input type="color" id="ceGrad2" value="#b388ff" class="ce-color"/>
+          <button class="ce-btn" onclick="ceWrapGradient()" title="Apply gradient">Apply</button>
+        </div>
+      </div>
+      <textarea id="ceTextarea" class="ce-textarea" placeholder="Type or paste your gift code here...&#10;Select text and use the toolbar to format it." spellcheck="false"></textarea>
+    </div>
     <div class="opt-panel" id="optimizeTips">
       <div class="opt-header" id="optHeader"></div>
       <div id="optList"></div>
     </div>
     <div class="code-actions">
-      <button class="btn btn-copy" onclick="copyCode()" data-i18n="copy_code">📋 Copy Code</button>
-      <button class="btn btn-reset" onclick="resetAll()" data-i18n="reset_all">↺ Reset All</button>
+      <button class="btn btn-copy" onclick="copyCode()"><i class="fa-icon" data-icon="clipboard"></i> <span data-i18n="copy_code">Copy Code</span></button>
+      <button class="btn btn-share" id="shareBtn" onclick="shareGift()"><i class="fa-icon" data-icon="share-nodes"></i> Share</button>
+      <button class="btn btn-undo disabled" id="undoBtn" onclick="undo()" title="Undo (Ctrl+Z)"><i class="fa-icon" data-icon="arrow-rotate-left"></i> Undo</button>
+      <button class="btn btn-redo disabled" id="redoBtn" onclick="redo()" title="Redo (Ctrl+Y)"><i class="fa-icon" data-icon="arrow-rotate-right"></i> Redo</button>
+      <button class="btn btn-reset" onclick="resetAll()"><i class="fa-icon" data-icon="rotate-left"></i> <span data-i18n="reset_all">Reset All</span></button>
     </div>
   </div>
 </div>
@@ -499,8 +581,22 @@
 <!-- ── RIGHT: templates ── -->
 <div class="col col-right">
   <div class="tpl-search">
-    <span class="tpl-search-icon">⌕</span>
+    <span class="tpl-search-icon"><i class="fa-icon" data-icon="search"></i></span>
     <input type="text" id="tplSearch" placeholder="search templates…" oninput="filterTpl(this.value)" data-i18n-ph="ph_search"/>
+  </div>
+  <div class="cat-filters">
+    <span class="cat-filter-btn" data-cat="Sweet" onclick="filterCategory('Sweet')">Sweet</span>
+    <span class="cat-filter-btn" data-cat="Funny" onclick="filterCategory('Funny')">Funny</span>
+    <span class="cat-filter-btn" data-cat="Friends" onclick="filterCategory('Friends')">Friends</span>
+    <span class="cat-filter-btn" data-cat="Flirty" onclick="filterCategory('Flirty')">Flirty</span>
+    <span class="cat-filter-btn" data-cat="Dominant" onclick="filterCategory('Dominant')">Dom</span>
+    <span class="cat-filter-btn" data-cat="Spicy" onclick="filterCategory('Spicy')">Spicy</span>
+    <span class="cat-filter-btn" data-cat="Roast" onclick="filterCategory('Roast')">Roast</span>
+    <span class="cat-filter-btn" data-cat="Birthday" onclick="filterCategory('Birthday')">Bday</span>
+  </div>
+  <div id="favPanel" style="display:none" class="fav-panel">
+    <div class="fav-header"><i class="fa-icon" data-icon="heart"></i> Favorites</div>
+    <div class="chips"></div>
   </div>
   <!-- EN -->
   <div class="lang-panel on" id="lang-en">
@@ -544,7 +640,7 @@
       <input type="text"  id="customHex"    value="#ff71b8" placeholder="#rrggbb" oninput="setCustomColor(this.value)"/>
     </div>
     <div class="modal-btns">
-      <button class="btn" onclick="applyColor()" style="border-color:var(--purple);color:var(--purple)" data-i18n="apply">✓ Apply</button>
+      <button class="btn" onclick="applyColor()" style="border-color:var(--purple);color:var(--purple)"><i class="fa-icon" data-icon="check"></i> <span data-i18n="apply">Apply</span></button>
       <button class="btn" onclick="closeModal()" style="color:var(--muted)" data-i18n="cancel">Cancel</button>
     </div>
     <label class="nocolor">
@@ -554,7 +650,7 @@
   </div>
 </div>
 
-<script src="/templates.js"></script>
-<script src="/app.js"></script>
-<script>renderAllTemplates();initUILang();</script>
+<script src="/js/templates.js"></script>
+<script src="/js/app.js"></script>
+<script>renderAllTemplates();initUILang();restoreSectionStates();renderFavPanel();</script>
 </html>

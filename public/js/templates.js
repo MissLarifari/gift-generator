@@ -1,8 +1,10 @@
 // ── template data ──
-// Each section: { title, items:[[label,main,top,bottom]], open?, titleStyle?, bday?, chipExtra? }
+// Each section: { icon, label, items:[[label,main,top,bottom]], open?, titleStyle?, bday?, chipExtra? }
+//   icon  = name from ICONS in icons.js (rendered as <i class="fa-icon" data-icon="…">)
+//   label = plain text title shown next to the icon
 const TEMPLATES = {
   en: [
-    { title: '🍬 Sweet', open: true, titleStyle: 'color:#ff9ec7;text-shadow:0 0 12px rgba(255,158,199,.3)', items: [
+    { icon: 'candy',   label: 'Sweet', open: true, titleStyle: 'color:#ff9ec7;text-shadow:0 0 12px rgba(255,158,199,.3)', items: [
       ['stay close',      'stay close',           'please always',         '.. stay close to me ..'],
       ['feel safe',       'you make me feel safe','every single day',      '.. thank you for that ..'],
       ['so cute',         'so cute',              'you are honestly',      '.. i cant handle it ..'],
@@ -15,7 +17,7 @@ const TEMPLATES = {
       ['safe place',      'safe place',           'you are my',            '.. and i am yours ..'],
       ['forever us',      'forever us',           'always you and me',     '.. no matter what ..'],
     ]},
-    { title: '😄 Funny', titleStyle: 'color:var(--purple);text-shadow:0 0 12px rgba(179,136,255,.3)', items: [
+    { icon: 'face-smile', label: 'Funny', open: true, titleStyle: 'color:var(--purple);text-shadow:0 0 12px rgba(179,136,255,.3)', items: [
       ['i like you',     'i like you',     'even though you drive me','.. completely crazy ..'],
       ['you annoy me',   'you annoy me',   'but please',              '.. never ever stop ..'],
       ['only you',       'only you',       'are allowed to',          '.. drive me this crazy ..'],
@@ -26,7 +28,7 @@ const TEMPLATES = {
       ['too late',       'too late',       'youre already',           '.. stuck with me ..'],
       ['pookie wookie',  'pookie wookie',  'i hope your poo poo time','.. went well today ..'],
     ]},
-    { title: '🫂 Friends', titleStyle: 'color:var(--green);text-shadow:0 0 12px rgba(126,200,126,.3)', items: [
+    { icon: 'users', label: 'Friends', open: true, titleStyle: 'color:var(--green);text-shadow:0 0 12px rgba(126,200,126,.3)', items: [
       ['best friend',       'best friend',       'you are simply',     '.. the best ..'],
       ['we are a team',     'we are a team',     'always have been',   '.. and always will be ..'],
       ['without you',       'without you',       'everything would be','.. only half as fun ..'],
@@ -36,7 +38,7 @@ const TEMPLATES = {
       ['hard to find',      'friends like you',  'are hard to find',   '.. so i am keeping you ..'],
       ['i miss us',         'i miss us',         'our little moments', '.. the best ones ..'],
     ]},
-    { title: '💞 Flirty', titleStyle: 'color:#ff8fb3;text-shadow:0 0 12px rgba(255,143,179,.3)', items: [
+    { icon: 'heart', label: 'Flirty', open: true, titleStyle: 'color:#ff8fb3;text-shadow:0 0 12px rgba(255,143,179,.3)', items: [
       ['just us',    'just us',    'no one else',         '.. you and me ..'],
       ['kiss me',    'kiss me',    'please',              '.. just once ..'],
       ['dont go',    'dont go',    'please just',         '.. stay with me ..'],
@@ -47,14 +49,14 @@ const TEMPLATES = {
       ['dangerous',  'dangerous',  'you are so',          '.. for my heart ..'],
       ['be mine',    'be mine',    'please just',         '.. say yes ..'],
     ]},
-    { title: '🔥 Dominant', titleStyle: 'color:#ff7a7a;text-shadow:0 0 12px rgba(255,77,77,.3)', chipExtra: 'red', items: [
+    { icon: 'fire', label: 'Dominant', open: true, titleStyle: 'color:#ff7a7a;text-shadow:0 0 12px rgba(255,77,77,.3)', chipExtra: 'red', items: [
       ['follow me',     'follow me',          'good girls follow rules',     '.. bad girls follow me ..'],
       ['lipstick',      'ruin your lipstick', 'i wanna',                     '.. not your life ..'],
       ['pin you',       'pinned to the wall', 'you talk cute for someone',   '.. who should be pinned ..'],
       ['i win',         'either way i win',   'behave or dont',              '.. i still win ..'],
       ['behave',        'where is the fun',   'i can behave but',            '.. honestly in that ..'],
     ]},
-    { title: '💋 Flirty bold', titleStyle: 'color:var(--pink);text-shadow:0 0 12px rgba(255,113,184,.3)', chipExtra: 'pink', items: [
+    { icon: 'kiss', label: 'Flirty bold', open: true, titleStyle: 'color:var(--pink);text-shadow:0 0 12px rgba(255,113,184,.3)', chipExtra: 'pink', items: [
       ['lingerie',      'walk by again',      'love at first sight or',      '.. should i walk by in lingerie ..'],
       ['so hot',        'so hot',             'you made my dirty thoughts',  '.. actually blush ..'],
       ['not flirting',  'just describing',    'im not flirting',             '.. what id do to you ..'],
@@ -72,13 +74,13 @@ const TEMPLATES = {
       ['that look',     'that look',          'you had me at',               '.. just one look ..'],
       ['obsessed',      'but damn',           'not saying im obsessed',      '.. but damn ..'],
     ]},
-    { title: '🌶 Spicy', titleStyle: 'color:#ffa566;text-shadow:0 0 12px rgba(255,165,102,.3)', chipExtra: 'spicy', items: [
+    { icon: 'pepper', label: 'Spicy', open: true, titleStyle: 'color:#ffa566;text-shadow:0 0 12px rgba(255,165,102,.3)', chipExtra: 'spicy', items: [
       ['no innocence',  'impossible',         'you make innocent thoughts',  '.. completely impossible ..'],
       ['one kiss',      'both in trouble',    'one kiss and were',           '.. both in trouble ..'],
       ['fantasies',     'better than dreams', 'you look way better',         '.. than my fantasies ..'],
       ['temptation',    'cant ignore',        'youre the kind of',           '.. temptation i need ..'],
     ]},
-    { title: '😂 Funny / Chaotic', titleStyle: 'color:var(--gold);text-shadow:0 0 12px rgba(255,216,77,.2)', items: [
+    { icon: 'face-laugh', label: 'Funny / Chaotic', open: true, titleStyle: 'color:var(--gold);text-shadow:0 0 12px rgba(255,216,77,.2)', items: [
       ['annoying',         'annoying but cute',  'youre annoying',           '.. but kinda cute ..'],
       ['playing cool',     'then you appeared',  'i was playing it cool',    '.. then there was you ..'],
       ['owe me',           'you owe me',         'i dropped my drink',       '.. staring at you ..'],
@@ -96,7 +98,7 @@ const TEMPLATES = {
       ['the problem',      'im the problem',     'id fix your issues',       '.. but im one ..'],
       ['weird',            'i like weird',       'youre weird and',          '.. i love that ..'],
     ]},
-    { title: '☠ Friends / Roast', titleStyle: 'color:#cc6666;text-shadow:0 0 12px rgba(204,102,102,.25)', chipExtra: 'danger', items: [
+    { icon: 'skull', label: 'Friends / Roast', open: true, titleStyle: 'color:#cc6666;text-shadow:0 0 12px rgba(204,102,102,.25)', chipExtra: 'danger', items: [
       ['still single',     'explains a lot',     'still single huh',         '.. that explains stuff ..'],
       ['loading',          'loading screen',     'you flirt like a',         '.. broken loading bar ..'],
       ['life roasted',     'life did it',        'id roast you but',         '.. life already did ..'],
@@ -118,7 +120,7 @@ const TEMPLATES = {
       ['smart dumb',       'smart and dumb',     'somehow youre both',       '.. at the same time ..'],
       ['ego',              'catch up someday',   'one day your personality', '.. will catch up to your ego ..'],
     ]},
-    { title: '🎂 Birthday', titleStyle: 'color:var(--gold);text-shadow:0 0 12px rgba(255,216,77,.2)', bday: true, chipExtra: 'gold', items: [
+    { icon: 'cake', label: 'Birthday', open: true, titleStyle: 'color:var(--gold);text-shadow:0 0 12px rgba(255,216,77,.2)', bday: true, chipExtra: 'gold', items: [
       ['happy birthday','happy birthday','wishing you all the best','.. today and always ..'],
       ['its your day',  'its your day',  'celebrate yourself',      '.. you deserve it ..'],
       ['make a wish',   'make a wish',   'the cake is ready',       '.. its all yours ..'],
@@ -140,11 +142,15 @@ function renderTemplatePanel(panel, sections){
     const bodyCls = 'sec-body'  + (sec.open ? ' open' : '');
     const chips = sec.items.map(it => {
       const [label, main, top, bottom] = it;
-      return `<span class="${chipCls}" onclick="${fn}('${esc(main)}','${esc(top)}','${esc(bottom)}')">${esc(label)}</span>`;
+      const favCls = (typeof isFav === 'function' && isFav(main, top, bottom)) ? ' fav-on' : '';
+      return `<span class="${chipCls}" onclick="${fn}('${esc(main)}','${esc(top)}','${esc(bottom)}')">${esc(label)}<span class="fav-star${favCls}" onclick="event.stopPropagation();toggleFav('${esc(main)}','${esc(top)}','${esc(bottom)}',this)">★</span></span>`;
     }).join('');
+    // category title = icon span + label span (consistent gap via CSS .cat-title)
+    const iconHtml = sec.icon ? `<span class="category-icon"><i class="fa-icon" data-icon="${esc(sec.icon)}"></i></span>` : '';
+    const labelHtml = `<span class="category-label">${esc(sec.label || sec.title || '')}</span>`;
     return `<div class="sec">
       <div class="${headCls}" onclick="toggleSec(this)">
-        <span class="sec-title"${titleAttr}>${esc(sec.title)}</span><span class="sec-arrow">▼</span>
+        <span class="sec-title cat-title"${titleAttr}>${iconHtml}${labelHtml}</span><span class="sec-arrow"><i class="fa-icon" data-icon="chevron-down"></i></span>
       </div>
       <div class="${bodyCls}"><div class="sec-inner"><div class="chips">${chips}</div></div></div>
     </div>`;
@@ -154,4 +160,5 @@ function renderTemplatePanel(panel, sections){
 function renderAllTemplates(){
   const en = document.getElementById('lang-en');
   if(en) renderTemplatePanel(en, TEMPLATES.en);
+  if(typeof hydrateIcons === 'function') hydrateIcons(en);
 }
