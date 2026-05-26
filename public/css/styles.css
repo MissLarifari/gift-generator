@@ -54,11 +54,54 @@ a{color:inherit;text-decoration:none;}
   padding:0 1.2rem;z-index:100;column-gap:1rem;
 }
 .tb-brand{display:flex;align-items:center;gap:.8rem;min-width:0;flex-wrap:nowrap;}
-.tb-brand h1{font-family:var(--font-display);font-size:1.25rem;color:#fff;white-space:nowrap;letter-spacing:.5px;display:inline-flex;align-items:center;gap:.5rem;}
+.tb-brand h1{font-family:var(--font-display);font-size:1.25rem;color:#fff;white-space:nowrap;letter-spacing:.5px;display:inline-flex;align-items:center;gap:.4rem;}
+
+/* ── brand: animated pink gift + gradient 'Gifty' wordmark + sparkle ── */
 .tb-brand-icon{
+  color:#ff71b8;
+  font-size:1.6em;
+  filter:drop-shadow(0 0 10px rgba(255,113,184,.6));
+  animation:brand-wobble 4s ease-in-out infinite;
+  transform-origin:50% 70%;
+}
+.tb-brand-name{
+  font-weight:800;
+  letter-spacing:.5px;
+  font-size:1.05em;
+  background:linear-gradient(135deg,#ff71b8 0%,#ff5fb7 30%,#b388ff 65%,#7dd3fc 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+  filter:drop-shadow(0 0 14px rgba(255,113,184,.28));
+  animation:brand-shimmer 6s linear infinite;
+}
+.tb-brand-sparkle{
   color:#ffd84d;
-  font-size:1.55em;
-  filter:drop-shadow(0 0 10px rgba(255,216,77,.55));
+  font-size:.7em;
+  margin-left:.05em;
+  filter:drop-shadow(0 0 8px rgba(255,216,77,.7));
+  animation:brand-twinkle 2.2s ease-in-out infinite;
+}
+@keyframes brand-shimmer{
+  0%{background-position:0% 50%;}
+  100%{background-position:200% 50%;}
+}
+@keyframes brand-wobble{
+  0%,100%{transform:rotate(0deg) scale(1);}
+  25%{transform:rotate(-6deg) scale(1.04);}
+  50%{transform:rotate(0deg) scale(1);}
+  75%{transform:rotate(6deg) scale(1.04);}
+}
+@keyframes brand-twinkle{
+  0%,100%{opacity:.55;transform:scale(.85) rotate(0deg);}
+  50%{opacity:1;transform:scale(1.15) rotate(20deg);}
+}
+.tb-brand h1:hover .tb-brand-icon{animation-duration:.8s;}
+.tb-brand h1:hover .tb-brand-sparkle{animation-duration:.6s;}
+@media (prefers-reduced-motion: reduce){
+  .tb-brand-icon,.tb-brand-name,.tb-brand-sparkle{animation:none !important;}
 }
 .tb-brand-sep{width:1px;height:20px;background:var(--b2);}
 .tb-proto{
@@ -918,14 +961,24 @@ input[type="checkbox"]:focus-visible{
   -webkit-backdrop-filter:none;
 }
 
-/* brand: navy text + pink gift icon for the light theme */
-[data-theme="light"] .tb-brand h1{
-  color:#1e3a8a;
-  text-shadow:0 1px 0 rgba(255,255,255,.3);
-}
+/* brand: keep the animated pink gift + gradient wordmark; light-mode shifts
+   the gradient toward navy/pink so it reads on the lighter topbar */
 [data-theme="light"] .tb-brand-icon{
   color:#e63995;
-  filter:drop-shadow(0 0 8px rgba(230,57,149,.45));
+  filter:drop-shadow(0 0 10px rgba(230,57,149,.55));
+}
+[data-theme="light"] .tb-brand-name{
+  background:linear-gradient(135deg,#e63995 0%,#be1f78 35%,#1e3a8a 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.4));
+}
+[data-theme="light"] .tb-brand-sparkle{
+  color:#d97706;
+  filter:drop-shadow(0 0 8px rgba(217,119,6,.5));
 }
 [data-theme="light"] .tb-brand-sep{background:var(--b2);}
 [data-theme="light"] .tb-brand-sub{color:#15803d;}
