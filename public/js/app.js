@@ -1338,7 +1338,12 @@ function generate(){
   DEFAULT_ORDER.forEach(f=>card.appendChild(pvMap[f])); // restore default DOM order first
   if(STACK_LAYOUTS.includes(currentLayout)){
     lineOrder.forEach(f=>card.appendChild(pvMap[f]));   // reorder by lineOrder
-    const visible=lineOrder.filter(f=>pvMap[f].style.display!=='none');
+    // only attach reorder controls to rows that actually have content — otherwise the empty .pvc keeps a reorder-only ghost row visible
+    const visible=lineOrder.filter(f=>{
+      const el=pvMap[f];
+      if(el.style.display==='none') return false;
+      return (el.textContent||'').trim().length>0;
+    });
     visible.forEach((f,idx)=>attachReorder(pvMap[f],f,visible,idx));
   }
 

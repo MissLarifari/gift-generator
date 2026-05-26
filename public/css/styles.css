@@ -492,7 +492,8 @@ input[type="number"]{width:60px;}
   background:rgba(255,255,255,.025);border-radius:6px;
   margin:0 8px;
 }
-.pv-card.reorder-mode .pvc:empty{display:none;}
+.pv-card.reorder-mode .pvc:empty{display:none !important;}
+.pvc:empty{display:none !important;}
 .pv-arr{
   display:flex;align-items:center;justify-content:center;
   width:26px;height:22px;font-size:13px;font-weight:700;line-height:1;
