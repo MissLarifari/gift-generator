@@ -1248,11 +1248,13 @@ function generate(){
 
   function mkS(text,css,fid){const s=document.createElement('span');s.textContent=text;s.style.cssText=css+';cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s;';s.onmouseenter=()=>s.style.background='rgba(255,255,255,.05)';s.onmouseleave=()=>s.style.background='';s.onclick=()=>pvClick(fid);return s;}
 
+  // helper: build bold/italic css fragment for top/bottom in non-default layouts
+  const biCss = (b,i) => `font-weight:${b?'bold':'normal'};font-style:${i?'italic':'normal'};`;
   if(currentLayout==='inline'){
     [pDT,pTR,pvMain].forEach(el=>el.style.display='none');
     const row=document.createElement('div');row.id='pvInlineRow';row.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;';
     if(dekoTop)row.appendChild(mkS(applyFont(dekoTop,fieldFonts.dekoTop),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
-    if(topText)row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`color:${colors.topText};font-size:${st/14}rem`,'topText'));
+    if(topText)row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText'));
     if(main){const ms=mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`,'mainText');ms.classList.toggle('pv-main-bold',!!mainB);ms.classList.toggle('pv-main-italic',!!mainI);row.appendChild(ms);}
     if(dekoTop)row.appendChild(mkS(applyFont(dekoTop,fieldFonts.dekoTop),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
     card.insertBefore(row,pBT);
@@ -1260,9 +1262,9 @@ function generate(){
   if(currentLayout==='compact'){
     [pDT,pTR,pvMain,pBT].forEach(el=>el.style.display='none');
     const row=document.createElement('div');row.id='pvCompactRow';row.style.cssText='display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;';
-    if(topText){row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`color:${colors.topText};font-size:${st/14}rem`,'topText'));const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);}
+    if(topText){row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText'));const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);}
     if(main){const ms=mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`,'mainText');ms.classList.toggle('pv-main-bold',!!mainB);ms.classList.toggle('pv-main-italic',!!mainI);row.appendChild(ms);}
-    if(bottom){const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);row.appendChild(mkS(applyFont(bottom,fieldFonts.bottomText),`color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText'));}
+    if(bottom){const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);row.appendChild(mkS(applyFont(bottom,fieldFonts.bottomText),`${biCss(botB,botI)}color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText'));}
     card.insertBefore(row,pDT.nextSibling);
   }
   if(currentLayout==='framed'){
@@ -1285,8 +1287,8 @@ function generate(){
     const star=(t,field)=>pyramidStars[field]?'* '+t+' *':t;
     const buildPyramidLine={
       dekoTop:    ()=> dekoTop ? mkPL(star(applyFont(dekoTop,fieldFonts.dekoTop),'dekoTop'),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop','0') : null,
-      topText:    ()=> topText ? mkPL(star(applyFont(topText,fieldFonts.topText),'topText'),`color:${colors.topText};font-size:${st/14}rem`,'topText','2rem') : null,
-      bottomText: ()=> bottom ? mkPL(star(applyFont(bottom,fieldFonts.bottomText),'bottomText'),`color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText','7.5rem') : null,
+      topText:    ()=> topText ? mkPL(star(applyFont(topText,fieldFonts.topText),'topText'),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText','2rem') : null,
+      bottomText: ()=> bottom ? mkPL(star(applyFont(bottom,fieldFonts.bottomText),'bottomText'),`${biCss(botB,botI)}color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText','7.5rem') : null,
       mainText:   ()=>{
         if(!main) return null;
         const d=document.createElement('div');d.style.cssText='text-align:center;margin-top:8px;margin-bottom:3px;';
