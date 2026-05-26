@@ -1277,15 +1277,12 @@ function generate(){
   const pms=Math.max(0.8,parseInt(size)/20)+'rem';
   const pvMain=document.getElementById('pvMain');
   const mainB=document.getElementById('mainBold')?.checked, mainI=document.getElementById('mainItalic')?.checked;
-  // Make Bold/Italic clearly visible in preview:
-  // - default 600 → bold 900 gives a big weight jump (serif display fonts usually only have 400 + 700, so we also add an outline-style text-shadow)
-  // - italic falls back to a skew if the font has no italic glyphs
-  const mainWeight = mainB ? '900' : '600';
+  // Sans-serif display font has proper 600/700/800 + italic, so just use real weights — no shadow hacks
+  const mainWeight = mainB ? '800' : '700';
   const mainStyle = mainI ? 'italic' : 'normal';
-  const mainShadow = mainB ? `text-shadow:1px 0 0 currentColor, -0.5px 0 0 currentColor;` : '';
   function setMainStyle(el){
-    if(grads.mainText.on){el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text`;}
-    else{el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`;}
+    if(grads.mainText.on){el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text`;}
+    else{el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`;}
   }
   ['pvInlineRow','pvCompactRow','pvFramedBot','pvPyramidWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
   const pDT=document.getElementById('pvDekoTop'),pTR=document.getElementById('pvTopRow'),pBT=document.getElementById('pvBottom'),pKA=document.getElementById('pvKaomoji'),pDB=document.getElementById('pvDekoBottom'),card=document.getElementById('previewCard');
@@ -1356,7 +1353,7 @@ function generate(){
     const row=document.createElement('div');row.id='pvInlineRow';row.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;';
     if(dekoTop)row.appendChild(mkS(applyFont(dekoTop,fieldFonts.dekoTop),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
     if(topText)row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText'));
-    if(main){const ms=mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`,'mainText');ms.classList.toggle('pv-main-bold',!!mainB);ms.classList.toggle('pv-main-italic',!!mainI);row.appendChild(ms);}
+    if(main){const ms=mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`,'mainText');ms.classList.toggle('pv-main-bold',!!mainB);ms.classList.toggle('pv-main-italic',!!mainI);row.appendChild(ms);}
     if(dekoTop)row.appendChild(mkS(applyFont(dekoTop,fieldFonts.dekoTop),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
     card.insertBefore(row,pBT);
   }
@@ -1364,7 +1361,7 @@ function generate(){
     [pDT,pTR,pvMain,pBT].forEach(el=>el.style.display='none');
     const row=document.createElement('div');row.id='pvCompactRow';row.style.cssText='display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;';
     if(topText){row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText'));const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);}
-    if(main){const ms=mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`,'mainText');ms.classList.toggle('pv-main-bold',!!mainB);ms.classList.toggle('pv-main-italic',!!mainI);row.appendChild(ms);}
+    if(main){const ms=mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`,'mainText');ms.classList.toggle('pv-main-bold',!!mainB);ms.classList.toggle('pv-main-italic',!!mainI);row.appendChild(ms);}
     if(bottom){const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);row.appendChild(mkS(applyFont(bottom,fieldFonts.bottomText),`${biCss(botB,botI)}color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText'));}
     card.insertBefore(row,pDT.nextSibling);
   }
@@ -1394,8 +1391,8 @@ function generate(){
         if(!main) return null;
         const d=document.createElement('div');d.style.cssText='text-align:center;margin-top:8px;margin-bottom:3px;';
         const s=document.createElement('span');s.textContent=applyFont(main,fieldFonts.mainText);
-        if(grads.mainText.on)s.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;`;
-        else s.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText};cursor:pointer;`;
+        if(grads.mainText.on)s.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;`;
+        else s.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText};cursor:pointer;`;
         s.classList.toggle('pv-main-bold',!!mainB);s.classList.toggle('pv-main-italic',!!mainI);
         s.onmouseenter=()=>s.style.opacity='.8';s.onmouseleave=()=>s.style.opacity='1';s.onclick=()=>pvClick('mainText');
         d.appendChild(s);return d;
