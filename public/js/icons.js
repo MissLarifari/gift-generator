@@ -32,6 +32,7 @@ const ICON_MAP = {
   ban:                'fa-solid fa-ban',
   warning:            'fa-solid fa-triangle-exclamation',
   'rotate-left':      'fa-solid fa-rotate-left',
+  'arrows-up-down':   'fa-solid fa-arrows-up-down',
   search:             'fa-solid fa-magnifying-glass',
   info:               'fa-solid fa-circle-info',
   layout:             'fa-solid fa-table-cells-large',
