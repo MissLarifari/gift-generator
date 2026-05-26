@@ -4,7 +4,7 @@
 //   label = plain text title shown next to the icon
 const TEMPLATES = {
   en: [
-    { icon: 'candy',   label: 'Sweet', titleStyle: 'color:#ff9ec7;text-shadow:0 0 12px rgba(255,158,199,.3)', divider: 'Cute', items: [
+    { icon: 'candy',   label: 'Sweet', titleStyle: 'color:#ff9ec7;text-shadow:0 0 12px rgba(255,158,199,.3)', items: [
       ['stay close',      'stay close',           'please always',         '.. stay close to me ..'],
       ['feel safe',       'you make me feel safe','every single day',      '.. thank you for that ..'],
       ['so cute',         'so cute',              'you are honestly',      '.. i cant handle it ..'],
@@ -27,7 +27,7 @@ const TEMPLATES = {
       ['hard to find',      'friends like you',  'are hard to find',   '.. so i am keeping you ..'],
       ['i miss us',         'i miss us',         'our little moments', '.. the best ones ..'],
     ]},
-    { icon: 'face-smile', label: 'Funny', titleStyle: 'color:var(--purple);text-shadow:0 0 12px rgba(179,136,255,.3)', divider: 'Funny', items: [
+    { icon: 'face-smile', label: 'Funny', titleStyle: 'color:var(--purple);text-shadow:0 0 12px rgba(179,136,255,.3)', items: [
       ['i like you',     'i like you',     'even though you drive me','.. completely crazy ..'],
       ['you annoy me',   'you annoy me',   'but please',              '.. never ever stop ..'],
       ['only you',       'only you',       'are allowed to',          '.. drive me this crazy ..'],
@@ -78,7 +78,7 @@ const TEMPLATES = {
       ['smart dumb',       'smart and dumb',     'somehow youre both',       '.. at the same time ..'],
       ['ego',              'catch up someday',   'one day your personality', '.. will catch up to your ego ..'],
     ]},
-    { icon: 'heart', label: 'Flirty', titleStyle: 'color:#ff8fb3;text-shadow:0 0 12px rgba(255,143,179,.3)', divider: 'Flirty', items: [
+    { icon: 'heart', label: 'Flirty', titleStyle: 'color:#ff8fb3;text-shadow:0 0 12px rgba(255,143,179,.3)', items: [
       ['just us',    'just us',    'no one else',         '.. you and me ..'],
       ['kiss me',    'kiss me',    'please',              '.. just once ..'],
       ['dont go',    'dont go',    'please just',         '.. stay with me ..'],
@@ -119,7 +119,7 @@ const TEMPLATES = {
       ['mischief',        'pure mischief',    'fully powered today by',            '.. mischief and nothing else ..'],
       ['trouble',         'big trouble',      'someone should hang a sign on me',  '.. saying trouble incoming ..'],
     ]},
-    { icon: 'fire', label: 'Dominant', titleStyle: 'color:#ff7a7a;text-shadow:0 0 12px rgba(255,77,77,.3)', chipExtra: 'red', divider: 'Adult', items: [
+    { icon: 'fire', label: 'Dominant', titleStyle: 'color:#ff7a7a;text-shadow:0 0 12px rgba(255,77,77,.3)', chipExtra: 'red', items: [
       ['follow me',     'follow me',          'good girls follow rules',     '.. bad girls follow me ..'],
       ['lipstick',      'ruin your lipstick', 'i wanna',                     '.. not your life ..'],
       ['pin you',       'pinned to the wall', 'you talk cute for someone',   '.. who should be pinned ..'],
