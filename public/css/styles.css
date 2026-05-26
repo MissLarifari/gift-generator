@@ -860,9 +860,10 @@ input[type="checkbox"]:focus-visible{
 .tb-theme{
   background:none;border:1px solid var(--b2);border-radius:50%;
   width:34px;height:34px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--gold);font-size:15px;
+  cursor:pointer;color:var(--gold);font-size:15px;line-height:0;
   transition:background .2s,border-color .2s,transform .2s;flex-shrink:0;
 }
+.tb-theme .fa-icon{vertical-align:0;line-height:1;display:inline-flex;align-items:center;justify-content:center;}
 .tb-theme:hover{border-color:var(--gold);background:rgba(255,216,77,.1);transform:rotate(20deg);}
 
 /* ── light theme ── */
@@ -873,21 +874,21 @@ input[type="checkbox"]:focus-visible{
    Dark mode untouched. Preview popup stays dark on purpose.
    ═══════════════════════════════════════════════════════════════════════ */
 [data-theme="light"]{
-  --bg:#d8dde8;            /* page / sidebar base — muted grey-lavender */
-  --s1:#eef1f7;            /* main panel — workspace surface */
-  --s2:#e4e8f1;            /* intermediate cards (sec-head, chips) */
-  --s3:#f7f8fb;            /* lightest accent — tiny highlights only */
-  --b1:#b9c2d3;            /* primary border */
-  --b2:#a3aec3;            /* stronger border */
-  --text:#263044;
-  --muted:#657086;
-  --subtle:#475067;
-  --pink:#ff5fb7;          /* accent-pink */
-  --purple:#7c5cff;        /* accent */
-  --gold:#a16207;
-  --green:#22c55e;
-  --red:#ef4444;
-  --orange:#f97316;
+  --bg:#b8c2d3;            /* page / sidebar base — properly dim grey-lavender */
+  --s1:#d6dce8;            /* main panel — workspace surface (still muted) */
+  --s2:#c8d0de;            /* intermediate cards (sec-head, chips) */
+  --s3:#e2e7f0;            /* lightest accent — tiny highlights only */
+  --b1:#9aa6bb;            /* primary border (darker for contrast on dim bg) */
+  --b2:#7e8aa3;            /* stronger border */
+  --text:#1e2a44;
+  --muted:#566076;
+  --subtle:#3a4358;
+  --pink:#e63995;          /* accent-pink */
+  --purple:#6841ff;        /* accent */
+  --gold:#8a5300;
+  --green:#15803d;
+  --red:#dc2626;
+  --orange:#ea580c;
 }
 
 /* ─── base shell ─── */
@@ -899,11 +900,35 @@ input[type="checkbox"]:focus-visible{
 
 /* topbar — slightly darker than sidebars, feels attached */
 [data-theme="light"] .topbar{
-  background:linear-gradient(180deg, #cdd4e1, #c4ccdb);
+  background:linear-gradient(180deg, #a8b3c8, #9aa6bb);
   border-bottom:1px solid var(--b2);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 2px 8px rgba(40,50,80,.1);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.25), 0 2px 10px rgba(20,30,55,.15);
   backdrop-filter:none;
   -webkit-backdrop-filter:none;
+}
+
+/* brand: navy text + pink gift icon for the light theme */
+[data-theme="light"] .tb-brand h1{
+  color:#1e3a8a;
+  text-shadow:0 1px 0 rgba(255,255,255,.3);
+}
+[data-theme="light"] .tb-brand-icon{
+  color:#e63995;
+  filter:drop-shadow(0 0 8px rgba(230,57,149,.45));
+}
+[data-theme="light"] .tb-brand-sep{background:var(--b2);}
+[data-theme="light"] .tb-brand-sub{color:#15803d;}
+[data-theme="light"] .tb-brand-sub a{color:#15803d;}
+[data-theme="light"] .tb-brand-sub .by-sep{color:var(--muted);}
+
+/* theme toggle — adapt to dim topbar */
+[data-theme="light"] .tb-theme{
+  border-color:var(--b2);
+  color:#8a5300;
+}
+[data-theme="light"] .tb-theme:hover{
+  border-color:#8a5300;
+  background:rgba(138,83,0,.1);
 }
 
 /* sidebars — same muted grey as page, framed by the workspace */
