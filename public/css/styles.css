@@ -636,7 +636,21 @@ input[type="number"]{width:60px;}
 .div{height:1px;background:var(--b1);margin:.5rem 0;}
 
 /* ── sym label ── */
-.sym-label{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.sym-label{font-size:11px;color:var(--muted);margin-bottom:4px;margin-top:6px;font-weight:600;letter-spacing:.4px;}
+.sym-label:first-child{margin-top:0;}
+
+/* ── symbol chips: bigger so the glyphs are actually readable ── */
+#sec-symbols .chip{
+  font-size:18px;
+  line-height:1;
+  padding:6px 12px;
+  min-width:36px;
+  text-align:center;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+#sec-symbols .chips{gap:6px !important;}
 
 /* ── preview column (middle) ── */
 .preview-wrap{
