@@ -431,7 +431,14 @@ input[type="number"]{width:60px;}
   width:100%;padding:0 2px .35rem;
 }
 .pv-label > span:first-child{color:#7dd3fc;font-size:11px;letter-spacing:1.8px;}
-.pv-label > span:nth-child(2){color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:none;font-style:italic;}
+.pv-label > span:nth-child(2){
+  color:#cbd5e1;font-size:11px;font-weight:500;
+  letter-spacing:.3px;text-transform:none;
+  background:rgba(125,211,252,.08);
+  border:1px solid rgba(125,211,252,.2);
+  padding:2px 10px;border-radius:10px;
+  white-space:nowrap;
+}
 .pv-card{
   background:#141420;border:none;border-radius:0;
   padding:0 0 1rem;
