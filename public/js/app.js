@@ -300,7 +300,7 @@ const I18N = {
     undo_btn:'Undo', redo_btn:'Redo',
     undo_title:'Undo last action (Ctrl+Z)', redo_title:'Redo (Ctrl+Y)',
     tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Themed templates (Holidays, Celebrations, Vibes) apply matching colors automatically and clear deco lines to stay under the limit.',
-    tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly. In Pyramid layout, use the ★ checkbox on each line to wrap or unwrap it with stars.',
+    tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly. Use the ★ checkbox next to Deco Top, Top Line or Bottom Line to wrap that line in * stars * — works in every layout.',
     disclaimer:'<strong>Disclaimer</strong><ul><li>Tool provided as-is, with no guarantees</li><li>Not responsible for errors, bugs, or character-limit issues</li><li>Use at your own risk</li><li>All texts are suggestions only</li></ul>',
     disclaimer_short:'Tool without warranty — all texts are suggestions.',
     modal_color:'Color · ', gradient:'Gradient', color_1:'Color 1', color_2:'Color 2',
@@ -365,7 +365,7 @@ const I18N = {
     undo_btn:'Rückgängig', redo_btn:'Wiederholen',
     undo_title:'Letzte Aktion rückgängig machen (Strg+Z)', redo_title:'Wiederholen (Strg+Y)',
     tip_howto:'Verläufe und lange Deko-Zeilen verbrauchen viele Zeichen. Wird der Zähler <span style="color:var(--red)">rot</span>, probier es mit kürzerem Text, weniger Deko-Zeilen oder ohne Verlauf. Themen-Vorlagen (Feiertage, Anlässe, Vibes) setzen die Farben automatisch passend und leeren die Deko-Zeilen, damit du unterm Limit bleibst.',
-    tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt ins passende Feld zu springen. Im Pyramid-Layout entscheidest du mit der ★-Checkbox pro Zeile, ob Sternchen drum kommen.',
+    tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt ins passende Feld zu springen. Mit der ★-Checkbox neben Deco Top, Top Line oder Bottom Line kannst du in jedem Layout eine Zeile in * Sternchen * wickeln.',
     disclaimer:'<strong>Haftungsausschluss</strong><ul><li>Tool wird ohne Gewähr bereitgestellt</li><li>Keine Haftung für Fehler, Bugs oder Probleme mit dem Zeichenlimit</li><li>Nutzung auf eigene Gefahr</li><li>Alle Texte sind nur Vorschläge</li></ul>',
     disclaimer_short:'Tool ohne Gewähr — alle Texte sind nur Vorschläge.',
     modal_color:'Farbe · ', gradient:'Verlauf', color_1:'Farbe 1', color_2:'Farbe 2',
@@ -429,7 +429,7 @@ const I18N = {
     undo_btn:'Annuler', redo_btn:'Refaire',
     undo_title:'Annuler la dernière action (Ctrl+Z)', redo_title:'Refaire (Ctrl+Y)',
     tip_howto:'Les dégradés et les longues lignes de déco utilisent beaucoup de caractères. Si le compteur devient <span style="color:var(--red)">rouge</span>, essaie un texte plus court, retire des lignes de déco ou désactive les dégradés. Les modèles à thème (Fêtes, Célébrations, Vibes) appliquent automatiquement les bonnes couleurs et vident les lignes de déco pour rester sous la limite.',
-    tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier. Dans le layout Pyramid, utilise la case ★ sur chaque ligne pour activer ou désactiver les étoiles.',
+    tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier. La case ★ à côté de Deco Top, Top Line ou Bottom Line entoure cette ligne d\'étoiles * — fonctionne dans tous les layouts.',
     disclaimer:'<strong>Avertissement</strong><ul><li>Outil fourni tel quel, sans garantie</li><li>Non responsable des erreurs, bugs ou problèmes de limite de caractères</li><li>Utilisation à tes propres risques</li><li>Tous les textes ne sont que des suggestions</li></ul>',
     disclaimer_short:'Outil sans garantie — tous les textes sont des suggestions.',
     modal_color:'Couleur · ', gradient:'Dégradé', color_1:'Couleur 1', color_2:'Couleur 2',
@@ -493,7 +493,7 @@ const I18N = {
     undo_btn:'Отменить', redo_btn:'Повторить',
     undo_title:'Отменить последнее действие (Ctrl+Z)', redo_title:'Повторить (Ctrl+Y)',
     tip_howto:'Градиенты и длинные строки декора используют много знаков. Если счётчик стал <span style="color:var(--red)">красным</span>, попробуй сократить текст, убрать строки декора или отключить градиенты. Тематические шаблоны (Праздники, Торжества, Вайбы) автоматически применяют подходящие цвета и очищают строки декора, чтобы остаться в пределах лимита.',
-    tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую. В макете Pyramid используй чекбокс ★ на каждой строке, чтобы включить или выключить звёздочки.',
+    tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую. Чекбокс ★ рядом с Deco Top, Top Line или Bottom Line оборачивает строку звёздочками * — работает в любом макете.',
     disclaimer:'<strong>Отказ от ответственности</strong><ul><li>Инструмент предоставляется как есть, без гарантий</li><li>Не несу ответственности за ошибки, баги или проблемы с лимитом знаков</li><li>Используй на свой страх и риск</li><li>Все тексты — лишь предложения</li></ul>',
     disclaimer_short:'Инструмент без гарантий — все тексты лишь предложения.',
     modal_color:'Цвет · ', gradient:'Градиент', color_1:'Цвет 1', color_2:'Цвет 2',
@@ -648,31 +648,47 @@ function setLayout(layout) {
   if(typeof lineOrder!=='undefined') lineOrder=DEFAULT_ORDER.slice();
   generate();
 }
+// Wrap a field's text in `* X *` if its star checkbox is on.
+// Only dekoTop / topText / bottomText have star checkboxes — other fields
+// fall through unchanged because pyramidStars[f] is undefined for them.
+function withStars(t, f){
+  if(!t) return t;
+  return pyramidStars[f] ? `* ${t} *` : t;
+}
 function applyLayout(lm) {
   const ord = (typeof lineOrder!=='undefined') ? lineOrder : ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'];
-  if(currentLayout==='center')  return ord.map(f=>lm[f]).filter(Boolean).join('\n');
-  if(currentLayout==='inline')  return [[lm.dekoTop,lm.topText,lm.mainText,lm.dekoTop].filter(Boolean).join(' '),lm.bottomText,lm.kaomoji,lm.dekoBottom].filter(Boolean).join('\n');
-  if(currentLayout==='compact') return [lm.dekoTop,[lm.topText,lm.mainText,lm.bottomText].filter(Boolean).join(' · '),lm.kaomoji,lm.dekoBottom].filter(Boolean).join('\n');
+  // Pre-wrap once so every branch below sees star-wrapped text where applicable.
+  const w = {
+    dekoTop:    withStars(lm.dekoTop,    'dekoTop'),
+    topText:    withStars(lm.topText,    'topText'),
+    mainText:   lm.mainText,
+    bottomText: withStars(lm.bottomText, 'bottomText'),
+    kaomoji:    lm.kaomoji,
+    dekoBottom: lm.dekoBottom,
+  };
+  if(currentLayout==='center')  return ord.map(f=>w[f]).filter(Boolean).join('\n');
+  if(currentLayout==='inline')  return [[w.dekoTop,w.topText,w.mainText,w.dekoTop].filter(Boolean).join(' '),w.bottomText,w.kaomoji,w.dekoBottom].filter(Boolean).join('\n');
+  if(currentLayout==='compact') return [w.dekoTop,[w.topText,w.mainText,w.bottomText].filter(Boolean).join(' · '),w.kaomoji,w.dekoBottom].filter(Boolean).join('\n');
   if(currentLayout==='framed'){
-    const body=ord.map(f=>lm[f]).filter(Boolean);
-    if(lm.dekoTop && !lm.dekoBottom) body.push(lm.dekoTop);
+    const body=ord.map(f=>w[f]).filter(Boolean);
+    if(w.dekoTop && !w.dekoBottom) body.push(w.dekoTop);
     return body.join('\n');
   }
-  if(currentLayout==='minimal') return ord.filter(f=>f==='mainText'||f==='kaomoji').map(f=>lm[f]).filter(Boolean).join('\n');
+  if(currentLayout==='minimal') return ord.filter(f=>f==='mainText'||f==='kaomoji').map(f=>w[f]).filter(Boolean).join('\n');
   if(currentLayout==='pyramid'){
-    const wrap = (indent, t, field) => pyramidStars[field] ? `${indent}* ${t} *` : `${indent}${t}`;
+    // pyramid keeps its indent prefixes, but the * X * wrap is already baked in via w.
     const pyrFmt={
-      dekoTop:    t => wrap('', t, 'dekoTop'),
-      topText:    t => wrap('　　', t, 'topText'),
-      bottomText: t => wrap('　　　　　　　　　　', t, 'bottomText'),
+      dekoTop:    t => t,
+      topText:    t => '　　' + t,
+      bottomText: t => '　　　　　　　　　　' + t,
       mainText:   t => t,
       kaomoji:    t => t,
     };
     const lines=[];
-    ord.forEach(f=>{if(pyrFmt[f]&&lm[f]) lines.push(pyrFmt[f](lm[f]));});
+    ord.forEach(f=>{if(pyrFmt[f]&&w[f]) lines.push(pyrFmt[f](w[f]));});
     return lines.join('\n');
   }
-  return Object.values(lm).filter(Boolean).join('\n');
+  return Object.values(w).filter(Boolean).join('\n');
 }
 
 // ── colors ──
@@ -1301,13 +1317,13 @@ function generate(){
   ['pvInlineRow','pvCompactRow','pvFramedBot','pvPyramidWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
   const pDT=document.getElementById('pvDekoTop'),pTR=document.getElementById('pvTopRow'),pBT=document.getElementById('pvBottom'),pKA=document.getElementById('pvKaomoji'),pDB=document.getElementById('pvDekoBottom'),card=document.getElementById('previewCard');
   [pDT,pTR,pvMain,pBT,pKA,pDB].forEach(el=>el.style.display='');
-  pDT.textContent=applyFont(dekoTop,fieldFonts.dekoTop); pDT.style.color=colors.dekoTop; pDT.style.fontSize=sd/14+'rem'; pDT.style.letterSpacing='4px';
-  pTR.textContent=applyFont(topText,fieldFonts.topText); pTR.style.color=colors.topText; pTR.style.fontSize=st/14+'rem';
+  pDT.textContent=withStars(applyFont(dekoTop,fieldFonts.dekoTop),'dekoTop'); pDT.style.color=colors.dekoTop; pDT.style.fontSize=sd/14+'rem'; pDT.style.letterSpacing='4px';
+  pTR.textContent=withStars(applyFont(topText,fieldFonts.topText),'topText'); pTR.style.color=colors.topText; pTR.style.fontSize=st/14+'rem';
   pTR.style.fontWeight=topB?'700':''; pTR.style.fontStyle=topI?'italic':'';
   pvMain.textContent=applyFont(main,fieldFonts.mainText); setMainStyle(pvMain);
   pvMain.classList.toggle('pv-main-bold', !!mainB);
   pvMain.classList.toggle('pv-main-italic', !!mainI);
-  pBT.textContent=applyFont(bottom,fieldFonts.bottomText); pBT.style.color=colors.bottomText; pBT.style.fontSize=sb/14+'rem';
+  pBT.textContent=withStars(applyFont(bottom,fieldFonts.bottomText),'bottomText'); pBT.style.color=colors.bottomText; pBT.style.fontSize=sb/14+'rem';
   pBT.style.fontWeight=botB?'700':''; pBT.style.fontStyle=botI?'italic':'';
   pKA.textContent=kaomoji; pKA.style.color=colors.kaomoji; pKA.style.fontSize=sk/14+'rem';
   pDB.textContent=applyFont(dekoBottom,fieldFonts.dekoBottom); pDB.style.color=colors.dekoBottom; pDB.style.fontSize=sdb/14+'rem';
@@ -1365,23 +1381,23 @@ function generate(){
   if(currentLayout==='inline'){
     [pDT,pTR,pvMain].forEach(el=>el.style.display='none');
     const row=document.createElement('div');row.id='pvInlineRow';row.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;';
-    if(dekoTop)row.appendChild(mkS(applyFont(dekoTop,fieldFonts.dekoTop),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
-    if(topText)row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText'));
+    if(dekoTop)row.appendChild(mkS(withStars(applyFont(dekoTop,fieldFonts.dekoTop),'dekoTop'),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
+    if(topText)row.appendChild(mkS(withStars(applyFont(topText,fieldFonts.topText),'topText'),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText'));
     if(main){const ms=mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`,'mainText');ms.classList.toggle('pv-main-bold',!!mainB);ms.classList.toggle('pv-main-italic',!!mainI);row.appendChild(ms);}
-    if(dekoTop)row.appendChild(mkS(applyFont(dekoTop,fieldFonts.dekoTop),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
+    if(dekoTop)row.appendChild(mkS(withStars(applyFont(dekoTop,fieldFonts.dekoTop),'dekoTop'),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
     card.insertBefore(row,pBT);
   }
   if(currentLayout==='compact'){
     [pDT,pTR,pvMain,pBT].forEach(el=>el.style.display='none');
     const row=document.createElement('div');row.id='pvCompactRow';row.style.cssText='display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;';
-    if(topText){row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText'));const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);}
+    if(topText){row.appendChild(mkS(withStars(applyFont(topText,fieldFonts.topText),'topText'),`${biCss(topB,topI)}color:${colors.topText};font-size:${st/14}rem`,'topText'));const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);}
     if(main){const ms=mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`,'mainText');ms.classList.toggle('pv-main-bold',!!mainB);ms.classList.toggle('pv-main-italic',!!mainI);row.appendChild(ms);}
-    if(bottom){const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);row.appendChild(mkS(applyFont(bottom,fieldFonts.bottomText),`${biCss(botB,botI)}color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText'));}
+    if(bottom){const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);row.appendChild(mkS(withStars(applyFont(bottom,fieldFonts.bottomText),'bottomText'),`${biCss(botB,botI)}color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText'));}
     card.insertBefore(row,pDT.nextSibling);
   }
   if(currentLayout==='framed'){
     pDB.style.display='none';
-    const b=document.createElement('div');b.id='pvFramedBot';b.textContent=applyFont(dekoTop||dekoBottom,fieldFonts.dekoTop);
+    const b=document.createElement('div');b.id='pvFramedBot';b.textContent=withStars(applyFont(dekoTop||dekoBottom,fieldFonts.dekoTop),'dekoTop');
     b.style.cssText=`color:${colors.dekoTop};font-size:${sd/14}rem;letter-spacing:4px;cursor:pointer;border-radius:4px;padding:2px 6px;transition:background .15s;`;
     b.onmouseenter=()=>b.style.background='rgba(255,255,255,.05)';b.onmouseleave=()=>b.style.background='';b.onclick=()=>pvClick('dekoTop');
     card.appendChild(b);
