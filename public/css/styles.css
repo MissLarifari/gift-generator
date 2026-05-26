@@ -440,12 +440,17 @@ input[type="number"]{width:60px;}
 /* main-text bold/italic toggles — forced with !important so they win against inline styles + cached gradient cssText */
 .pv-main-bold{
   font-weight:900 !important;
-  text-shadow:1px 0 0 currentColor, -0.5px 0 0 currentColor !important;
+  text-shadow:
+    1.5px 0 0 currentColor,
+    -1px 0 0 currentColor,
+    0 1px 0 currentColor,
+    0 -1px 0 currentColor !important;
+  letter-spacing:.5px !important;
 }
 .pv-main-italic{
   font-style:italic !important;
-  transform:skewX(-8deg);
-  display:inline-block;
+  transform:skewX(-12deg) !important;
+  display:inline-block !important;
 }
 .pv-reorder{
   position:absolute;right:-28px;top:50%;transform:translateY(-50%);
