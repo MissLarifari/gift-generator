@@ -950,10 +950,60 @@ input[type="checkbox"]:focus-visible{
   box-shadow:inset 6px 0 12px -8px rgba(40,50,80,.18), inset -6px 0 12px -8px rgba(40,50,80,.18);
 }
 
-/* ─── preview stays dark on purpose ─── */
-[data-theme="light"] .pv-popup{background:#1a1a2a !important;border:1px solid #2a2d3f;border-radius:14px;}
-[data-theme="light"] .pv-card{background:#141420 !important;}
-[data-theme="light"] .ce-preview-popup{background:#1a1a2a !important;}
+/* ─── preview adapts to light mode ─────────────────────────────────────
+   The .pv-card (gift content) stays a soft dark navy because user-chosen
+   gift colors are typically pastel/light and need a dark backdrop to read.
+   But the surrounding chrome (popup frame, header, tabs, sender row) is
+   harmonized with the light theme: softer borders, lighter accents, a
+   purple glow that ties it back into the lavender UI.                     */
+
+[data-theme="light"] .pv-popup{
+  background:#1e2236 !important;
+  border:1px solid rgba(104,65,255,.35);
+  border-radius:14px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.4),
+    0 12px 32px rgba(30,40,70,.25),
+    0 0 24px rgba(104,65,255,.18);
+  overflow:hidden;
+}
+[data-theme="light"] .pv-popup-head{
+  background:linear-gradient(180deg, #252b45, #1e2236);
+  border-bottom:1px solid rgba(104,65,255,.25);
+}
+[data-theme="light"] .pv-popup-uname{color:#ff9ad1;}
+[data-theme="light"] .pv-popup-backbtn{background:#0fa3a3;color:#fff;}
+[data-theme="light"] .pv-popup-closex{color:#a0aec0;}
+[data-theme="light"] .pv-popup-tabs{
+  background:#181c2e;
+  border-bottom:1px solid rgba(104,65,255,.22);
+}
+[data-theme="light"] .pv-popup-tab{color:#7a8499;border-right-color:rgba(104,65,255,.15);}
+[data-theme="light"] .pv-popup-tab.on{
+  color:#5fe3b4;background:#1e2236;border-bottom-color:#5fe3b4;
+}
+[data-theme="light"] .pv-popup-sender{background:#1e2236;}
+[data-theme="light"] .pv-popup-sender-name{color:#f0f3ff;}
+[data-theme="light"] .pv-popup-sender-date{color:#8a92a8;}
+[data-theme="light"] .pv-popup-sep{background:rgba(104,65,255,.18);}
+
+[data-theme="light"] .pv-card{
+  background:#1e2236 !important;
+  border-radius:0;
+}
+[data-theme="light"] .pv-card::before{
+  background:radial-gradient(ellipse at 50% 30%, rgba(104,65,255,.08) 0%, transparent 65%);
+}
+[data-theme="light"] .pv-gift-img{background:#1e2236;}
+
+/* custom-editor preview popup also gets the soft-dark treatment */
+[data-theme="light"] .ce-preview-popup{
+  background:#1e2236 !important;
+  border:1px solid rgba(104,65,255,.35);
+  box-shadow:
+    0 12px 32px rgba(30,40,70,.25),
+    0 0 24px rgba(104,65,255,.18);
+}
 
 /* ─── sections as rounded button-cards in the sidebars ─── */
 [data-theme="light"] .sec{
