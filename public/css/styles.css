@@ -189,7 +189,18 @@ a{color:inherit;text-decoration:none;}
   display:flex;flex-direction:column;min-height:0;
   overflow:hidden;
 }
+.col-right > .col-toolbar,
 .col-right > .fav-panel{flex-shrink:0;}
+.col-toolbar{
+  display:flex;justify-content:flex-end;align-items:center;
+  padding:6px 12px;border-bottom:1px solid var(--b1);background:var(--s2);
+}
+.col-toolbar-btn{
+  font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;
+  color:var(--muted);border:1px solid var(--b2);background:var(--s3);
+  user-select:none;transition:all .15s;white-space:nowrap;font-family:inherit;
+}
+.col-toolbar-btn:hover{border-color:var(--purple);color:var(--purple);}
 .col-right > .lang-panel{flex:1 1 auto;overflow-y:auto;min-height:0;}
 /* slim scrollbar for the section list */
 .col-right > .lang-panel::-webkit-scrollbar{width:6px;}

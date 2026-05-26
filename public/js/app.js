@@ -89,6 +89,33 @@ function updateUndoBtns() {
 }
 
 // ── ui helpers ──
+function toggleAllSections(scopeSelector) {
+  const scope = document.querySelector(scopeSelector);
+  if (!scope) return;
+  const secs = scope.querySelectorAll('.sec');
+  if (!secs.length) return;
+  let openCount = 0;
+  secs.forEach(s => { if (s.querySelector('.sec-head')?.classList.contains('open')) openCount++; });
+  const shouldExpand = openCount < secs.length;
+  secs.forEach(s => {
+    const head = s.querySelector('.sec-head');
+    const body = s.querySelector('.sec-body');
+    if (!head || !body) return;
+    head.classList.toggle('open', shouldExpand);
+    body.classList.toggle('open', shouldExpand);
+    if (s.id) { try { localStorage.setItem('sec_' + s.id, shouldExpand ? '1' : '0'); } catch(e) {} }
+  });
+  // update button label — scope to the surrounding column so left/right buttons stay independent
+  const col = scope.classList.contains('col') ? scope : scope.closest('.col');
+  const btn = col?.querySelector('.col-toolbar-btn');
+  if (btn) {
+    const key = shouldExpand ? 'collapse_all' : 'expand_all';
+    const arrow = shouldExpand ? '▴' : '▾';
+    const label = shouldExpand ? 'Collapse all' : 'Expand all';
+    btn.setAttribute('data-i18n', key);
+    btn.textContent = `${arrow} ${typeof t === 'function' ? t(key) || label : label}`;
+  }
+}
 function toggleSec(head) {
   head.classList.toggle('open');
   head.nextElementSibling.classList.toggle('open');
@@ -259,6 +286,7 @@ const I18N = {
     tip_howto_title:'How It Works',
     fav_empty:'Click ★ on any template to pin it here',
     char_limit_tt:'3dxchat allows up to 240 characters and 255 bytes per gift message. Yellow = warning, red = over limit.',
+    expand_all:'Expand all', collapse_all:'Collapse all',
     tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Themed templates (Holidays, Celebrations, Vibes) apply matching colors automatically and clear deco lines to stay under the limit.',
     tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly. In Pyramid layout, use the ★ checkbox on each line to wrap or unwrap it with stars.',
     disclaimer:'Disclaimer: This tool is provided as-is, without any guarantees. I am not responsible for any errors, bugs, or character limit issues. Use at your own risk. All texts are just suggestions.',
@@ -313,6 +341,7 @@ const I18N = {
     tip_howto_title:'So funktioniert es',
     fav_empty:'Klick ★ neben einer Vorlage, um sie hier zu speichern',
     char_limit_tt:'3dxchat erlaubt max. 240 Zeichen und 255 Bytes pro Gift-Nachricht. Gelb = Warnung, Rot = überm Limit.',
+    expand_all:'Alle ausklappen', collapse_all:'Alle einklappen',
     tip_howto:'Verläufe und lange Deko-Zeilen brauchen viele Zeichen. Wird der Counter <span style="color:var(--red)">rot</span>, probier kürzeren Text, entferne Deko-Zeilen oder deaktiviere Verläufe. Themen-Vorlagen (Feiertage, Anlässe, Vibes) setzen automatisch passende Farben und leeren die Deko-Zeilen, damit du unterm Limit bleibst.',
     tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt zum passenden Feld zu springen. Im Pyramid-Layout kannst du mit der ★-Checkbox pro Zeile entscheiden, ob die Sternchen drum kommen.',
     disclaimer:'Haftungsausschluss: Dieses Tool wird ohne Gewähr bereitgestellt. Ich übernehme keine Verantwortung für Fehler, Bugs oder Probleme mit dem Zeichenlimit. Benutzung auf eigene Gefahr. Alle Texte sind nur Vorschläge.',
@@ -366,6 +395,7 @@ const I18N = {
     tip_howto_title:'Comment ça marche',
     fav_empty:'Clique ★ sur un modèle pour l\'épingler ici',
     char_limit_tt:'3dxchat autorise max. 240 caractères et 255 octets par message cadeau. Jaune = attention, rouge = au-delà.',
+    expand_all:'Tout déplier', collapse_all:'Tout replier',
     tip_howto:'Les dégradés et les longues lignes de déco utilisent beaucoup de caractères. Si le compteur devient <span style="color:var(--red)">rouge</span>, essaie un texte plus court, retire des lignes de déco ou désactive les dégradés. Les modèles à thème (Fêtes, Célébrations, Vibes) appliquent automatiquement les bonnes couleurs et vident les lignes de déco pour rester sous la limite.',
     tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier. Dans le layout Pyramid, utilise la case ★ sur chaque ligne pour activer ou désactiver les étoiles.',
     disclaimer:'Avertissement : Cet outil est fourni tel quel, sans garantie. Je ne suis pas responsable des erreurs, bugs ou problèmes de limite de caractères. Utilisation à tes propres risques. Tous les textes ne sont que des suggestions.',
@@ -419,6 +449,7 @@ const I18N = {
     tip_howto_title:'Как это работает',
     fav_empty:'Нажми ★ на любом шаблоне, чтобы закрепить его здесь',
     char_limit_tt:'3dxchat допускает до 240 знаков и 255 байт на сообщение подарка. Жёлтый = предупреждение, красный = за лимитом.',
+    expand_all:'Развернуть всё', collapse_all:'Свернуть всё',
     tip_howto:'Градиенты и длинные строки декора используют много знаков. Если счётчик стал <span style="color:var(--red)">красным</span>, попробуй сократить текст, убрать строки декора или отключить градиенты. Тематические шаблоны (Праздники, Торжества, Вайбы) автоматически применяют подходящие цвета и очищают строки декора, чтобы остаться в пределах лимита.',
     tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую. В макете Pyramid используй чекбокс ★ на каждой строке, чтобы включить или выключить звёздочки.',
     disclaimer:'Отказ от ответственности: этот инструмент предоставляется как есть, без каких-либо гарантий. Я не несу ответственности за ошибки, баги или проблемы с лимитом знаков. Используй на свой страх и риск. Все тексты — лишь предложения.',
@@ -1159,11 +1190,13 @@ function generate(){
   const pms=Math.max(0.8,parseInt(size)/20)+'rem';
   const pvMain=document.getElementById('pvMain');
   const mainB=document.getElementById('mainBold')?.checked, mainI=document.getElementById('mainItalic')?.checked;
+  // Serif display fonts often don't have 900 weight, so we layer a text-shadow trick to thicken visibly when Bold is on
   const mainWeight = mainB ? '900' : '700';
   const mainStyle = mainI ? 'italic' : 'normal';
+  const mainShadow = mainB ? `text-shadow:0.6px 0 0 currentColor, -0.3px 0 0 currentColor;` : '';
   function setMainStyle(el){
-    if(grads.mainText.on){el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text`;}
-    else{el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`;}
+    if(grads.mainText.on){el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text`;}
+    else{el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`;}
   }
   ['pvInlineRow','pvCompactRow','pvFramedBot','pvPyramidWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
   const pDT=document.getElementById('pvDekoTop'),pTR=document.getElementById('pvTopRow'),pBT=document.getElementById('pvBottom'),pKA=document.getElementById('pvKaomoji'),pDB=document.getElementById('pvDekoBottom'),card=document.getElementById('previewCard');
@@ -1216,7 +1249,7 @@ function generate(){
     const row=document.createElement('div');row.id='pvInlineRow';row.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;';
     if(dekoTop)row.appendChild(mkS(applyFont(dekoTop,fieldFonts.dekoTop),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
     if(topText)row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`color:${colors.topText};font-size:${st/14}rem`,'topText'));
-    if(main)row.appendChild(mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`,'mainText'));
+    if(main)row.appendChild(mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`,'mainText'));
     if(dekoTop)row.appendChild(mkS(applyFont(dekoTop,fieldFonts.dekoTop),`color:${colors.dekoTop};font-size:${sd/14}rem`,'dekoTop'));
     card.insertBefore(row,pBT);
   }
@@ -1224,7 +1257,7 @@ function generate(){
     [pDT,pTR,pvMain,pBT].forEach(el=>el.style.display='none');
     const row=document.createElement('div');row.id='pvCompactRow';row.style.cssText='display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;';
     if(topText){row.appendChild(mkS(applyFont(topText,fieldFonts.topText),`color:${colors.topText};font-size:${st/14}rem`,'topText'));const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);}
-    if(main)row.appendChild(mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`,'mainText'));
+    if(main)row.appendChild(mkS(applyFont(main,fieldFonts.mainText),`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText}`,'mainText'));
     if(bottom){const d=document.createElement('span');d.textContent='·';d.style.color='#444';row.appendChild(d);row.appendChild(mkS(applyFont(bottom,fieldFonts.bottomText),`color:${colors.bottomText};font-size:${sb/14}rem`,'bottomText'));}
     card.insertBefore(row,pDT.nextSibling);
   }
@@ -1254,8 +1287,8 @@ function generate(){
         if(!main) return null;
         const d=document.createElement('div');d.style.cssText='text-align:center;margin-top:8px;margin-bottom:3px;';
         const s=document.createElement('span');s.textContent=applyFont(main,fieldFonts.mainText);
-        if(grads.mainText.on)s.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;`;
-        else s.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText};cursor:pointer;`;
+        if(grads.mainText.on)s.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;`;
+        else s.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};${mainShadow}color:${colors.mainText};cursor:pointer;`;
         s.onmouseenter=()=>s.style.opacity='.8';s.onmouseleave=()=>s.style.opacity='1';s.onclick=()=>pvClick('mainText');
         d.appendChild(s);return d;
       },

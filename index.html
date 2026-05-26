@@ -54,6 +54,10 @@
 <!-- ── LEFT: editor ── -->
 <div class="col col-left">
 
+  <div class="col-toolbar">
+    <button type="button" class="col-toolbar-btn" onclick="toggleAllSections('.col-left')" data-i18n="expand_all" title="Expand or collapse all sections">▾ Expand all</button>
+  </div>
+
   <!-- How it works -->
   <div class="sec" id="sec-howto">
     <div class="sec-head" onclick="toggleSec(this)">
@@ -578,6 +582,9 @@
 
 <!-- ── RIGHT: templates ── -->
 <div class="col col-right">
+  <div class="col-toolbar">
+    <button type="button" class="col-toolbar-btn" onclick="toggleAllSections('.col-right .lang-panel')" data-i18n="expand_all" title="Expand or collapse all template categories">▾ Expand all</button>
+  </div>
   <div id="favPanel" style="display:none" class="fav-panel">
     <div class="fav-header"><i class="fa-icon" data-icon="heart"></i> Favorites</div>
     <div class="chips"></div>
