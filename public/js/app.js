@@ -1,3 +1,6 @@
+// ── build marker (lets users verify which version is live) ──
+console.log('%c[gift-generator] build 2026-05-26 — resetAll hardened, sans-serif preview', 'color:#7ec87e;font-weight:bold');
+
 // ── debounce helper ──
 function debounce(fn, ms) {
   let tid;
