@@ -583,6 +583,27 @@ input[type="number"]{width:60px;}
   background:rgba(126,200,126,.06);border:1px solid rgba(126,200,126,.18);
   border-radius:var(--r);color:var(--green);font-size:11px;line-height:1.5;
 }
+.howto-intro{
+  font-size:12px;line-height:1.4;color:var(--muted);font-style:italic;
+  margin-bottom:.15rem;
+}
+.howto-extras{
+  margin-top:.6rem;padding:.55rem .7rem;
+  background:rgba(126,200,126,.05);border:1px solid rgba(126,200,126,.18);
+  border-radius:var(--r);
+}
+.howto-extras-title{
+  font-size:11px;font-weight:600;color:var(--green);
+  margin-bottom:.35rem;letter-spacing:.3px;
+  display:flex;align-items:center;gap:.35rem;
+}
+.howto-extras-title .fa-icon{color:var(--gold);}
+.howto-extras ul{
+  margin:0;padding-left:1.1rem;list-style:disc;
+  font-size:11.5px;line-height:1.55;color:var(--text);
+}
+.howto-extras li{margin:.2rem 0;}
+.howto-extras li b{color:var(--text);}
 .howto-row--highlight{
   padding:.5rem .6rem;border-radius:var(--r);
   background:rgba(255,127,0,.08);
