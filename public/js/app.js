@@ -1040,15 +1040,50 @@ function resetThemeColors(){
   document.getElementById('btn_topText').style.background = DEFAULT_COLORS.topText;
   document.getElementById('btn_bottomText').style.background = DEFAULT_COLORS.bottomText;
 }
+// Auto-trim default decoration lines + kaomoji whenever applying a template
+// would overflow 240 chars / 255 bytes. We strip in this order:
+//   kaomoji → dekoBottom → dekoTop
+// (most decorative → most structural) and stop the moment we fit.
+function _isCodeOverLimit(){
+  const el = document.getElementById('outputBox');
+  if (!el) return false;
+  const code = el.textContent || '';
+  return code.length > 240 || new TextEncoder().encode(code).length > 255;
+}
+function trimDecoToFit(){
+  const ids = ['kaomoji','dekoBottom','dekoTop'];
+  for (const id of ids) {
+    if (!_isCodeOverLimit()) return;
+    const el = document.getElementById(id);
+    if (!el || !el.value) continue;
+    el.value = '';
+    generate();
+  }
+}
+
+// Restore deco lines + kaomoji to the current layout's defaults so that each
+// template click starts from a fresh preset (avoids a previously-trimmed
+// long template leaving empty decos for the next short one).
+function restoreDefaultDecos(){
+  const d = (typeof layoutDefaults !== 'undefined') && layoutDefaults[currentLayout];
+  if (!d) return;
+  ['dekoTop','dekoBottom','kaomoji'].forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.value = d[f] || '';
+  });
+}
+
 function setSpruch(main,top,bottom){
   pushUndo(); userHasEdited=true;
   // if previous click was a themed template, revert to defaults so colors don't bleed across
   if (lastWasThemed) { resetThemeColors(); lastWasThemed = false; }
   if (grads.mainText) grads.mainText.rainbow=false;
+  restoreDefaultDecos();
   document.getElementById('mainText').value=main;
   document.getElementById('topText').value=top;
   document.getElementById('bottomText').value=bottom;
   generate();
+  trimDecoToFit();
 }
 function setBday(main,top,bottom){
   setSpruch(main,top,bottom);
@@ -1059,6 +1094,7 @@ function setBday(main,top,bottom){
   document.getElementById('btn_bottomText').style.background='#FFB300';
   lastWasThemed = true;
   generate();
+  trimDecoToFit();
 }
 function applyTheme(main,top,bottom,cMain,cTop,cBot){
   setSpruch(main,top,bottom);
