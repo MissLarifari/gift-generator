@@ -597,7 +597,7 @@ function removeFav(key) {
 // ── layout ──
 let userHasEdited = false;
 let currentLayout = 'center';
-const pyramidStars = { dekoTop: true, topText: true, bottomText: true };
+const pyramidStars = { dekoTop: false, topText: false, bottomText: false };
 function setPyramidStars(field, on){ pushUndo(); pyramidStars[field] = on; generate(); }
 const layoutDefaults = {
   center:  {dekoTop:'· ily ·←', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:'.. ･ ✦ ･ ..'},
@@ -1185,9 +1185,9 @@ function resetAll(){
   safe('theme/pyramid flags', () => {
     if (typeof lastWasThemed !== 'undefined') lastWasThemed = false;
     if (typeof pyramidStars !== 'undefined') {
-      Object.keys(pyramidStars).forEach(f => { pyramidStars[f] = true; });
+      Object.keys(pyramidStars).forEach(f => { pyramidStars[f] = false; });
       ['dekoTopStars','topStars','bottomStars'].forEach(id => {
-        const el = document.getElementById(id); if (el) el.checked = true;
+        const el = document.getElementById(id); if (el) el.checked = false;
       });
     }
   });

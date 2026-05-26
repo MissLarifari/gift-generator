@@ -170,7 +170,7 @@
             <span class="meta-label" data-i18n="size">Size</span>
             <input type="number" id="sizeDekoTop" value="12"/>
             <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle);margin-left:6px;">
-              <input type="checkbox" id="dekoTopStars" checked onchange="setPyramidStars('dekoTop',this.checked)"/> ★
+              <input type="checkbox" id="dekoTopStars" onchange="setPyramidStars('dekoTop',this.checked)"/> ★
             </label>
             <span class="fc-badge" id="fc_dekoTop" title="Chars used">0</span>
           </div>
@@ -200,7 +200,7 @@
               <input type="checkbox" id="topItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
             </label>
             <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="topStars" checked onchange="setPyramidStars('topText',this.checked)"/> ★
+              <input type="checkbox" id="topStars" onchange="setPyramidStars('topText',this.checked)"/> ★
             </label>
           </div>
           <div class="meta">
@@ -277,7 +277,7 @@
               <input type="checkbox" id="bottomItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
             </label>
             <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="bottomStars" checked onchange="setPyramidStars('bottomText',this.checked)"/> ★
+              <input type="checkbox" id="bottomStars" onchange="setPyramidStars('bottomText',this.checked)"/> ★
             </label>
           </div>
           <div class="meta">
