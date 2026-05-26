@@ -520,7 +520,26 @@ const I18N = {
     fl_bottomText:'Нижняя строка', fl_kaomoji:'Каомодзи', fl_dekoBottom:'Декор снизу',
   }
 };
-let uiLang = (typeof localStorage!=='undefined' && localStorage.getItem('uiLang')) || 'en';
+// Detect the visitor's preferred UI language from the browser.
+// Returns one of the 4 supported language codes; falls back to 'en'.
+function detectBrowserLang(){
+  const supported = ['en','de','fr','ru'];
+  const candidates = [];
+  try {
+    if (typeof navigator !== 'undefined') {
+      if (Array.isArray(navigator.languages)) candidates.push(...navigator.languages);
+      if (navigator.language) candidates.push(navigator.language);
+      if (navigator.userLanguage) candidates.push(navigator.userLanguage); // IE / old Edge
+    }
+  } catch(e) {}
+  for (const c of candidates) {
+    const code = String(c||'').toLowerCase().split('-')[0];
+    if (supported.includes(code)) return code;
+  }
+  return 'en';
+}
+// Priority: explicit user choice in localStorage > browser language > 'en'
+let uiLang = (typeof localStorage!=='undefined' && localStorage.getItem('uiLang')) || detectBrowserLang();
 function t(key,...args){
   const v = (I18N[uiLang]&&I18N[uiLang][key]) ?? (I18N.en[key] ?? key);
   return typeof v === 'function' ? v(...args) : v;
