@@ -293,6 +293,9 @@ const I18N = {
     expand_all:'Expand all', collapse_all:'Collapse all',
     copy_blocked:'Too long to copy',
     copy_blocked_msg:'Your gift is over the limit. Shorten the text, remove emojis, or use less styling.',
+    line_removed:'Line removed.',
+    undo_action:'Undo',
+    remove_line:'Remove line',
     tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Themed templates (Holidays, Celebrations, Vibes) apply matching colors automatically and clear deco lines to stay under the limit.',
     tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly. In Pyramid layout, use the ★ checkbox on each line to wrap or unwrap it with stars.',
     disclaimer:'<strong>Disclaimer</strong><ul><li>Tool provided as-is, with no guarantees</li><li>Not responsible for errors, bugs, or character-limit issues</li><li>Use at your own risk</li><li>All texts are suggestions only</li></ul>',
@@ -351,6 +354,9 @@ const I18N = {
     expand_all:'Alle ausklappen', collapse_all:'Alle einklappen',
     copy_blocked:'Zu lang zum Kopieren',
     copy_blocked_msg:'Dein Gift ist überm Limit. Kürze den Text, entferne Emojis oder reduziere das Styling.',
+    line_removed:'Zeile entfernt.',
+    undo_action:'Rückgängig',
+    remove_line:'Zeile entfernen',
     tip_howto:'Verläufe und lange Deko-Zeilen verbrauchen viele Zeichen. Wird der Zähler <span style="color:var(--red)">rot</span>, probier es mit kürzerem Text, weniger Deko-Zeilen oder ohne Verlauf. Themen-Vorlagen (Feiertage, Anlässe, Vibes) setzen die Farben automatisch passend und leeren die Deko-Zeilen, damit du unterm Limit bleibst.',
     tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt ins passende Feld zu springen. Im Pyramid-Layout entscheidest du mit der ★-Checkbox pro Zeile, ob Sternchen drum kommen.',
     disclaimer:'<strong>Haftungsausschluss</strong><ul><li>Tool wird ohne Gewähr bereitgestellt</li><li>Keine Haftung für Fehler, Bugs oder Probleme mit dem Zeichenlimit</li><li>Nutzung auf eigene Gefahr</li><li>Alle Texte sind nur Vorschläge</li></ul>',
@@ -408,6 +414,9 @@ const I18N = {
     expand_all:'Tout déplier', collapse_all:'Tout replier',
     copy_blocked:'Trop long pour copier',
     copy_blocked_msg:'Ton cadeau dépasse la limite. Raccourcis le texte, retire les emojis ou réduis le style.',
+    line_removed:'Ligne supprimée.',
+    undo_action:'Annuler',
+    remove_line:'Supprimer la ligne',
     tip_howto:'Les dégradés et les longues lignes de déco utilisent beaucoup de caractères. Si le compteur devient <span style="color:var(--red)">rouge</span>, essaie un texte plus court, retire des lignes de déco ou désactive les dégradés. Les modèles à thème (Fêtes, Célébrations, Vibes) appliquent automatiquement les bonnes couleurs et vident les lignes de déco pour rester sous la limite.',
     tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier. Dans le layout Pyramid, utilise la case ★ sur chaque ligne pour activer ou désactiver les étoiles.',
     disclaimer:'<strong>Avertissement</strong><ul><li>Outil fourni tel quel, sans garantie</li><li>Non responsable des erreurs, bugs ou problèmes de limite de caractères</li><li>Utilisation à tes propres risques</li><li>Tous les textes ne sont que des suggestions</li></ul>',
@@ -465,6 +474,9 @@ const I18N = {
     expand_all:'Развернуть всё', collapse_all:'Свернуть всё',
     copy_blocked:'Слишком длинно',
     copy_blocked_msg:'Подарок превышает лимит. Сократи текст, убери эмодзи или уменьши стилизацию.',
+    line_removed:'Строка удалена.',
+    undo_action:'Отменить',
+    remove_line:'Удалить строку',
     tip_howto:'Градиенты и длинные строки декора используют много знаков. Если счётчик стал <span style="color:var(--red)">красным</span>, попробуй сократить текст, убрать строки декора или отключить градиенты. Тематические шаблоны (Праздники, Торжества, Вайбы) автоматически применяют подходящие цвета и очищают строки декора, чтобы остаться в пределах лимита.',
     tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую. В макете Pyramid используй чекбокс ★ на каждой строке, чтобы включить или выключить звёздочки.',
     disclaimer:'<strong>Отказ от ответственности</strong><ul><li>Инструмент предоставляется как есть, без гарантий</li><li>Не несу ответственности за ошибки, баги или проблемы с лимитом знаков</li><li>Используй на свой страх и риск</li><li>Все тексты — лишь предложения</li></ul>',
@@ -1296,9 +1308,18 @@ function generate(){
     const dn=document.createElement('span');dn.className='pv-arr';dn.innerHTML=icon('chevron-down');dn.title='move down';
     if(idx===visibleList.length-1) dn.classList.add('disabled');
     else dn.onclick=(e)=>{e.stopPropagation();swapInOrder(field,visibleList[idx+1]);};
-    const rm=document.createElement('span');rm.className='pv-arr pv-arr-rm';rm.innerHTML=icon('xmark');rm.title='remove line';
+    const rm=document.createElement('span');rm.className='pv-arr pv-arr-rm';rm.innerHTML=icon('xmark');rm.title=t('remove_line');
     if(typeof hydrateIcons==='function'){hydrateIcons(up);hydrateIcons(dn);hydrateIcons(rm);}
-    rm.onclick=(e)=>{e.stopPropagation();if(field==='kaomoji'){setKaoMode(false);}else{setField(field,'');}};
+    rm.onclick=(e)=>{
+      e.stopPropagation();
+      if(field==='kaomoji'){setKaoMode(false);} else {setField(field,'');}
+      // show "Line removed — Undo" toast with a clickable Undo action
+      showToast(
+        '<i class="fa-icon" data-icon="rotate-left"></i> <span>' + t('line_removed') +
+        ' <button class="toast-action" onclick="undo();document.getElementById(\'copyToast\').classList.remove(\'show\')">' + t('undo_action') + '</button></span>',
+        'info'
+      );
+    };
     ctrl.appendChild(up);ctrl.appendChild(dn);ctrl.appendChild(rm);
     el.appendChild(ctrl);
   };

@@ -736,9 +736,10 @@ input[type="checkbox"]:focus-visible{
 .modal-bg:not(.open) .modal{transform:scale(.95);opacity:0;}
 
 /* ── undo / redo / share buttons ── */
-.btn-undo,.btn-redo{border-color:var(--b2);color:var(--subtle);min-width:auto;padding:8px 14px;}
+.btn-undo,.btn-redo{border-color:var(--b2);color:var(--subtle);min-width:auto;padding:8px 14px;transition:opacity .25s,border-color .15s,color .15s;}
 .btn-undo:hover,.btn-redo:hover{border-color:var(--purple);color:var(--purple);}
-.btn-undo.disabled,.btn-redo.disabled{opacity:.35;pointer-events:none;}
+.btn-undo:not(.disabled){border-color:rgba(179,136,255,.4);color:var(--purple);}
+.btn-undo.disabled,.btn-redo.disabled{opacity:.3;pointer-events:none;}
 .btn-share{border-color:var(--green);color:var(--green);}
 .btn-share:hover{background:rgba(126,200,126,.12);}
 
@@ -909,6 +910,14 @@ input[type="checkbox"]:focus-visible{
 }
 .copy-toast.warn .fa-icon{color:#ff7a7a;margin-top:2px;}
 .copy-toast.warn b{color:#ff7a7a;display:block;margin-bottom:2px;font-size:13.5px;letter-spacing:.3px;}
+.copy-toast .toast-action{
+  margin-left:10px;padding:4px 12px;border-radius:6px;
+  background:var(--purple);color:#fff;border:none;
+  font:inherit;font-weight:600;font-size:12px;cursor:pointer;
+  transition:background .15s,transform .1s;
+}
+.copy-toast .toast-action:hover{background:#9c6dff;transform:translateY(-1px);}
+.copy-toast .toast-action:active{transform:translateY(0);}
 
 /* ── custom editor ── */
 .custom-editor{width:100%;}
