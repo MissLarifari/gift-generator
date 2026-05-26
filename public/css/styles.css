@@ -208,8 +208,55 @@ a{color:inherit;text-decoration:none;}
 .col-right > .lang-panel::-webkit-scrollbar-thumb:hover{background:var(--muted);}
 
 /* ── section (collapsible block) ── */
-.sec{border-bottom:1px solid var(--b1);}
+.sec{border-bottom:1px solid var(--b1);position:relative;}
 .sec:last-child{border-bottom:none;}
+.sec::before{
+  content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;
+  background:transparent;border-radius:0 2px 2px 0;
+  transition:background .2s;
+}
+.sec:hover::before{background:rgba(179,136,255,.3);}
+
+/* ── left column section themes — give each section its own accent ── */
+.col-left #sec-howto    .sec-title-icon{color:#85C8FF;text-shadow:0 0 8px rgba(133,200,255,.4);}
+.col-left #sec-howto:hover::before, .col-left #sec-howto.sec:hover::before{background:#85C8FF;}
+.col-left #sec-howto    .sec-title>span[data-i18n]{color:#85C8FF;}
+
+.col-left #sec-layout   .sec-title-icon{color:#b388ff;text-shadow:0 0 8px rgba(179,136,255,.45);}
+.col-left #sec-layout:hover::before{background:#b388ff;}
+.col-left #sec-layout   .sec-title>span[data-i18n]{color:#b388ff;}
+
+.col-left #sec-decoTop  .sec-title-icon{color:#ffd84d;text-shadow:0 0 8px rgba(255,216,77,.45);}
+.col-left #sec-decoTop:hover::before{background:#ffd84d;}
+.col-left #sec-decoTop  .sec-title>span[data-i18n]{color:#ffd84d;}
+
+.col-left #sec-topText  .sec-title{color:#FF85C2;}
+.col-left #sec-topText:hover::before{background:#FF85C2;}
+
+.col-left #sec-mainText .sec-title-icon{color:#ff71b8;text-shadow:0 0 10px rgba(255,113,184,.55);}
+.col-left #sec-mainText:hover::before{background:#ff71b8;}
+.col-left #sec-mainText .sec-title>span[data-i18n]{color:#ff71b8;}
+
+.col-left #sec-bottomText .sec-title{color:#FF85C2;}
+.col-left #sec-bottomText:hover::before{background:#FF85C2;}
+
+.col-left #sec-kaomoji  .sec-title-icon{color:#ffd84d;text-shadow:0 0 8px rgba(255,216,77,.45);}
+.col-left #sec-kaomoji:hover::before{background:#ffd84d;}
+.col-left #sec-kaomoji  .sec-title>span[data-i18n]{color:#ffd84d;}
+
+.col-left #sec-decoBottom .sec-title-icon{color:#7EC87E;text-shadow:0 0 8px rgba(126,200,126,.45);}
+.col-left #sec-decoBottom:hover::before{background:#7EC87E;}
+.col-left #sec-decoBottom .sec-title>span[data-i18n]{color:#7EC87E;}
+
+/* open sections keep their accent stripe visible */
+.col-left #sec-howto:has(.sec-head.open)::before    {background:#85C8FF;}
+.col-left #sec-layout:has(.sec-head.open)::before   {background:#b388ff;}
+.col-left #sec-decoTop:has(.sec-head.open)::before  {background:#ffd84d;}
+.col-left #sec-topText:has(.sec-head.open)::before  {background:#FF85C2;}
+.col-left #sec-mainText:has(.sec-head.open)::before {background:#ff71b8;}
+.col-left #sec-bottomText:has(.sec-head.open)::before{background:#FF85C2;}
+.col-left #sec-kaomoji:has(.sec-head.open)::before  {background:#ffd84d;}
+.col-left #sec-decoBottom:has(.sec-head.open)::before{background:#7EC87E;}
 .sec-divider{
   display:flex;align-items:center;gap:6px;
   margin:6px 12px 2px;padding-top:4px;
