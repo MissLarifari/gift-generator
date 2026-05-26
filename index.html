@@ -641,9 +641,12 @@
       <div class="grad-preview" id="gradPreview"></div>
     </div>
     <div class="div"></div>
-    <div class="color-row">
-      <input type="color" id="customPicker" value="#ff71b8" oninput="setCustomColor(this.value)"/>
-      <input type="text"  id="customHex"    value="#ff71b8" placeholder="#rrggbb" oninput="setCustomColor(this.value)"/>
+    <div class="custom-color-block">
+      <div class="custom-color-label" data-i18n="custom_color">Custom color — pick any hex</div>
+      <div class="color-row custom-color-row">
+        <input type="color" id="customPicker" value="#ff71b8" oninput="setCustomColor(this.value)" title="Click to open the OS color picker"/>
+        <input type="text"  id="customHex"    value="#ff71b8" placeholder="#rrggbb" oninput="setCustomColor(this.value)" title="Type any hex code like #ff71b8"/>
+      </div>
     </div>
     <div class="modal-btns">
       <button class="btn" onclick="applyColor()" style="border-color:var(--purple);color:var(--purple)"><i class="fa-icon" data-icon="check"></i> <span data-i18n="apply">Apply</span></button>

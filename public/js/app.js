@@ -305,6 +305,7 @@ const I18N = {
     disclaimer_short:'Tool without warranty — all texts are suggestions.',
     modal_color:'Color · ', gradient:'Gradient', color_1:'Color 1', color_2:'Color 2',
     apply:'Apply', cancel:'Cancel', no_color:'No Color Tag', saves_chars:'· saves chars',
+    custom_color:'Custom color — pick any hex',
     // dynamic optimize tips
     opt_over:'Over the limit — shorten your message',
     opt_warn:'Getting long — optimization hints',
@@ -369,6 +370,7 @@ const I18N = {
     disclaimer_short:'Tool ohne Gewähr — alle Texte sind nur Vorschläge.',
     modal_color:'Farbe · ', gradient:'Verlauf', color_1:'Farbe 1', color_2:'Farbe 2',
     apply:'Übernehmen', cancel:'Abbrechen', no_color:'Kein Color-Tag', saves_chars:'· spart Zeichen',
+    custom_color:'Eigene Farbe — beliebigen Hex wählen',
     opt_over:'Über dem Limit — kürz deine Nachricht',
     opt_warn:'Wird lang — Optimierungs-Tipps',
     opt_info:'Optimierungs-Tipps',
@@ -432,6 +434,7 @@ const I18N = {
     disclaimer_short:'Outil sans garantie — tous les textes sont des suggestions.',
     modal_color:'Couleur · ', gradient:'Dégradé', color_1:'Couleur 1', color_2:'Couleur 2',
     apply:'Appliquer', cancel:'Annuler', no_color:'Pas de couleur', saves_chars:'· économise des caractères',
+    custom_color:'Couleur personnalisée — n\'importe quel hex',
     opt_over:'Au-dessus de la limite — raccourcis ton message',
     opt_warn:'Devient long — conseils d\'optimisation',
     opt_info:'Conseils d\'optimisation',
@@ -495,6 +498,7 @@ const I18N = {
     disclaimer_short:'Инструмент без гарантий — все тексты лишь предложения.',
     modal_color:'Цвет · ', gradient:'Градиент', color_1:'Цвет 1', color_2:'Цвет 2',
     apply:'Применить', cancel:'Отмена', no_color:'Без цвета', saves_chars:'· экономит знаки',
+    custom_color:'Свой цвет — любой HEX',
     opt_over:'Превышен лимит — сократи сообщение',
     opt_warn:'Становится длинным — советы по оптимизации',
     opt_info:'Советы по оптимизации',
@@ -698,7 +702,17 @@ function openModal(field){
 }
 function closeModal(){document.getElementById('colorModal').classList.remove('open');currentField=null;}
 function selectModalColor(hex){colors[currentField]=hex;document.getElementById('customHex').value=hex;document.getElementById('customPicker').value=hex;}
-function setCustomColor(hex){if(/^#[0-9a-fA-F]{6}$/.test(hex)){colors[currentField]=hex;document.getElementById('customPicker').value=hex;}}
+function setCustomColor(input){
+  let hex = String(input || '').trim();
+  if (hex && !hex.startsWith('#')) hex = '#' + hex;
+  // expand #abc → #aabbcc
+  if (/^#[0-9a-fA-F]{3}$/.test(hex)) hex = '#' + hex.slice(1).split('').map(c => c+c).join('');
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+  colors[currentField] = hex;
+  document.getElementById('customPicker').value = hex;
+  const hexInput = document.getElementById('customHex');
+  if (hexInput && hexInput.value.trim().toLowerCase() !== hex.toLowerCase()) hexInput.value = hex;
+}
 function syncGrad(idx,hex){
   if(!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
   if(idx===0){document.getElementById('grad1').value=hex;document.getElementById('grad1Picker').value=hex;}
