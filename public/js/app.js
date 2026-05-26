@@ -1068,59 +1068,98 @@ function focusField(id){
   },50);
 }
 function resetAll(){
-  pushUndo();
-  userHasEdited=false;
-  // if in custom mode, switch back to center first
-  const resetLayout = (currentLayout === 'custom') ? 'center' : currentLayout;
-  const d = layoutDefaults[resetLayout];
-  ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f=>document.getElementById(f).value=d?d[f]:'');
-  ['fontSize','sizeDekoTop','sizeTopText','sizeBottomText','sizeKaomoji','sizeDekoBottom'].forEach((f,i)=>document.getElementById(f).value=[60,12,14,14,16,12][i]);
-  ['mainBold','mainItalic','topBold','topItalic','bottomBold','bottomItalic'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
-  currentFontStyle='normal';
-  Object.keys(fieldFonts).forEach(f=>fieldFonts[f]='normal');
-  document.querySelectorAll('[id^="font_"]').forEach(el=>el.classList.remove('on'));
-  ['dekoTop','topText','mainText','bottomText','dekoBottom'].forEach(function(f){var el=document.getElementById('font_'+f+'_normal');if(el)el.classList.add('on');});
-  // reset colors to defaults
-  Object.assign(colors, {dekoTop:'#555555',topText:'#8f8f8f',mainText:'#ff71b8',bottomText:'#8f8f8f',kaomoji:'#ffd84d',dekoBottom:'#5c5c7a'});
-  Object.keys(noColor).forEach(f => noColor[f] = false);
-  Object.keys(grads).forEach(f => { grads[f].on = false; grads[f].rainbow = false; grads[f].c1 = '#ff71b8'; grads[f].c2 = '#b388ff'; });
-  // reset theme tracking + per-field pyramid stars
-  lastWasThemed = false;
-  Object.keys(pyramidStars).forEach(f => { pyramidStars[f] = true; });
-  ['dekoTopStars','topStars','bottomStars'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = true; });
-  // update color buttons
-  ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f => {
-    const btn = document.getElementById('btn_' + f);
-    if (btn) btn.style.background = colors[f];
+  // wrap each step in its own try so one failure doesn't kill the rest
+  const safe = (label, fn) => { try { fn(); } catch(e) { console.warn('[resetAll]', label, 'failed:', e); } };
+
+  safe('pushUndo', () => pushUndo());
+  safe('userHasEdited flag', () => { userHasEdited = false; });
+
+  // text fields → layout defaults
+  safe('text fields', () => {
+    const resetLayout = (currentLayout === 'custom') ? 'center' : currentLayout;
+    const d = layoutDefaults[resetLayout];
+    ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f => {
+      const el = document.getElementById(f); if (el) el.value = d ? (d[f] || '') : '';
+    });
   });
-  // reset kaomoji mode
-  document.getElementById('kaoSection').style.display = '';
-  document.getElementById('kao_on').classList.add('on');
-  document.getElementById('kao_off').classList.remove('on');
-  lineOrder=DEFAULT_ORDER.slice();
-  // clear custom editor
-  const ceTa = document.getElementById('ceTextarea');
-  if (ceTa) { ceTa.value = ''; }
-  const cePv = document.getElementById('cePreviewContent');
-  if (cePv) { cePv.innerHTML = ''; }
-  // clear saved state
-  try { localStorage.removeItem('giftState'); } catch(e) {}
-  // switch back to center layout
-  if (currentLayout === 'custom') {
-    currentLayout = 'center';
-    document.querySelectorAll('[id^="lay_"]').forEach(el=>el.classList.remove('on'));
-    document.getElementById('lay_center').classList.add('on');
-    const ce = document.getElementById('customEditor');
-    if (ce) ce.style.display = 'none';
-    document.getElementById('outputBox').style.display = '';
-    const pvWrap = document.querySelector('.pv-popup');
-    if (pvWrap) pvWrap.style.display = '';
-    const codeLabel = document.querySelector('.code-label');
-    if (codeLabel) codeLabel.style.display = '';
-    const pvLabel = document.querySelector('.pv-label');
-    if (pvLabel) pvLabel.style.display = '';
-  }
-  generate();
+
+  // size fields
+  safe('size fields', () => {
+    const sizes = {fontSize:60, sizeDekoTop:12, sizeTopText:14, sizeBottomText:14, sizeKaomoji:16, sizeDekoBottom:12};
+    Object.entries(sizes).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+  });
+
+  // bold/italic checkboxes
+  safe('bold/italic', () => {
+    ['mainBold','mainItalic','topBold','topItalic','bottomBold','bottomItalic'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.checked = false;
+    });
+  });
+
+  // fonts
+  safe('fonts', () => {
+    currentFontStyle = 'normal';
+    Object.keys(fieldFonts).forEach(f => fieldFonts[f] = 'normal');
+    document.querySelectorAll('[id^="font_"]').forEach(el => el.classList.remove('on'));
+    ['dekoTop','topText','mainText','bottomText','dekoBottom'].forEach(f => {
+      const el = document.getElementById('font_' + f + '_normal'); if (el) el.classList.add('on');
+    });
+  });
+
+  // colors + gradients
+  safe('colors', () => {
+    Object.assign(colors, {dekoTop:'#555555',topText:'#8f8f8f',mainText:'#ff71b8',bottomText:'#8f8f8f',kaomoji:'#ffd84d',dekoBottom:'#5c5c7a'});
+    Object.keys(noColor).forEach(f => noColor[f] = false);
+    Object.keys(grads).forEach(f => { grads[f].on = false; grads[f].rainbow = false; grads[f].c1 = '#ff71b8'; grads[f].c2 = '#b388ff'; });
+    ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f => {
+      const btn = document.getElementById('btn_' + f); if (btn) btn.style.background = colors[f];
+    });
+  });
+
+  // theme tracking + pyramid stars
+  safe('theme/pyramid flags', () => {
+    if (typeof lastWasThemed !== 'undefined') lastWasThemed = false;
+    if (typeof pyramidStars !== 'undefined') {
+      Object.keys(pyramidStars).forEach(f => { pyramidStars[f] = true; });
+      ['dekoTopStars','topStars','bottomStars'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.checked = true;
+      });
+    }
+  });
+
+  // kaomoji mode
+  safe('kaomoji mode', () => {
+    const ks = document.getElementById('kaoSection'); if (ks) ks.style.display = '';
+    const on = document.getElementById('kao_on'); if (on) on.classList.add('on');
+    const off = document.getElementById('kao_off'); if (off) off.classList.remove('on');
+  });
+
+  // line order
+  safe('line order', () => { lineOrder = DEFAULT_ORDER.slice(); });
+
+  // custom editor cleanup
+  safe('custom editor', () => {
+    const ceTa = document.getElementById('ceTextarea'); if (ceTa) ceTa.value = '';
+    const cePv = document.getElementById('cePreviewContent'); if (cePv) cePv.innerHTML = '';
+  });
+
+  // saved state
+  safe('localStorage', () => { localStorage.removeItem('giftState'); });
+
+  // exit custom layout
+  safe('exit custom layout', () => {
+    if (currentLayout === 'custom') {
+      currentLayout = 'center';
+      document.querySelectorAll('[id^="lay_"]').forEach(el => el.classList.remove('on'));
+      const lc = document.getElementById('lay_center'); if (lc) lc.classList.add('on');
+      const ce = document.getElementById('customEditor'); if (ce) ce.style.display = 'none';
+      const ob = document.getElementById('outputBox'); if (ob) ob.style.display = '';
+      ['.pv-popup','.code-label','.pv-label'].forEach(sel => { const el = document.querySelector(sel); if (el) el.style.display = ''; });
+    }
+  });
+
+  // re-render
+  safe('generate', () => generate());
 }
 
 // ── line order (reorderable in preview) ──
