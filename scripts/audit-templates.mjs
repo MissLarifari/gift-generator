@@ -85,7 +85,7 @@ function stateForSetFn(name, main, top, bottom) {
     };
   }
 
-  // applyTheme — clears deco/kaomoji, applies 3 theme colors
+  // applyTheme — KEEPS deco/kaomoji defaults; only trimDecoToFit prunes if over.
   const themeColors = {
     setXmas:        ['#ef4444','#16a34a','#f59e0b'],
     setHalloween:   ['#fb923c','#a855f7','#7c3aed'],
@@ -108,18 +108,17 @@ function stateForSetFn(name, main, top, bottom) {
   if (themeColors[name]) {
     const [cMain, cTop, cBot] = themeColors[name];
     return {
+      ...base,
       colors: { ...DEFAULT_COLORS, mainText: cMain, topText: cTop, bottomText: cBot },
-      mainGrad: null,
-      decoTop: '', decoBottom: '', kaomoji: '',
     };
   }
 
-  // setPride — clears decos, rainbow gradient on main, colored top/bot
+  // setPride — KEEPS decos, rainbow gradient on main, colored top/bot
   if (name === 'setPride') {
     return {
+      ...base,
       colors: { ...DEFAULT_COLORS, topText: '#f9a8d4', bottomText: '#a0c4ff' },
       mainGrad: { c1: '#ffadad', c2: '#bdb2ff', rainbow: true },
-      decoTop: '', decoBottom: '', kaomoji: '',
     };
   }
 
@@ -172,8 +171,7 @@ const rows = [];
 // we fit. Only applies to setFns that keep defaults (setSpruch / setBday).
 function buildCodeWithAutoTrim(setFn, main, top, bottom) {
   let code = buildCode(setFn, main, top, bottom);
-  if (setFn !== 'setSpruch' && setFn !== 'setBday') return code;
-  // Already over → trim in order kaomoji, dekoBottom, dekoTop
+  // Every setFn now keeps decos by default; trim only when actually over.
   const trimSteps = [
     { kaomoji: '' },
     { kaomoji: '', decoBottom: '' },

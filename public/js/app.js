@@ -1098,8 +1098,9 @@ function setBday(main,top,bottom){
 }
 function applyTheme(main,top,bottom,cMain,cTop,cBot){
   setSpruch(main,top,bottom);
-  // clear deco + kaomoji to free byte budget for the themed text
-  ['dekoTop','dekoBottom','kaomoji'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  // Keep deco + kaomoji so themed templates stay visually consistent with
+  // the non-themed ones (6 lines). trimDecoToFit below only strips them
+  // when the result genuinely exceeds the 240/255 limit.
   grads.mainText={on:false,c1:cMain,c2:cMain};
   colors.mainText=cMain;colors.topText=cTop;colors.bottomText=cBot;
   document.getElementById('btn_mainText').style.background=cMain;
@@ -1107,6 +1108,7 @@ function applyTheme(main,top,bottom,cMain,cTop,cBot){
   document.getElementById('btn_bottomText').style.background=cBot;
   lastWasThemed = true;
   generate();
+  trimDecoToFit();
 }
 function setXmas(main,top,bottom){       applyTheme(main,top,bottom,'#ef4444','#16a34a','#f59e0b'); }
 function setHalloween(main,top,bottom){  applyTheme(main,top,bottom,'#fb923c','#a855f7','#7c3aed'); }
@@ -1127,7 +1129,6 @@ function setThanksgiving(main,top,bottom){ applyTheme(main,top,bottom,'#d97706',
 function setAnniv(main,top,bottom){      applyTheme(main,top,bottom,'#e8b4b8','#d4af37','#f9d5e5'); }
 function setPride(main,top,bottom){
   setSpruch(main,top,bottom);
-  ['dekoTop','dekoBottom','kaomoji'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   // rainbow + fancy font would overflow the byte limit — force normal font on text fields
   ['topText','mainText','bottomText'].forEach(f=>{ fieldFonts[f]='normal'; });
   grads.mainText={on:true,rainbow:true,c1:'#ffadad',c2:'#bdb2ff'};
@@ -1137,6 +1138,7 @@ function setPride(main,top,bottom){
   document.getElementById('btn_bottomText').style.background='#a0c4ff';
   lastWasThemed = true;
   generate();
+  trimDecoToFit();
 }
 function setKaoMode(on){
   pushUndo();
