@@ -1154,7 +1154,9 @@ input[type="checkbox"]:focus-visible{
   text-align:center;padding:8px 12px 12px;min-height:40px;
   line-height:1.6;word-break:break-word;
 }
-.ce-preview-content .ce-line{margin-bottom:2px;}
+/* pre-wrap keeps leading/trailing/multiple spaces visible — otherwise the
+   browser collapses them and "  spaced   out  " renders as "spaced out". */
+.ce-preview-content .ce-line{margin-bottom:2px;white-space:pre-wrap;}
 .ce-code-label{
   font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;
   color:var(--muted);margin-bottom:.35rem;

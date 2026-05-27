@@ -837,12 +837,26 @@ function rainbowText(text){
     .map(({b,ws})=>`<color=${cols[b]}>${ws.join(' ')}</color>`).join(' ');
 }
 // ── custom layout editor ──
+
+// Tag-aware applyFont. The custom editor textarea contains raw Unity
+// rich-text markup (<color=…>, <size=N>, <b>, <i>) intermixed with plain
+// content. A naive applyFont() would happily turn `<color=#ff71b8>test`
+// into `<¢σℓσя=#ff71в8>тєѕт` — mangling the tag itself (the `b` in the
+// hex code becomes Cyrillic `в`, etc). So we split on tags first and
+// only convert the text segments between them.
+function ceApplyFontPreservingTags(text, style){
+  return text.split(/(<[^>]*>)/).map(part => {
+    if (part.startsWith('<') && part.endsWith('>')) return part;
+    return applyFont(part, style);
+  }).join('');
+}
+
 function ceApplyFont(style) {
   const ta = document.getElementById('ceTextarea');
   const s = ta.selectionStart, e = ta.selectionEnd;
   if (s === e) return;
   const sel = ta.value.substring(s, e);
-  const converted = applyFont(sel, style);
+  const converted = ceApplyFontPreservingTags(sel, style);
   ta.value = ta.value.substring(0, s) + converted + ta.value.substring(e);
   ta.selectionStart = s;
   ta.selectionEnd = s + converted.length;
