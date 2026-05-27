@@ -2284,6 +2284,57 @@ document.getElementById('ceTextarea')?.addEventListener('input', ceSync);
 // Any user typing invalidates the gradient-apply snapshot so the next
 // Apply click re-applies fresh instead of trying to strip stale state.
 document.getElementById('ceTextarea')?.addEventListener('input', () => { _ceLastGradApply = null; });
+
+// ── Smart Enter: preserve the active tag wraps across the new line ─
+// When the cursor sits inside one or more Unity rich-text wraps
+// (<size=N>, <b>, <i>, <color=#…>), pressing Enter currently dumps a
+// plain newline INSIDE the wrap. So the next line shares the formatting
+// only as long as the user doesn't add anything after the closing tag.
+// On split, we close every active wrap, drop the newline, then re-open
+// all the wraps in the same order so each line is independently
+// formatted with the same size / color / bold / italic.
+// Shift+Enter / Ctrl+Enter / etc. bypass the split.
+function ceHandleEnter(ev){
+  if (ev.key !== 'Enter' || ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey) return;
+  const ta = ev.target;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  if (s !== e) return; // user has a selection; let default behaviour replace it
+
+  const val = ta.value;
+  const before = val.substring(0, s);
+
+  // Walk all tags before cursor with a balanced stack of unclosed opens.
+  const tagRe = /<([a-zA-Z]+)(?:=[^>]*)?>|<\/([a-zA-Z]+)>/g;
+  const stack = []; // [{full, name}]
+  let m;
+  while ((m = tagRe.exec(before)) !== null) {
+    if (m[2]) {
+      // closing tag — pop matching open from stack
+      for (let i = stack.length - 1; i >= 0; i--) {
+        if (stack[i].name === m[2]) { stack.splice(i, 1); break; }
+      }
+    } else {
+      stack.push({ full: m[0], name: m[1] });
+    }
+  }
+
+  if (!stack.length) return; // cursor outside any wrap — default Enter is fine
+
+  // Build the split: close each open wrap (reverse order), then \n,
+  // then re-open every wrap in the original order.
+  const closes = stack.slice().reverse().map(t => '</' + t.name + '>').join('');
+  const opens  = stack.map(t => t.full).join('');
+  const insertion = closes + '\n' + opens;
+
+  ev.preventDefault();
+  ta.value = before + insertion + val.substring(s);
+  const newPos = s + closes.length + 1; // right after the \n, before the re-opened tags' content slot
+  ta.selectionStart = newPos + opens.length;  // cursor lands after the reopened tags, ready to type
+  ta.selectionEnd   = newPos + opens.length;
+  _ceLastSel = { s: ta.selectionStart, e: ta.selectionEnd };
+  ceSync();
+}
+document.getElementById('ceTextarea')?.addEventListener('keydown', ceHandleEnter);
 // Keep _ceLastSel in sync so Apply buttons can recover when focus drift
 // during color-picker / button-click collapses the textarea selection.
 ['select','mouseup','keyup','blur','input'].forEach(ev => {
