@@ -872,8 +872,7 @@ function ceApplyFont(style) {
   ta.value = ta.value.substring(0, s) + converted + ta.value.substring(e);
   ta.selectionStart = s;
   ta.selectionEnd = s + converted.length;
-  ta.focus();
-  ceSync();
+  _ceApplyMergeAndUpdate(); ta.focus(); ceSync();
 }
 
 // Toggle-wrap for simple paired tags (<b>, <i>). Mirrors the size/color
@@ -902,7 +901,7 @@ function ceWrap(tag) {
     ta.value = val.substring(0, s) + inner + val.substring(e);
     ta.selectionStart = s;
     ta.selectionEnd = s + inner.length;
-    ta.focus(); ceSync(); return;
+    _ceApplyMergeAndUpdate(); ta.focus(); ceSync(); return;
   }
 
   // Case 2: an enclosing <tag>…</tag> wraps the selection (possibly
@@ -923,7 +922,7 @@ function ceWrap(tag) {
     const shift = -(enclosing.openEnd - enclosing.openStart);
     ta.selectionStart = s + shift;
     ta.selectionEnd   = e + shift;
-    ta.focus(); ceSync(); return;
+    _ceApplyMergeAndUpdate(); ta.focus(); ceSync(); return;
   }
 
   // Case 3: nothing wraps it — plain wrap
@@ -931,7 +930,7 @@ function ceWrap(tag) {
   ta.value = val.substring(0, s) + wrapped + val.substring(e);
   ta.selectionStart = s;
   ta.selectionEnd = s + wrapped.length;
-  ta.focus(); ceSync();
+  _ceApplyMergeAndUpdate(); ta.focus(); ceSync();
 }
 
 // S / M / L presets — clicking the SAME preset that's already applied
@@ -953,7 +952,7 @@ function ceSetSize(sz) {
       ta.selectionStart = s;
       ta.selectionEnd = s + inner.length;
       _ceLastSel = { s, e: s + inner.length };
-      ta.focus(); ceSync(); return;
+      _ceApplyMergeAndUpdate(); ta.focus(); ceSync(); return;
     }
 
     // Case 2: an enclosing <size=N>…</size> wraps the selection AND that
@@ -972,7 +971,7 @@ function ceSetSize(sz) {
         ta.selectionStart = s - openLen;
         ta.selectionEnd   = e - openLen;
         _ceLastSel = { s: s - openLen, e: e - openLen };
-        ta.focus(); ceSync(); return;
+        _ceApplyMergeAndUpdate(); ta.focus(); ceSync(); return;
       }
     }
   }
@@ -1033,6 +1032,44 @@ function findEnclosingTag(val, s, e, openPattern, closePattern){
   return null;
 }
 
+// After any wrap/swap, collapse adjacent same-tag pairs into one wrapper.
+// Two <size=20>…</size> separated by only whitespace become a single
+// <size=20>…</size> spanning the whole range. Same for color, bold,
+// italic. Saves bytes and matches user expectation that consecutive
+// identical formatting is one block, not many.
+function _ceMergeAdjacentTags(text){
+  let prev;
+  do {
+    prev = text;
+    text = text
+      .replace(/<size=(\d+)>([\s\S]*?)<\/size>(\s*)<size=\1>([\s\S]*?)<\/size>/g, '<size=$1>$2$3$4</size>')
+      .replace(/<color=(#[0-9a-fA-F]{3,8})>([\s\S]*?)<\/color>(\s*)<color=\1>([\s\S]*?)<\/color>/g, '<color=$1>$2$3$4</color>')
+      .replace(/<b>([\s\S]*?)<\/b>(\s*)<b>([\s\S]*?)<\/b>/g, '<b>$1$2$3</b>')
+      .replace(/<i>([\s\S]*?)<\/i>(\s*)<i>([\s\S]*?)<\/i>/g, '<i>$1$2$3</i>');
+  } while (text !== prev);
+  return text;
+}
+
+// Run the merge over the current textarea value and patch the selection
+// indices so the cursor stays roughly in place even when wrap boundaries
+// collapse around it. Called at the tail of every ceWrap* / ceSetSize.
+function _ceApplyMergeAndUpdate(){
+  const ta = document.getElementById('ceTextarea');
+  if (!ta) return;
+  const before = ta.value;
+  const merged = _ceMergeAdjacentTags(before);
+  if (merged === before) return;
+  // Naive selection update: clamp old positions to the new shorter length.
+  // The merge only removes redundant tag pairs, so the visible content
+  // stays in the same order — clamping is good enough.
+  const s = Math.min(ta.selectionStart, merged.length);
+  const e = Math.min(ta.selectionEnd, merged.length);
+  ta.value = merged;
+  ta.selectionStart = s;
+  ta.selectionEnd = e;
+  _ceLastSel = { s, e };
+}
+
 // Smart-wrap that swaps an existing size tag instead of nesting one
 // inside another. Three cases:
 //   1) selection is exactly <size=N>X</size>        → replace N
@@ -1054,7 +1091,7 @@ function ceWrapSize() {
     ta.value = val.substring(0, s) + wrapped + val.substring(e);
     ta.selectionStart = s;
     ta.selectionEnd = s + wrapped.length;
-    ta.focus(); ceSync(); return;
+    _ceApplyMergeAndUpdate(); ta.focus(); ceSync(); return;
   }
 
   // Case 2: some <size=N>…</size> wraps the selection (possibly through
@@ -1068,7 +1105,7 @@ function ceWrapSize() {
     const shift = newOpen.length - oldOpenLen;
     ta.selectionStart = s + shift;
     ta.selectionEnd   = e + shift;
-    ta.focus(); ceSync(); return;
+    _ceApplyMergeAndUpdate(); ta.focus(); ceSync(); return;
   }
 
   // Case 3: ordinary wrap — strip any nested size tags from the selection
@@ -1078,7 +1115,7 @@ function ceWrapSize() {
   ta.value = val.substring(0, s) + wrapped + val.substring(e);
   ta.selectionStart = s;
   ta.selectionEnd = s + wrapped.length;
-  ta.focus(); ceSync();
+  _ceApplyMergeAndUpdate(); ta.focus(); ceSync();
 }
 
 // Same tag-swap logic as ceWrapSize but for <color=#hex>...</color>.
@@ -1097,7 +1134,7 @@ function ceWrapColor() {
     ta.value = val.substring(0, s) + wrapped + val.substring(e);
     ta.selectionStart = s;
     ta.selectionEnd = s + wrapped.length;
-    ta.focus(); ceSync(); return;
+    _ceApplyMergeAndUpdate(); ta.focus(); ceSync(); return;
   }
 
   // Case 2: some <color=#…>…</color> wraps the selection — swap its hex
@@ -1110,7 +1147,7 @@ function ceWrapColor() {
     const shift = newOpen.length - oldOpenLen;
     ta.selectionStart = s + shift;
     ta.selectionEnd   = e + shift;
-    ta.focus(); ceSync(); return;
+    _ceApplyMergeAndUpdate(); ta.focus(); ceSync(); return;
   }
 
   // Case 3: strip nested colour tags, then wrap
@@ -1119,7 +1156,7 @@ function ceWrapColor() {
   ta.value = val.substring(0, s) + wrapped + val.substring(e);
   ta.selectionStart = s;
   ta.selectionEnd = s + wrapped.length;
-  ta.focus(); ceSync();
+  _ceApplyMergeAndUpdate(); ta.focus(); ceSync();
 }
 
 // Last non-empty textarea selection — restored when the focus has drifted
@@ -1214,7 +1251,7 @@ function ceWrapGradient() {
     ta.selectionEnd = s + stripped.length;
     _ceLastSel = { s, e: s + stripped.length };
     _ceLastGradApply = null;
-    ta.focus(); ceSync();
+    _ceApplyMergeAndUpdate(); ta.focus(); ceSync();
     return;
   }
 
@@ -1309,8 +1346,7 @@ function ceWrapGradient() {
     e: baseS + wrapped.length,
     params: { c1, c2, mode, mid: middleOnly },
   };
-  ta.focus();
-  ceSync();
+  _ceApplyMergeAndUpdate(); ta.focus(); ceSync();
 }
 
 function ceSync() {
