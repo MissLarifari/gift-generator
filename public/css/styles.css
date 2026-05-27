@@ -417,16 +417,16 @@ a{color:inherit;text-decoration:none;}
 .col-left .sec .sec-title-icon{color:rgba(125,211,252,.85);}
 .col-left .sec:hover .sec-title-icon{color:#7dd3fc;text-shadow:0 0 8px rgba(125,211,252,.4);}
 .col-left .sec:has(.sec-head.open) .sec-title-icon{color:#7dd3fc;text-shadow:0 0 8px rgba(125,211,252,.4);}
-/* Section dividers (Vibes / Holidays / Celebrations) — bumped from
-   9px/600 muted to 13px/800 brighter so they actually read as group
-   labels and don't get lost between the chip rows. */
+/* Section dividers (Vibes / Holidays / Celebrations) — same metrics
+   as the left column's .field-label so the right column reads
+   consistently. Was 9px/600 muted, then briefly 13px/800 (too loud);
+   landed on 10.5px/700 / #d8d8e8 to match. */
 .sec-divider{
   display:flex;align-items:center;gap:8px;
-  margin:14px 12px 6px;padding-top:8px;
+  margin:10px 12px 4px;padding-top:6px;
   border-top:1px solid var(--b1);
-  font-size:13px;letter-spacing:2px;text-transform:uppercase;
-  color:#e8e8f5;font-weight:800;
-  text-shadow:0 0 8px rgba(232,232,245,.18);
+  font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
+  color:#d8d8e8;font-weight:700;
 }
 .sec-divider::after{content:'';flex:1;height:1px;background:var(--b1);}
 .sec-head{
