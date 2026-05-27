@@ -343,7 +343,18 @@ const TEMPLATES = {
 function esc(s){return s.replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function renderTemplatePanel(panel, sections){
-  panel.innerHTML = sections.map(sec => {
+  // Flipped section uses smallcaps + upside-down chars that only read
+  // correctly inside the Flipped layout. Hide it everywhere else so the
+  // right panel doesn't show templates that look broken in the active
+  // layout. setLayout() calls renderAllTemplates() so the panel
+  // refreshes when the user switches in or out of Flipped.
+  const filtered = sections.filter(sec => {
+    if (sec.setFn === 'setFlipped' || sec.label === 'Flipped') {
+      return typeof currentLayout !== 'undefined' && currentLayout === 'flipped';
+    }
+    return true;
+  });
+  panel.innerHTML = filtered.map(sec => {
     const fn = sec.setFn || (sec.bday ? 'setBday' : 'setSpruch');
     const titleAttr = sec.titleStyle ? ` style="${sec.titleStyle}"` : '';
     const chipCls = 'chip t' + (sec.chipExtra ? ' ' + sec.chipExtra : '');
