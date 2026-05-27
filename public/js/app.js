@@ -30,6 +30,8 @@ function captureState() {
   s._lay = currentLayout;
   s._lo = lineOrder.slice();
   s._kao = document.getElementById('kaoSection')?.style.display !== 'none';
+  const ceTa = document.getElementById('ceTextarea');
+  if (ceTa) s._ceText = ceTa.value;
   return s;
 }
 
@@ -66,6 +68,14 @@ function applyState(s) {
     document.getElementById('kaoSection').style.display = s._kao ? '' : 'none';
     document.getElementById('kao_on')?.classList.toggle('on', s._kao);
     document.getElementById('kao_off')?.classList.toggle('on', !s._kao);
+  }
+  // Restore custom editor textarea (undo for ceApplyFont/ceWrap/etc.)
+  if (s._ceText != null) {
+    const ceTa = document.getElementById('ceTextarea');
+    if (ceTa) {
+      ceTa.value = s._ceText;
+      if (typeof ceSync === 'function') ceSync();
+    }
   }
   generate();
 }
@@ -867,6 +877,7 @@ function ceApplyFont(style) {
   const ta = document.getElementById('ceTextarea');
   const { s, e } = ceGetSel(ta);
   if (s === e) return;
+  pushUndo(); // snapshot BEFORE mutation so Undo restores the original text
   const sel = ta.value.substring(s, e);
   const converted = ceApplyFontPreservingTags(sel, style);
   ta.value = ta.value.substring(0, s) + converted + ta.value.substring(e);
@@ -888,6 +899,7 @@ function ceWrap(tag) {
   const ta = document.getElementById('ceTextarea');
   const { s, e } = ceGetSel(ta);
   if (s === e) return; // no selection
+  pushUndo();
   const val = ta.value;
   const sel = val.substring(s, e);
   const openLen = tag.length + 2;
@@ -941,6 +953,7 @@ function ceSetSize(sz) {
   const ta = document.getElementById('ceTextarea');
   const { s, e } = ceGetSel(ta);
   if (s !== e) {
+    pushUndo();
     const val = ta.value;
     const sel = val.substring(s, e);
 
@@ -977,9 +990,12 @@ function ceSetSize(sz) {
   }
 
   // Otherwise: just apply the preset normally (ceWrapSize handles
-  // swapping any existing different size).
+  // swapping any existing different size). Suppress ceWrapSize's own
+  // pushUndo since we already pushed above for the s!==e case.
   document.getElementById('ceSize').value = sz;
-  ceWrapSize();
+  const hadSel = s !== e;
+  if (hadSel) _suppressPushUndo = true;
+  try { ceWrapSize(); } finally { if (hadSel) _suppressPushUndo = false; }
 }
 
 // Walks the text outside [s..e] to find the INNERMOST paired tag that
@@ -1112,6 +1128,7 @@ function ceWrapSize() {
   const sz = document.getElementById('ceSize').value;
   const { s, e } = ceGetSel(ta);
   if (s === e) return;
+  pushUndo();
   const val = ta.value;
   let sel = val.substring(s, e);
 
@@ -1155,6 +1172,7 @@ function ceWrapColor() {
   const col = document.getElementById('ceColor').value;
   const { s, e } = ceGetSel(ta);
   if (s === e) return;
+  pushUndo();
   const val = ta.value;
   let sel = val.substring(s, e);
 
@@ -1261,6 +1279,7 @@ function ceWrapGradient() {
   const middleOnly = !!document.getElementById('ceGradMid')?.checked;
   const { s, e } = ceGetSel(ta);
   if (s === e) return;
+  pushUndo();
 
   // Toggle-off: if nothing has changed since the previous Apply
   // (same textarea content, same selection, same gradient params)
@@ -1494,7 +1513,31 @@ function colorTag(text,field){const g=grads[field];if(g?.rainbow)return rainbowT
 const FM={'a':'α','b':'в','c':'¢','d':'∂','e':'є','f':'f','g':'g','h':'н','i':'ι','j':'נ','k':'к','l':'ℓ','m':'м','n':'η','o':'σ','p':'ρ','q':'q','r':'я','s':'ѕ','t':'т','u':'υ','v':'ν','w':'ω','x':'χ','y':'у','z':'z'};
 const SM={'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'};
 const TM={'a':'ล','b':'в','c':'¢','d':'∂','e':'э','f':'ƒ','g':'φ','h':'ђ','i':'เ','j':'נ','k':'к','l':'ℓ','m':'м','n':'и','o':'๏','p':'ק','q':'ợ','r':'я','s':'ร','t':'†','u':'µ','v':'√','w':'ω','x':'җ','y':'ý','z':'ž'};
-function applyFont(text,style){if(style==='fancy')return text.split('').map(c=>FM[c.toLowerCase()]||c).join('');if(style==='smallcaps')return text.split('').map(c=>SM[c.toLowerCase()]||c).join('');if(style==='thai')return text.split('').map(c=>TM[c.toLowerCase()]||c).join('');return text;}
+// Reverse map: every variant char back to its ASCII source. Lets the user
+// switch from one font to another without first clearing — applyFont
+// normalises to ASCII before re-applying so e.g. fancy → smallcaps works
+// even on text that's already fancy.
+const FONT_REVERSE = (() => {
+  const r = {};
+  [FM, SM, TM].forEach(m => Object.keys(m).forEach(k => { if (m[k] !== k) r[m[k]] = k; }));
+  return r;
+})();
+function normalizeFontChars(text){ return text.split('').map(c => FONT_REVERSE[c] || c).join(''); }
+function applyFont(text,style){
+  // For 'normal', leave the text alone (the user may have pasted
+  // variant chars on purpose — don't strip them just because no font
+  // style is selected).
+  if(!style || style==='normal') return text;
+  // For an active font style, normalise to ASCII first so switching
+  // between font styles works on already-converted text (otherwise
+  // fancy → smallcaps would be a no-op because the fancy chars aren't
+  // keys in SM).
+  const ascii = normalizeFontChars(text);
+  if(style==='fancy')    return ascii.split('').map(c=>FM[c.toLowerCase()]||c).join('');
+  if(style==='smallcaps')return ascii.split('').map(c=>SM[c.toLowerCase()]||c).join('');
+  if(style==='thai')     return ascii.split('').map(c=>TM[c.toLowerCase()]||c).join('');
+  return ascii;
+}
 function setFontStyle(field,style){
   pushUndo();
   fieldFonts[field]=style;
