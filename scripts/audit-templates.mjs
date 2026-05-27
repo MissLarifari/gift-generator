@@ -224,16 +224,22 @@ function buildCodeWithAutoTrim(setFn, main, top, bottom) {
   }
   return code;
 }
+// 3dxchat counts line breaks as CRLF (\r\n) — each \n adds 2 chars/
+// bytes to its internal counter, not 1. Match that here so the audit's
+// limit check is identical to what the in-game profile editor measures.
 function isOver(code){
-  return code.length > 240 || enc.encode(code).length > 255;
+  const crlf = code.replace(/\n/g, '\r\n');
+  return crlf.length > 240 || enc.encode(crlf).length > 255;
 }
 
 for (const section of TEMPLATES.en) {
   const setFn = section.setFn || (section.bday ? 'setBday' : 'setSpruch');
   for (const [label, main, top, bottom] of section.items) {
     const code = buildCodeWithAutoTrim(setFn, main, top, bottom);
-    const chars = code.length;
-    const bytes = enc.encode(code).length;
+    // Match 3dxchat's counter: CRLF-normalise before measuring.
+    const crlfCode = code.replace(/\n/g, '\r\n');
+    const chars = crlfCode.length;
+    const bytes = enc.encode(crlfCode).length;
     let status = 'ok';
     if (chars > CHAR_LIMIT || bytes > BYTE_LIMIT) status = 'OVER';
     else if (chars > WARN_CHAR || bytes > WARN_BYTE) status = 'warn';

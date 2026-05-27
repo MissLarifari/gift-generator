@@ -12,6 +12,14 @@ function debounce(fn, ms) {
 // generate() / counter / trim-check, so we keep one instance module-wide.
 const TEXT_ENCODER = new TextEncoder();
 const byteLen = s => TEXT_ENCODER.encode(s || '').length;
+// 3dxchat counts line breaks as CRLF (\r\n) — each \n adds 2 chars/bytes
+// to its internal counter, not 1. Fernie (original ColinDude profile
+// editor) measured a 5-line gift at 229/254; ours read 224/249, an
+// exact 5/5 delta = the 5 LF→CRLF expansions. These helpers
+// CRLF-normalise before measuring so our counter matches 3dxchat 1:1.
+const giftCount  = s => (s || '').replace(/\n/g, '\r\n');
+const giftChars  = s => giftCount(s).length;
+const giftBytes  = s => byteLen(giftCount(s));
 
 // ── undo / redo ──
 const UNDO_STACK = [];
@@ -1496,8 +1504,8 @@ function ceSync() {
   }
   const code = document.getElementById('ceTextarea').value;
   document.getElementById('outputBox').textContent = code;
-  // update counters
-  const chars = code.length, bytes = byteLen(code);
+  // update counters — use CRLF-normalised count to match 3dxchat
+  const chars = giftChars(code), bytes = giftBytes(code);
   const cc = document.getElementById('charCount'), bc = document.getElementById('byteCount');
   cc.textContent = chars; bc.textContent = bytes;
   cc.className = 'cv ' + (chars > 240 ? 'over-v' : chars > 210 ? 'warn-v' : 'ok');
@@ -1729,7 +1737,7 @@ function _isCodeOverLimit(){
   const el = document.getElementById('outputBox');
   if (!el) return false;
   const code = el.textContent || '';
-  return code.length > 240 || byteLen(code) > 255;
+  return giftChars(code) > 240 || giftBytes(code) > 255;
 }
 function trimDecoToFit(){
   const ids = ['kaomoji','dekoBottom','dekoTop'];
@@ -2071,7 +2079,9 @@ function generate(){
   const code=applyLayout(lm);
   document.getElementById('outputBox').textContent=code;
 
-  const chars=code.length, bytes=byteLen(code);
+  // CRLF-normalised counts match 3dxchat's internal counter (each \n
+  // counts as 2 in their profile editor, not 1).
+  const chars=giftChars(code), bytes=giftBytes(code);
   const cc=document.getElementById('charCount'),bc=document.getElementById('byteCount');
   cc.textContent=chars; bc.textContent=bytes;
   cc.className='cv '+(chars>240?'over-v':chars>210?'warn-v':'ok');
@@ -2315,7 +2325,8 @@ function showToast(html, type){
 
 function copyCode(){
   const text=document.getElementById('outputBox').textContent;
-  const chars=text.length, bytes=byteLen(text);
+  // Block based on CRLF-normalised count (matches 3dxchat's limit check)
+  const chars=giftChars(text), bytes=giftBytes(text);
   if (chars > 240 || bytes > 255) {
     showToast('<i class="fa-icon" data-icon="warning"></i> <span><b>' + t('copy_blocked') + '</b><br>' + t('copy_blocked_msg') + '</span>', 'warn');
     return;
