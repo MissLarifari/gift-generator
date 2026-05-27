@@ -699,7 +699,14 @@ const layoutDefaults = {
   // matches the screenshot's whitish/no-tint look AND frees enough
   // bytes to fit "apparently" + "so here comes" + everything else
   // (final: 239B / 255). dekoBottom doubles as the bridge slot here.
-  flipped: {dekoTop:'.. ↓ ..', topText:'3 ᴡᴀsɴᴛ\nᴇɴᴏᴜɢʜ ᴀᴘᴘᴀʀᴇɴᴛʟʏ...\n', mainText:'ɴᴜᴍʙᴇʀ 4*', bottomText:'ʇsnɾ for you ♡', kaomoji:'(✿◡✿)', dekoBottom:'sᴏ ʜᴇʀᴇ ᴄᴏᴍᴇs',
+  // Flipped: "falling" theme — fits the down-arrow + 180°-rotation
+  // identity better than the previous "Number 4" reference. Eight
+  // visible elements (deco / zeile / zeile / blank / zeile / main /
+  // zeile / deco) per Sophey's spec. bottomText pre-bakes "hard"
+  // rotated 180° ("pɹɐɥ") in front of normal smallcaps "for you ♡"
+  // for the mixed-font twist. All field fonts forced to 'normal'.
+  // Bytes: 246/255.
+  flipped: {dekoTop:'.. ↓ ..', topText:'ɢʀᴀᴠɪᴛʏ ɢᴀᴠᴇ ᴜᴘ\nᴀɴᴅ sᴏ ᴅɪᴅ ɪ\n', mainText:'ꜰᴀʟʟɪɴɢ', bottomText:'pɹɐɥ ꜰᴏʀ ʏᴏᴜ ♡', kaomoji:'(◡‿◡)', dekoBottom:'ɴᴏᴡ ɪᴍ ᴊᴜsᴛ',
             fonts:{dekoTop:'normal', topText:'normal', mainText:'normal', bottomText:'normal', kaomoji:'normal', dekoBottom:'normal'},
             lineOrder:['dekoTop','topText','dekoBottom','mainText','bottomText','kaomoji'],
             noColor:{dekoTop:true, dekoBottom:true, kaomoji:true}},
