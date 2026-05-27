@@ -75,9 +75,6 @@ function pushUndo() {
   if (UNDO_STACK.length > MAX_UNDO) UNDO_STACK.shift();
   REDO_STACK.length = 0;
   updateUndoBtns();
-  // Any externally-triggered undo entry ends any active quick-edit
-  // typing session, so the next keystroke captures a fresh baseline.
-  if (typeof _qeSession !== 'undefined') _qeSession = false;
 }
 
 function undo() {
@@ -308,10 +305,6 @@ const I18N = {
     reorder_btn:'Reorder', reorder_done:'Done',
     undo_btn:'Undo', redo_btn:'Redo',
     undo_title:'Undo last action (Ctrl+Z)', redo_title:'Redo (Ctrl+Y)',
-    qe_deco_top:'Deco', qe_top:'Top', qe_main:'Main', qe_bottom:'Bottom', qe_kao:'Kao', qe_deco_bottom:'Deco',
-    qe_ph_deco_top:'· deco top ·', qe_ph_top:'top line', qe_ph_main:'main text', qe_ph_bottom:'bottom line', qe_ph_kao:'(❀◡❀)', qe_ph_deco_bottom:'.. ✦ ..',
-    qe_clear:'clear',
-    qe_clear_all:'Clear all',
     decos_trimmed:(names)=>`Trimmed ${names} to fit the 240/255 limit`,
     byte_breakdown:'Per-field bytes',
     tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Themed templates (Holidays, Celebrations, Vibes) apply matching colors automatically and clear deco lines to stay under the limit.',
@@ -378,10 +371,6 @@ const I18N = {
     remove_line:'Zeile entfernen',
     reorder_btn:'Sortieren', reorder_done:'Fertig',
     undo_btn:'Rückgängig', redo_btn:'Wiederholen',
-    qe_deco_top:'Deko', qe_top:'Oben', qe_main:'Haupt', qe_bottom:'Unten', qe_kao:'Kao', qe_deco_bottom:'Deko',
-    qe_ph_deco_top:'· Deko oben ·', qe_ph_top:'obere Zeile', qe_ph_main:'Haupttext', qe_ph_bottom:'untere Zeile', qe_ph_kao:'(❀◡❀)', qe_ph_deco_bottom:'.. ✦ ..',
-    qe_clear:'leeren',
-    qe_clear_all:'Alles leeren',
     decos_trimmed:(names)=>`${names} entfernt um ins 240/255-Limit zu passen`,
     byte_breakdown:'Bytes pro Feld',
     undo_title:'Letzte Aktion rückgängig machen (Strg+Z)', redo_title:'Wiederholen (Strg+Y)',
@@ -448,10 +437,6 @@ const I18N = {
     remove_line:'Supprimer la ligne',
     reorder_btn:'Réordonner', reorder_done:'Terminé',
     undo_btn:'Annuler', redo_btn:'Refaire',
-    qe_deco_top:'Déco', qe_top:'Haut', qe_main:'Principal', qe_bottom:'Bas', qe_kao:'Kao', qe_deco_bottom:'Déco',
-    qe_ph_deco_top:'· déco haut ·', qe_ph_top:'ligne du haut', qe_ph_main:'texte principal', qe_ph_bottom:'ligne du bas', qe_ph_kao:'(❀◡❀)', qe_ph_deco_bottom:'.. ✦ ..',
-    qe_clear:'effacer',
-    qe_clear_all:'Tout effacer',
     decos_trimmed:(names)=>`${names} supprimé(s) pour rester sous la limite 240/255`,
     byte_breakdown:'Octets par champ',
     undo_title:'Annuler la dernière action (Ctrl+Z)', redo_title:'Refaire (Ctrl+Y)',
@@ -518,10 +503,6 @@ const I18N = {
     remove_line:'Удалить строку',
     reorder_btn:'Порядок', reorder_done:'Готово',
     undo_btn:'Отменить', redo_btn:'Повторить',
-    qe_deco_top:'Деко', qe_top:'Верх', qe_main:'Основной', qe_bottom:'Низ', qe_kao:'Као', qe_deco_bottom:'Деко',
-    qe_ph_deco_top:'· деко сверху ·', qe_ph_top:'верхняя строка', qe_ph_main:'основной текст', qe_ph_bottom:'нижняя строка', qe_ph_kao:'(❀◡❀)', qe_ph_deco_bottom:'.. ✦ ..',
-    qe_clear:'очистить',
-    qe_clear_all:'Очистить всё',
     decos_trimmed:(names)=>`${names} убрано — чтобы уложиться в лимит 240/255`,
     byte_breakdown:'Байты по полям',
     undo_title:'Отменить последнее действие (Ctrl+Z)', redo_title:'Повторить (Ctrl+Y)',
@@ -672,14 +653,12 @@ function setLayout(layout) {
   const pvWrap = document.querySelector('.pv-popup');
   const codeLabel = document.querySelector('.code-label');
   const pvLabel = document.querySelector('.pv-label');
-  const qe = document.getElementById('quickEdit');
   if (layout === 'custom') {
     ce.style.display = '';
     ob.style.display = 'none';
     pvWrap.style.display = 'none';
     if (codeLabel) codeLabel.style.display = 'none';
     if (pvLabel) pvLabel.style.display = 'none';
-    if (qe) qe.style.display = 'none';
     // hide optimization tips from previous layout
     const optPanel = document.getElementById('optimizeTips');
     if (optPanel) optPanel.style.display = 'none';
@@ -693,7 +672,6 @@ function setLayout(layout) {
     pvWrap.style.display = '';
     if (codeLabel) codeLabel.style.display = '';
     if (pvLabel) pvLabel.style.display = '';
-    if (qe) qe.style.display = '';
   }
 
   if (!userHasEdited) {
@@ -1386,94 +1364,9 @@ function moveLine(field,dir){
 }
 
 // ── main generate ──
-// ── Quick-Edit sync ──
-// Bidirectional bridge between the always-visible Top/Main/Bottom inputs
-// under the preview and the canonical form fields inside the accordion
-// sections. Editing the quick-edit input writes to the underlying field
-// and re-generates; refreshQuickEdit() mirrors the source-of-truth back
-// after template clicks / undo / reset.
-// Push undo once per editing session so a quick-edit run produces ONE
-// undo entry total, not one per keystroke. _qeSession resets on blur or
-// whenever the model state otherwise changes (template click etc).
-let _qeSession = false;
-
-// Cascade: once ALL three main text lines are empty, wipe the surrounding
-// decorations too. Otherwise the preview shows orphaned deco-top + kaomoji
-// + deco-bottom floating on their own — looks like leftover junk rather
-// than a deliberate blank slate. Returns true if it cleared anything.
-function cascadeClearDecosIfTextEmpty(){
-  const allEmpty = ['topText','mainText','bottomText'].every(id => {
-    const e = document.getElementById(id);
-    return !e || !e.value;
-  });
-  if (!allEmpty) return false;
-  let cleared = false;
-  ['dekoTop','dekoBottom','kaomoji'].forEach(id => {
-    const e = document.getElementById(id);
-    if (e && e.value) { e.value = ''; cleared = true; }
-  });
-  return cleared;
-}
-
-function syncQuickEdit(field, value){
-  if (!_qeSession) { pushUndo(); _qeSession = true; }
-  const el = document.getElementById(field);
-  if (!el) return;
-  el.value = value;
-  userHasEdited = true;
-  // Only worth running the cascade when the field was emptied — typing
-  // a non-empty value can't possibly trigger the all-empty case.
-  if (!value) cascadeClearDecosIfTextEmpty();
-  // use the same 80ms debounce as the canonical form inputs to avoid
-  // rebuilding the whole preview DOM on every keystroke
-  if (typeof generateDebounced === 'function') generateDebounced();
-  else generate();
-}
-function endQuickEditSession(){ _qeSession = false; }
-
-// Wipe ALL six text fields (top/main/bottom + decoTop/decoBottom/kaomoji)
-// in one undo-able action — gives the user a true blank canvas in one
-// click instead of requiring six separate clears.
-function clearAllText(){
-  pushUndo();
-  _qeSession = false;
-  ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  generate();
-}
-function clearQuickEditField(field){
-  pushUndo();
-  _qeSession = false;
-  const el = document.getElementById(field);
-  if (el) el.value = '';
-  cascadeClearDecosIfTextEmpty();
-  generate();
-}
-function refreshQuickEdit(){
-  const map = {
-    qeDekoTop:'dekoTop',
-    qeTop:'topText',
-    qeMain:'mainText',
-    qeBottom:'bottomText',
-    qeKaomoji:'kaomoji',
-    qeDekoBottom:'dekoBottom',
-  };
-  for (const qeId in map) {
-    const qe = document.getElementById(qeId);
-    if (!qe) continue;
-    // Don't trample the cursor of an actively-typed input
-    if (document.activeElement === qe) continue;
-    const src = document.getElementById(map[qeId]);
-    if (src && qe.value !== src.value) qe.value = src.value;
-  }
-}
-
 function generate(){
   // skip auto-generate in custom mode
   if (currentLayout === 'custom') return;
-  refreshQuickEdit();
   const v=f=>document.getElementById(f).value;
   const dekoTop=v('dekoTop'),topText=v('topText'),main=v('mainText'),bottom=v('bottomText'),kaomoji=v('kaomoji'),dekoBottom=v('dekoBottom');
   const size=v('fontSize');
@@ -1934,16 +1827,6 @@ const generateDebounced = debounce(generate, 80);
 document.querySelectorAll('input[type="text"],input[type="number"]').forEach(el=>{
   el.addEventListener('input',generateDebounced);
   el.addEventListener('input',()=>{ userHasEdited=true; });
-});
-// Same cascade-clear logic as the quick-edit path: when the user empties
-// the top/main/bottom inputs in their accordion sections too, also wipe
-// the decorations so the preview doesn't end up with orphaned deco-only.
-['topText','mainText','bottomText'].forEach(id => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('input', () => {
-    if (!el.value && cascadeClearDecosIfTextEmpty()) generateDebounced();
-  });
 });
 // save state after every generate — debounced to avoid thrashing
 const _saveDebounced = debounce(saveGiftState, 200);
