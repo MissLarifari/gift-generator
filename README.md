@@ -41,7 +41,7 @@ Vanilla HTML/CSS/JS bundled by [Vite](https://vitejs.dev/). No framework, no bac
 │   │   ├── templates.js    # Template sections + render
 │   │   └── icons.js        # FontAwesome icon map + hydration
 │   ├── css/
-│   │   └── styles.css      # All styling (dark + light themes)
+│   │   └── styles.css      # All styling (dark theme)
 │   ├── img/
 │   │   ├── gift.png        # Gift preview image
 │   │   └── flags/          # UI language flags

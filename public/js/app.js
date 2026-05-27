@@ -1775,27 +1775,10 @@ function loadFromURL() {
 }
 
 // ── theme ──
-let theme = 'dark';
-try { theme = localStorage.getItem('theme') || 'dark'; } catch(e) {}
-
-function toggleTheme() {
-  theme = theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', theme);
-  try { localStorage.setItem('theme', theme); } catch(e) {}
-  const ic = document.querySelector('#themeBtn .fa-icon');
-  if (ic) {
-    ic.classList.remove('fa-sun', 'fa-moon');
-    ic.classList.add(theme === 'dark' ? 'fa-sun' : 'fa-moon');
-    ic.setAttribute('data-icon', theme === 'dark' ? 'sun' : 'moon');
-  }
-}
-
-// apply on load
-if (theme === 'light') {
-  document.documentElement.setAttribute('data-theme', 'light');
-  const ic = document.querySelector('#themeBtn .fa-icon');
-  if (ic) ic.setAttribute('data-icon', 'moon');
-}
+// Light mode was removed — page is dark-mode only now.
+// Clear any previously saved 'light' preference so old visitors don't see weird state.
+try { if (localStorage.getItem('theme')) localStorage.removeItem('theme'); } catch(e) {}
+document.documentElement.removeAttribute('data-theme');
 
 // ── keyboard shortcuts ──
 document.addEventListener('keydown', function(e) {
