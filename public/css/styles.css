@@ -714,7 +714,7 @@ input[type="number"]{width:60px;}
 }
 .pvc{cursor:pointer;border-radius:4px;padding:2px 8px;transition:background .15s;min-height:4px;position:relative;}
 /* main-text bold/italic toggles — forced with !important so they win against inline styles + cached gradient cssText */
-.pv-main-bold{font-weight:800 !important;}
+.pv-main-bold{font-weight:700 !important;}
 .pv-main-italic{font-style:italic !important;}
 /* reorder controls — hidden by default, only visible when reorder mode is on */
 .pv-reorder{

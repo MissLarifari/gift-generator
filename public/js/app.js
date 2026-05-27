@@ -1442,8 +1442,10 @@ function generate(){
   const pms=Math.max(0.8,parseInt(size)/20)+'rem';
   const pvMain=document.getElementById('pvMain');
   const mainB=document.getElementById('mainBold')?.checked, mainI=document.getElementById('mainItalic')?.checked;
-  // Sans-serif display font has proper 600/700/800 + italic, so just use real weights — no shadow hacks
-  const mainWeight = mainB ? '800' : '700';
+  // 3dxchat renders the main message in a regular (~400) weight by default;
+  // only when the user explicitly ticks Bold should it become heavy. Was
+  // 700/800 here, which always looked too thick compared to the real client.
+  const mainWeight = mainB ? '700' : '400';
   const mainStyle = mainI ? 'italic' : 'normal';
   function setMainStyle(el){
     if(grads.mainText.on){el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};background:linear-gradient(to right,${grads.mainText.c1},${grads.mainText.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text`;}
