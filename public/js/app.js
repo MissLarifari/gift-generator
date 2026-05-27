@@ -1050,24 +1050,55 @@ function _ceMergeAdjacentTags(text){
   return text;
 }
 
+// Merge with cursor-aware position tracking. Each pattern replacement
+// passes through a callback that knows the match offset, so when text
+// gets removed BEFORE the cursor we shift the cursor by the same
+// number of chars. Cursor inside the match collapses to the start of
+// the merged block.
+function _ceMergeWithCursor(text, cursor){
+  const patterns = [
+    { re: /<size=(\d+)>([\s\S]*?)<\/size>(\s*)<size=\1>([\s\S]*?)<\/size>/g,
+      repl: (sz, a, sep, b) => '<size=' + sz + '>' + a + sep + b + '</size>' },
+    { re: /<color=(#[0-9a-fA-F]{3,8})>([\s\S]*?)<\/color>(\s*)<color=\1>([\s\S]*?)<\/color>/g,
+      repl: (col, a, sep, b) => '<color=' + col + '>' + a + sep + b + '</color>' },
+    { re: /<b>([\s\S]*?)<\/b>(\s*)<b>([\s\S]*?)<\/b>/g,
+      repl: (a, sep, b) => '<b>' + a + sep + b + '</b>' },
+    { re: /<i>([\s\S]*?)<\/i>(\s*)<i>([\s\S]*?)<\/i>/g,
+      repl: (a, sep, b) => '<i>' + a + sep + b + '</i>' },
+  ];
+  let prev;
+  do {
+    prev = text;
+    for (const p of patterns) {
+      text = text.replace(p.re, function(){
+        const args = Array.prototype.slice.call(arguments);
+        const match = args[0];
+        const offset = args[args.length - 2];
+        const newStr = p.repl.apply(null, args.slice(1, -2));
+        const removed = match.length - newStr.length;
+        if (cursor >= offset + match.length) cursor -= removed;
+        else if (cursor > offset)             cursor = offset + newStr.length;
+        return newStr;
+      });
+    }
+  } while (text !== prev);
+  return { text, cursor };
+}
+
 // Run the merge over the current textarea value and patch the selection
-// indices so the cursor stays roughly in place even when wrap boundaries
-// collapse around it. Called at the tail of every ceWrap* / ceSetSize.
+// indices so the cursor stays in place. Called at the tail of every
+// ceWrap* / ceSetSize and from ceSync (so plain typing also collapses
+// adjacent same-tag wraps).
 function _ceApplyMergeAndUpdate(){
   const ta = document.getElementById('ceTextarea');
   if (!ta) return;
   const before = ta.value;
-  const merged = _ceMergeAdjacentTags(before);
-  if (merged === before) return;
-  // Naive selection update: clamp old positions to the new shorter length.
-  // The merge only removes redundant tag pairs, so the visible content
-  // stays in the same order — clamping is good enough.
-  const s = Math.min(ta.selectionStart, merged.length);
-  const e = Math.min(ta.selectionEnd, merged.length);
-  ta.value = merged;
-  ta.selectionStart = s;
-  ta.selectionEnd = e;
-  _ceLastSel = { s, e };
+  const r = _ceMergeWithCursor(before, ta.selectionStart);
+  if (r.text === before) return;
+  ta.value = r.text;
+  ta.selectionStart = r.cursor;
+  ta.selectionEnd = r.cursor;
+  _ceLastSel = { s: r.cursor, e: r.cursor };
 }
 
 // Smart-wrap that swaps an existing size tag instead of nesting one
@@ -1349,7 +1380,17 @@ function ceWrapGradient() {
   _ceApplyMergeAndUpdate(); ta.focus(); ceSync();
 }
 
+// Guard so the merge call inside ceSync doesn't infinitely re-trigger
+// itself (mutating ta.value would fire another input event in some
+// scenarios). Re-entrancy protected by this flag.
+let _ceSyncing = false;
 function ceSync() {
+  // Auto-collapse any adjacent same-tag pairs the user just produced
+  // by typing or smart-Enter. Only runs once per sync to avoid loops.
+  if (!_ceSyncing) {
+    _ceSyncing = true;
+    try { _ceApplyMergeAndUpdate(); } finally { _ceSyncing = false; }
+  }
   const code = document.getElementById('ceTextarea').value;
   document.getElementById('outputBox').textContent = code;
   // update counters
