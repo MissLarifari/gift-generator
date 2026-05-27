@@ -341,7 +341,7 @@ function renderTemplatePanel(panel, sections){
       const [label, main, top, bottom] = it;
       const favCls = (typeof isFav === 'function' && isFav(main, top, bottom)) ? ' fav-on' : '';
       const labelText = sec.chipExtra === 'pride' ? `<span class="chip-rainbow">${esc(label)}</span>` : esc(label);
-      return `<span class="${chipCls}" onclick="${fn}('${esc(main)}','${esc(top)}','${esc(bottom)}')">${labelText}<span class="fav-star${favCls}" onclick="event.stopPropagation();toggleFav('${esc(main)}','${esc(top)}','${esc(bottom)}',this)">★</span></span>`;
+      return `<span class="${chipCls}" onclick="applyTemplate('${fn}','${esc(main)}','${esc(top)}','${esc(bottom)}')">${labelText}<span class="fav-star${favCls}" onclick="event.stopPropagation();toggleFav('${esc(main)}','${esc(top)}','${esc(bottom)}',this)">★</span></span>`;
     }).join('');
     // category title = icon span + label span (consistent gap via CSS .cat-title)
     const iconExtra = sec.chipExtra === 'pride' ? ' chip-rainbow' : '';

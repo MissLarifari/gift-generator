@@ -70,11 +70,26 @@ function applyState(s) {
   generate();
 }
 
+// Suppression flag for synthetic pushUndo() calls (e.g. resetAll re-applying
+// a template internally — we don't want an extra "factory state" entry to
+// pollute the undo stack between the user's reset and the template re-apply).
+let _suppressPushUndo = false;
 function pushUndo() {
+  if (_suppressPushUndo) return;
   UNDO_STACK.push(captureState());
   if (UNDO_STACK.length > MAX_UNDO) UNDO_STACK.shift();
   REDO_STACK.length = 0;
   updateUndoBtns();
+}
+
+// Tracks the most recently clicked template so Reset can return to that
+// state instead of the factory default. Cleared on hard "factory" resets
+// (i.e. a Reset when no template has been picked this session).
+let lastTemplate = null;
+function applyTemplate(fnName, main, top, bottom){
+  lastTemplate = { fnName, main, top, bottom };
+  const fn = window[fnName];
+  if (typeof fn === 'function') fn(main, top, bottom);
 }
 
 function undo() {
@@ -623,7 +638,7 @@ function renderFavPanel() {
   panel.style.display = '';
   const chips = favorites.map(key => {
     const [main, top, bottom] = key.split('|');
-    return `<span class="chip t fav-chip" onclick="setSpruch('${esc(main)}','${esc(top)}','${esc(bottom)}')">${esc(main)}<span class="fav-rm" onclick="event.stopPropagation();removeFav('${esc(key)}')">×</span></span>`;
+    return `<span class="chip t fav-chip" onclick="applyTemplate('setSpruch','${esc(main)}','${esc(top)}','${esc(bottom)}')">${esc(main)}<span class="fav-rm" onclick="event.stopPropagation();removeFav('${esc(key)}')">×</span></span>`;
   }).join('');
   panel.querySelector('.chips').innerHTML = chips;
 }
@@ -1360,6 +1375,21 @@ function resetAll(){
 
   // re-render
   safe('generate', () => generate());
+
+  // If the user had picked a template earlier this session, snap back to
+  // THAT state instead of the bare factory defaults — matches the mental
+  // model "Reset = undo my changes since the template was chosen".
+  // Suppress the template setter's own pushUndo so the undo stack stays
+  // [pre-reset-state] → [post-reset-state], without an intermediate
+  // factory-state entry.
+  safe('re-apply last template', () => {
+    if (!lastTemplate) return;
+    const fn = window[lastTemplate.fnName];
+    if (typeof fn !== 'function') return;
+    _suppressPushUndo = true;
+    try { fn(lastTemplate.main, lastTemplate.top, lastTemplate.bottom); }
+    finally { _suppressPushUndo = false; }
+  });
 }
 
 // ── line order (reorderable in preview) ──
