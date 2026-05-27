@@ -2674,7 +2674,11 @@ document.querySelectorAll('input[type="text"],textarea').forEach(el => {
   el.addEventListener('input', _typingMarkActivity);
 });
 
-document.querySelectorAll('input[type="text"],input[type="number"]').forEach(el=>{
+// Includes textarea too — topText is a textarea since the Flipped
+// layout needed multiline support; without this it stayed mute on
+// input events and the preview froze when the user typed in Top Line.
+document.querySelectorAll('input[type="text"],input[type="number"],textarea').forEach(el=>{
+  if (el.id === 'ceTextarea') return; // custom-editor has its own listener
   el.addEventListener('input',generateDebounced);
   el.addEventListener('input',()=>{ userHasEdited=true; });
 });
