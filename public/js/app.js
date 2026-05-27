@@ -699,7 +699,14 @@ const layoutDefaults = {
   compact: {dekoTop:'· · ·', topText:'wollt nur sagen', mainText:'danke dir', bottomText:'für alles', kaomoji:'(˘³˘)♥', dekoBottom:'· · ·'},
   framed:  {dekoTop:'❀ · ❀ · ❀', topText:'du bist mein', mainText:'liebling', bottomText:'· kein scherz ·', kaomoji:'', dekoBottom:''},
   minimal: {dekoTop:'', topText:'', mainText:'nur wir', bottomText:'', kaomoji:'(❀◡❀)', dekoBottom:''},
-  pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:''},
+  // Pyramid: kaomoji renders BEFORE bottomText so the visual matches
+  // what 3dxchat actually shows in-game (the heavily-indented bottomText
+  // ends up to the right BELOW the kaomoji, forming the pyramid step).
+  // Previous default put bottomText then kaomoji, which produced an
+  // inverted layout that didn't match the in-game render — Sophey
+  // pointed this out with a comparison screenshot.
+  pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:'',
+            lineOrder:['dekoTop','topText','mainText','kaomoji','bottomText','dekoBottom']},
   // Flipped: matches Sophey's "Number 4" screenshot 1:1. Pre-baked
   // Unicode in the strings (so mixed fonts in one line work, and the
   // input fields' \n-stripping isn't a problem) + a custom lineOrder
