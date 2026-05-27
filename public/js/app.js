@@ -1156,54 +1156,63 @@ function ceWrapGradient() {
     baseE = e - openLen;
   }
 
-  // ── split into segments per mode ───────────────────────────────────
-  // For each split we keep the SEPARATOR string so it can be re-inserted
-  // verbatim between the colored segments (preserves spacing/newlines).
-  let segments;     // strings to color
-  let separators;   // joined back between segments
-  if (mode === 'letter') {
-    // Use Array.from to handle surrogate pairs correctly (e.g. emoji).
-    segments = Array.from(sel);
-    separators = segments.map(() => '');
-    separators.pop();
-  } else if (mode === 'line') {
-    segments = sel.split('\n');
-    separators = segments.map(() => '\n'); separators.pop();
-  } else if (mode === 'paragraph') {
-    // Paragraphs are separated by one or more blank lines.
-    segments = sel.split(/\n\s*\n/);
-    separators = segments.map((_, i) => i < segments.length - 1 ? '\n\n' : ''); separators.pop();
-  } else {
-    // word (default)
-    // Preserve runs of whitespace between words.
-    const parts = sel.split(/(\s+)/);
-    segments = [];
-    separators = [];
-    for (let i = 0; i < parts.length; i++) {
-      if (i % 2 === 0) { if (parts[i].length) segments.push(parts[i]); else if (i + 1 < parts.length) separators.push(parts[i+1]); }
-      else { if (segments.length) separators.push(parts[i]); }
+  // Tokenize the selection for the chosen mode. Each token is either a
+  // 'color' (gets one stop of the gradient) or a 'raw' chunk (passes
+  // through unchanged: existing markup tags, whitespace separators,
+  // line breaks, paragraph gaps). This is the critical fix that stops
+  // <size=40><b>test</b></size> from being shredded into one <color>
+  // per CHARACTER of the markup.
+  function tokenize(text, modeName){
+    const tokens = [];
+    // First split out any markup tags so they always stay atomic.
+    const parts = text.split(/(<[^>]*>)/);
+    for (const part of parts) {
+      if (!part) continue;
+      if (/^<[^>]*>$/.test(part)) { tokens.push({ type:'raw', value:part }); continue; }
+      // part is plain text — split it according to the active mode.
+      if (modeName === 'letter') {
+        // Array.from handles surrogate pairs / emoji correctly.
+        for (const ch of Array.from(part)) tokens.push({ type:'color', value:ch });
+      } else if (modeName === 'word') {
+        for (const p of part.split(/(\s+)/)) {
+          if (!p) continue;
+          tokens.push({ type: /^\s+$/.test(p) ? 'raw' : 'color', value: p });
+        }
+      } else if (modeName === 'line') {
+        for (const p of part.split(/(\n)/)) {
+          if (!p) continue;
+          tokens.push({ type: p === '\n' ? 'raw' : 'color', value: p });
+        }
+      } else { // paragraph
+        for (const p of part.split(/(\n\s*\n)/)) {
+          if (!p) continue;
+          tokens.push({ type: /^\n\s*\n$/.test(p) ? 'raw' : 'color', value: p });
+        }
+      }
     }
-  }
-  segments = segments.filter(seg => seg.length > 0);
-  if (!segments.length) return;
-
-  // If the chosen mode doesn't yield ≥2 segments (e.g. "Per word" on a
-  // single word, "Per line" on a one-line selection), silently fall
-  // back to per-letter so the user always gets a visible gradient
-  // instead of a single-colour wrap.
-  if (segments.length < 2 && mode !== 'letter') {
-    segments = Array.from(sel);
-    separators = segments.map(() => '');
-    separators.pop();
-    segments = segments.filter(seg => seg.length > 0);
+    return tokens;
   }
 
-  const colored = _buildGradientSegments(segments, c1, c2, middleOnly);
+  let tokens = tokenize(sel, mode);
+  let colorables = tokens.filter(t => t.type === 'color');
 
+  // Fallback: if the chosen mode yields <2 colored slots, retry as
+  // per-letter so the user always sees a visible gradient.
+  if (colorables.length < 2 && mode !== 'letter') {
+    tokens = tokenize(sel, 'letter');
+    colorables = tokens.filter(t => t.type === 'color');
+  }
+  if (!colorables.length) return;
+
+  const colored = _buildGradientSegments(colorables.map(t => t.value), c1, c2, middleOnly);
+
+  // Re-emit: raw tokens verbatim, color tokens wrapped with the next
+  // gradient stop. Markup tags inside the selection survive intact.
   let wrapped = '';
-  for (let i = 0; i < colored.length; i++) {
-    wrapped += '<color=' + colored[i].hex + '>' + colored[i].txt + '</color>';
-    if (i < colored.length - 1) wrapped += (separators[i] || '');
+  let ci = 0;
+  for (const tok of tokens) {
+    if (tok.type === 'raw') wrapped += tok.value;
+    else { wrapped += '<color=' + colored[ci].hex + '>' + tok.value + '</color>'; ci++; }
   }
 
   ta.value = baseVal.substring(0, baseS) + wrapped + baseVal.substring(baseE);
