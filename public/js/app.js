@@ -690,11 +690,13 @@ const layoutDefaults = {
   framed:  {dekoTop:'❀ · ❀ · ❀', topText:'du bist mein', mainText:'liebling', bottomText:'· kein scherz ·', kaomoji:'', dekoBottom:''},
   minimal: {dekoTop:'', topText:'', mainText:'nur wir', bottomText:'', kaomoji:'(❀◡❀)', dekoBottom:''},
   pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:''},
-  // Flipped: a topsy-turvy layout. Default bottomText is meant to be
-  // toggled to the 'flipped' font for the 180°-rotated read.
-  // Text trimmed so the full code stays within 240 chars / 255 bytes
-  // even with the multibyte arrow/heart decoration. Original was 259B.
-  flipped: {dekoTop:'.. ↓ ..', topText:'world flipped today', mainText:'still chose you', bottomText:'.. always you ♡ ..', kaomoji:'(◡‿◡)', dekoBottom:'.. ↑ ..'},
+  // Flipped: a topsy-turvy layout matching the "Number 4" screenshot
+  // — small-caps top, big small-caps main, upside-down bottom + flower
+  // kaomoji. The 'fonts' key tells setLayout to apply per-field font
+  // defaults (smallcaps / flipped) on first pick. Text kept tight so
+  // smallcaps multibyte expansion + flipped chars still fit 240/255.
+  flipped: {dekoTop:'.. ↓ ..', topText:'3 wasnt enough', mainText:'number 4*', bottomText:'just for you ♡', kaomoji:'(✿◡✿)', dekoBottom:'',
+            fonts:{topText:'smallcaps', mainText:'smallcaps', bottomText:'flipped'}},
   custom: {dekoTop:'', topText:'', mainText:'', bottomText:'', kaomoji:'', dekoBottom:''}
 };
 function setLayout(layout) {
@@ -733,6 +735,18 @@ function setLayout(layout) {
   if (!userHasEdited) {
     const d = layoutDefaults[layout];
     if (d) ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f=>document.getElementById(f).value=d[f]);
+    // Per-layout default fonts (e.g. 'flipped' wants topText smallcaps,
+    // bottomText upside-down). Sync both fieldFonts AND the chip UI so
+    // the user sees the active state immediately.
+    if (d && d.fonts) {
+      Object.keys(d.fonts).forEach(field => {
+        fieldFonts[field] = d.fonts[field];
+        ['normal','fancy','smallcaps','thai','flipped'].forEach(s => {
+          const el = document.getElementById('font_' + field + '_' + s);
+          if (el) el.classList.toggle('on', d.fonts[field] === s);
+        });
+      });
+    }
     // 'flipped' is the only layout with a built-in theme palette —
     // apply its cosmic-pink colours when the user first picks it so the
     // preview matches the layout's identity (otherwise the user sees
