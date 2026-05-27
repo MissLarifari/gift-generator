@@ -1393,15 +1393,24 @@ function ceWrapGradient() {
   ta.selectionStart = baseS;
   ta.selectionEnd = baseS + wrapped.length;
   _ceLastSel = { s: baseS, e: baseS + wrapped.length };
-  // Snapshot so the next Apply click on the same selection / params
-  // toggles the gradient off.
+  // Run the adjacent-tag merge FIRST (may collapse same-color spans and
+  // shorten ta.value), then snapshot the post-merge state. Snapshot
+  // BEFORE merge would make toggle-off fail because the stored val no
+  // longer matches ta.value, and the stored selection range no longer
+  // covers the gradient content.
+  _ceApplyMergeAndUpdate();
+  // Re-derive the wrapped-region length from the size change.
+  const newWrappedEnd = baseS + (ta.value.length - baseVal.length + (baseE - baseS));
+  ta.selectionStart = baseS;
+  ta.selectionEnd = newWrappedEnd;
+  _ceLastSel = { s: baseS, e: newWrappedEnd };
   _ceLastGradApply = {
     val: ta.value,
     s: baseS,
-    e: baseS + wrapped.length,
+    e: newWrappedEnd,
     params: { c1, c2, mode, mid: middleOnly },
   };
-  _ceApplyMergeAndUpdate(); ta.focus(); ceSync();
+  ta.focus(); ceSync();
 }
 
 // Guard so the merge call inside ceSync doesn't infinitely re-trigger
@@ -2469,10 +2478,20 @@ function ceHandleEnter(ev){
 
   ev.preventDefault();
   ta.value = before + insertion + val.substring(s);
-  const newPos = s + closes.length + 1; // right after the \n, before the re-opened tags' content slot
-  ta.selectionStart = newPos + opens.length;  // cursor lands after the reopened tags, ready to type
-  ta.selectionEnd   = newPos + opens.length;
-  _ceLastSel = { s: ta.selectionStart, e: ta.selectionEnd };
+  // The adjacent-tag merge will collapse the closes+opens around \n into
+  // a single wrap (because they have identical params). Run the merge
+  // explicitly, then locate the \n in the merged value and place the
+  // cursor right after it — that's where the user wants to type. The
+  // generic _ceMergeWithCursor heuristic moves cursors-inside-match to
+  // the end of the merged block, which here lands the cursor OUTSIDE
+  // the wrap. We override that with a structural anchor (the \n).
+  _ceApplyMergeAndUpdate();
+  const nlIdx = ta.value.indexOf('\n', s);
+  if (nlIdx >= 0) {
+    ta.selectionStart = nlIdx + 1;
+    ta.selectionEnd   = nlIdx + 1;
+    _ceLastSel = { s: nlIdx + 1, e: nlIdx + 1 };
+  }
   ceSync();
 }
 document.getElementById('ceTextarea')?.addEventListener('keydown', ceHandleEnter);
