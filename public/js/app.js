@@ -699,7 +699,7 @@ const layoutDefaults = {
   // matches the screenshot's whitish/no-tint look AND frees enough
   // bytes to fit "apparently" + "so here comes" + everything else
   // (final: 239B / 255). dekoBottom doubles as the bridge slot here.
-  flipped: {dekoTop:'.. ↓ ..', topText:'3 ᴡᴀsɴᴛ ᴇɴᴏᴜɢʜ ᴀᴘᴘᴀʀᴇɴᴛʟʏ...', mainText:'ɴᴜᴍʙᴇʀ 4*', bottomText:'ʇsnɾ for you ♡', kaomoji:'(✿◡✿)', dekoBottom:'sᴏ ʜᴇʀᴇ ᴄᴏᴍᴇs',
+  flipped: {dekoTop:'.. ↓ ..', topText:'3 ᴡᴀsɴᴛ\nᴇɴᴏᴜɢʜ ᴀᴘᴘᴀʀᴇɴᴛʟʏ...\n', mainText:'ɴᴜᴍʙᴇʀ 4*', bottomText:'ʇsnɾ for you ♡', kaomoji:'(✿◡✿)', dekoBottom:'sᴏ ʜᴇʀᴇ ᴄᴏᴍᴇs',
             fonts:{dekoTop:'normal', topText:'normal', mainText:'normal', bottomText:'normal', kaomoji:'normal', dekoBottom:'normal'},
             lineOrder:['dekoTop','topText','dekoBottom','mainText','bottomText','kaomoji'],
             noColor:{dekoTop:true, dekoBottom:true, kaomoji:true}},
@@ -2128,6 +2128,12 @@ function generate(){
     else{el.style.cssText=`font-family:var(--font-display);font-size:${pms};font-weight:${mainWeight};font-style:${mainStyle};color:${colors.mainText}`;}
   }
   ['pvInlineRow','pvCompactRow','pvFramedBot','pvPyramidWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
+  // Set data-layout on the preview card so CSS can apply layout-specific
+  // tweaks (e.g. extra margin between topText and dekoBottom in 'flipped'
+  // to render the screenshot's blank-line gap — browsers swallow a
+  // div's trailing \n even with white-space:pre-wrap).
+  const previewCardEl = document.getElementById('previewCard');
+  if (previewCardEl) previewCardEl.setAttribute('data-layout', currentLayout);
   const pDT=document.getElementById('pvDekoTop'),pTR=document.getElementById('pvTopRow'),pBT=document.getElementById('pvBottom'),pKA=document.getElementById('pvKaomoji'),pDB=document.getElementById('pvDekoBottom'),card=document.getElementById('previewCard');
   [pDT,pTR,pvMain,pBT,pKA,pDB].forEach(el=>el.style.display='');
   // 3dxchat's default text color (whitish gray) — used when a field has

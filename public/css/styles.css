@@ -482,18 +482,24 @@ a{color:inherit;text-decoration:none;}
 .field-label{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#d8d8e8;margin-bottom:.35rem;display:block;}
 
 /* ── inputs ── */
-input[type="text"],input[type="number"]{
+input[type="text"],input[type="number"],textarea{
   width:100%;background:var(--bg);border:1px solid var(--b1);
   border-radius:var(--r);color:#fff;padding:7px 11px;
   font-size:13.5px;font-family:inherit;outline:none;margin:0;
   transition:border-color .2s,box-shadow .2s;
 }
-input:focus{border-color:var(--purple);box-shadow:0 0 0 2px rgba(179,136,255,.08);}
+input:focus,textarea:focus{border-color:var(--purple);box-shadow:0 0 0 2px rgba(179,136,255,.08);}
 input[type="number"]{width:68px;}
+/* topText is a textarea so multi-line phrases (e.g. the Flipped
+   layout's "3 wasn't enough / so here comes" two-liner) can be stored.
+   Auto-grows with content via field-sizing where supported, otherwise
+   the user can drag the corner. min-height matches the single-line
+   input metric so layouts that use one line look the same. */
+textarea{resize:vertical;min-height:33px;line-height:1.35;}
 
 /* ── row ── */
 .row{display:flex;gap:6px;align-items:center;}
-.row input[type="text"]{flex:1;}
+.row input[type="text"],.row textarea{flex:1;}
 
 /* ── field clear btn ── */
 .field-clear{
@@ -723,7 +729,17 @@ input[type="number"]{width:68px;}
   content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(ellipse at 50% 30%,rgba(179,136,255,.03) 0%,transparent 65%);
 }
-.pvc{cursor:pointer;border-radius:4px;padding:2px 8px;transition:background .15s;min-height:4px;position:relative;}
+/* pre-wrap (not pre-line) so internal \n in field values renders as
+   line breaks — needed for the Flipped layout where topText holds
+   "3 wᴀsɴ'ᴛ\nᴇɴᴏᴜɢʜ ᴀᴘᴘᴀʀᴇɴᴛʟʏ..." as a two-line phrase. */
+.pvc{cursor:pointer;border-radius:4px;padding:2px 8px;transition:background .15s;min-height:4px;position:relative;white-space:pre-wrap;}
+
+/* Flipped layout: the trailing \n in topText creates an explicit blank
+   line in the gift code (so 3dxchat renders "...apparently..." then a
+   blank then "so here comes"), but browsers swallow the visual line at
+   the end of a div. Add margin-top to pvDekoBottom so the preview
+   matches what the gift will actually look like. */
+.pv-card[data-layout="flipped"] #pvDekoBottom{margin-top:.9rem;}
 /* main-text bold/italic toggles — forced with !important so they win against inline styles + cached gradient cssText */
 .pv-main-bold{font-weight:700 !important;}
 .pv-main-italic{font-style:italic !important;}
