@@ -864,21 +864,23 @@ function ceApplyFont(style) {
   ceSync();
 }
 
-// Toggle-wrap for simple paired tags (<b>, <i>): if the selection is
-// already wrapped — or sits inside a matching wrapper — strip the tags
-// instead of adding a second nested layer. Three cases mirror the
-// size/color helpers:
-//   1) selection IS <tag>X</tag>            → unwrap to X
-//   2) selection sits between <tag> and </tag> → extend + unwrap
-//   3) anything else                          → wrap as before
+// Toggle-wrap for simple paired tags (<b>, <i>). Mirrors the size/color
+// logic so the toggle works EVEN IF there are other tags (color, size)
+// between the selection and the matching <b>…</b> wrapper.
+//
+//   1) selection IS <tag>X</tag>                        → unwrap to X
+//   2) some <tag>…</tag> wraps the selection            → remove THAT
+//      pair (peels one layer; click again to peel more — handles the
+//      'I accidentally clicked Bold 11 times' situation cleanly)
+//   3) no wrapper found                                 → add fresh wrap
 function ceWrap(tag) {
   const ta = document.getElementById('ceTextarea');
   const s = ta.selectionStart, e = ta.selectionEnd;
   if (s === e) return; // no selection
   const val = ta.value;
   const sel = val.substring(s, e);
-  const openLen = tag.length + 2;     // <b> / <i>
-  const closeLen = tag.length + 3;    // </b> / </i>
+  const openLen = tag.length + 2;
+  const closeLen = tag.length + 3;
   const open = '<' + tag + '>';
   const close = '</' + tag + '>';
 
@@ -891,17 +893,28 @@ function ceWrap(tag) {
     ta.focus(); ceSync(); return;
   }
 
-  // Case 2: <tag> sits right before and </tag> right after — strip both
-  if (val.substring(s - openLen, s) === open && val.substring(e, e + closeLen) === close) {
-    const newStart = s - openLen;
-    const newEnd = e + closeLen;
-    ta.value = val.substring(0, newStart) + sel + val.substring(newEnd);
-    ta.selectionStart = newStart;
-    ta.selectionEnd = newStart + sel.length;
+  // Case 2: an enclosing <tag>…</tag> wraps the selection (possibly
+  // through other tags like <color>, <size>) — remove that pair.
+  // RegExp metacharacter-safe: tag is always 'b' or 'i' here, so escape
+  // is unnecessary, but keep open/close patterns explicit for clarity.
+  const openRe  = new RegExp('<' + tag + '>');
+  const closeRe = new RegExp('<\\/' + tag + '>');
+  const enclosing = findEnclosingTag(val, s, e, openRe, closeRe);
+  if (enclosing) {
+    const newVal = val.substring(0, enclosing.openStart)
+                 + val.substring(enclosing.openEnd, enclosing.closeStart)
+                 + val.substring(enclosing.closeEnd);
+    ta.value = newVal;
+    // The open tag in front of the selection just vanished; shift the
+    // selection left by its length so the user's cursor stays on the
+    // same characters.
+    const shift = -(enclosing.openEnd - enclosing.openStart);
+    ta.selectionStart = s + shift;
+    ta.selectionEnd   = e + shift;
     ta.focus(); ceSync(); return;
   }
 
-  // Case 3: plain wrap
+  // Case 3: nothing wraps it — plain wrap
   const wrapped = open + sel + close;
   ta.value = val.substring(0, s) + wrapped + val.substring(e);
   ta.selectionStart = s;
