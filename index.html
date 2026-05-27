@@ -708,5 +708,15 @@
 
 <script src="/js/templates.js"></script>
 <script src="/js/app.js"></script>
-<script>renderAllTemplates();initUILang();restoreSectionStates();renderFavPanel();</script>
+<script>
+  // Stamp today's date into the gift-preview "sender date" boxes.
+  // Format mirrors 3dxchat's in-game popup: "May, 24 2026".
+  (function setPreviewDate(){
+    const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const d = new Date();
+    const s = m[d.getMonth()] + ', ' + d.getDate() + ' ' + d.getFullYear();
+    document.querySelectorAll('.pv-popup-sender-date').forEach(el => { el.textContent = s; });
+  })();
+  renderAllTemplates();initUILang();restoreSectionStates();renderFavPanel();
+</script>
 </html>
