@@ -690,17 +690,19 @@ const layoutDefaults = {
   framed:  {dekoTop:'❀ · ❀ · ❀', topText:'du bist mein', mainText:'liebling', bottomText:'· kein scherz ·', kaomoji:'', dekoBottom:''},
   minimal: {dekoTop:'', topText:'', mainText:'nur wir', bottomText:'', kaomoji:'(❀◡❀)', dekoBottom:''},
   pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:''},
-  // Flipped: matches Sophey's "Number 4" screenshot — characters are
-  // pre-baked Unicode in the default strings rather than applied via
-  // font transforms. Lets us mix flipped + normal in one bottomText
-  // ('ʇsnɾ for you ♡' — only "just" is rotated). All field fonts are
-  // forced to 'normal' so pre-baked chars survive unchanged through
-  // applyFont. Topbar inputs strip \n so the screenshot's two-line
-  // topText ("3 wasn't enough apparently / so here comes") becomes one
-  // line — kept "apparently" since it's more distinctive than the
-  // bridge phrase. Byte budget right at the edge (~251/255).
-  flipped: {dekoTop:'.. ↓ ..', topText:'3 ᴡᴀsɴᴛ ᴇɴᴏᴜɢʜ ᴀᴘᴘᴀʀᴇɴᴛʟʏ', mainText:'ɴᴜᴍʙᴇʀ 4*', bottomText:'ʇsnɾ for you ♡', kaomoji:'(✿◡✿)', dekoBottom:'',
-            fonts:{dekoTop:'normal', topText:'normal', mainText:'normal', bottomText:'normal', kaomoji:'normal', dekoBottom:'normal'}},
+  // Flipped: matches Sophey's "Number 4" screenshot 1:1. Pre-baked
+  // Unicode in the strings (so mixed fonts in one line work, and the
+  // input fields' \n-stripping isn't a problem) + a custom lineOrder
+  // that places dekoBottom BETWEEN topText and mainText so "so here
+  // comes" sits between the witty opener and the big headline, just
+  // like in the screenshot. noColor on the gray decorative lines
+  // matches the screenshot's whitish/no-tint look AND frees enough
+  // bytes to fit "apparently" + "so here comes" + everything else
+  // (final: 239B / 255). dekoBottom doubles as the bridge slot here.
+  flipped: {dekoTop:'.. ↓ ..', topText:'3 ᴡᴀsɴᴛ ᴇɴᴏᴜɢʜ ᴀᴘᴘᴀʀᴇɴᴛʟʏ...', mainText:'ɴᴜᴍʙᴇʀ 4*', bottomText:'ʇsnɾ for you ♡', kaomoji:'(✿◡✿)', dekoBottom:'sᴏ ʜᴇʀᴇ ᴄᴏᴍᴇs',
+            fonts:{dekoTop:'normal', topText:'normal', mainText:'normal', bottomText:'normal', kaomoji:'normal', dekoBottom:'normal'},
+            lineOrder:['dekoTop','topText','dekoBottom','mainText','bottomText','kaomoji'],
+            noColor:{dekoTop:true, dekoBottom:true, kaomoji:true}},
   custom: {dekoTop:'', topText:'', mainText:'', bottomText:'', kaomoji:'', dekoBottom:''}
 };
 function setLayout(layout) {
@@ -739,9 +741,9 @@ function setLayout(layout) {
   if (!userHasEdited) {
     const d = layoutDefaults[layout];
     if (d) ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f=>document.getElementById(f).value=d[f]);
-    // Per-layout default fonts (e.g. 'flipped' wants topText smallcaps,
-    // bottomText upside-down). Sync both fieldFonts AND the chip UI so
-    // the user sees the active state immediately.
+    // Per-layout default fonts (e.g. 'flipped' wants everything 'normal'
+    // because its chars are pre-baked Unicode). Sync both fieldFonts
+    // AND the chip UI so the user sees the active state immediately.
     if (d && d.fonts) {
       Object.keys(d.fonts).forEach(field => {
         fieldFonts[field] = d.fonts[field];
@@ -750,6 +752,15 @@ function setLayout(layout) {
           if (el) el.classList.toggle('on', d.fonts[field] === s);
         });
       });
+    }
+    // Per-layout noColor flags (e.g. 'flipped' renders dekoTop/
+    // dekoBottom/kaomoji without colour tags so they show in 3dxchat's
+    // default text colour — matches the screenshot's whitish look AND
+    // saves enough bytes to fit the longer phrase).
+    if (d && d.noColor) {
+      Object.keys(noColor).forEach(f => { noColor[f] = !!d.noColor[f]; });
+    } else {
+      Object.keys(noColor).forEach(f => { noColor[f] = false; });
     }
     // 'flipped' is the only layout with a built-in theme palette —
     // apply its cosmic-pink colours when the user first picks it so the
@@ -766,7 +777,13 @@ function setLayout(layout) {
       });
     }
   }
-  if(typeof lineOrder!=='undefined') lineOrder=DEFAULT_ORDER.slice();
+  // Per-layout lineOrder override (e.g. 'flipped' puts dekoBottom
+  // between topText and mainText so the "so here comes" bridge sits
+  // where it belongs). Falls back to the default order otherwise.
+  if (typeof lineOrder !== 'undefined') {
+    const d = layoutDefaults[layout];
+    lineOrder = (d && d.lineOrder) ? d.lineOrder.slice() : DEFAULT_ORDER.slice();
+  }
   generate();
 }
 // Wrap a field's text in `* X *` if its star checkbox is on.
@@ -2010,7 +2027,11 @@ function resetAll(){
 // ── line order (reorderable in preview) ──
 const DEFAULT_ORDER=['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'];
 let lineOrder=DEFAULT_ORDER.slice();
-const STACK_LAYOUTS=['center','framed','minimal'];
+// Layouts that render as a vertical stack and honour lineOrder in the
+// preview (the gift code already follows applyLayout's branch). 'flipped'
+// belongs here so its custom lineOrder ('so here comes' between topText
+// and mainText) is reflected in the live preview, not just the code box.
+const STACK_LAYOUTS=['center','framed','minimal','flipped'];
 function moveLine(field,dir){
   const i=lineOrder.indexOf(field); if(i<0) return;
   const j=i+dir; if(j<0||j>=lineOrder.length) return;
@@ -2109,16 +2130,21 @@ function generate(){
   ['pvInlineRow','pvCompactRow','pvFramedBot','pvPyramidWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
   const pDT=document.getElementById('pvDekoTop'),pTR=document.getElementById('pvTopRow'),pBT=document.getElementById('pvBottom'),pKA=document.getElementById('pvKaomoji'),pDB=document.getElementById('pvDekoBottom'),card=document.getElementById('previewCard');
   [pDT,pTR,pvMain,pBT,pKA,pDB].forEach(el=>el.style.display='');
-  pDT.textContent=withStars(applyFont(dekoTop,fieldFonts.dekoTop),'dekoTop'); pDT.style.color=colors.dekoTop; pDT.style.fontSize=sd/14+'rem'; pDT.style.letterSpacing='4px';
-  pTR.textContent=withStars(applyFont(topText,fieldFonts.topText),'topText'); pTR.style.color=colors.topText; pTR.style.fontSize=st/14+'rem';
+  // 3dxchat's default text color (whitish gray) — used when a field has
+  // noColor=true so the preview matches what 3dxchat actually renders
+  // (the gift code skips the <color=…> wrap for those fields).
+  const PV_NOCOLOR = '#dadce0';
+  const pvColor = f => noColor[f] ? PV_NOCOLOR : colors[f];
+  pDT.textContent=withStars(applyFont(dekoTop,fieldFonts.dekoTop),'dekoTop'); pDT.style.color=pvColor('dekoTop'); pDT.style.fontSize=sd/14+'rem'; pDT.style.letterSpacing='4px';
+  pTR.textContent=withStars(applyFont(topText,fieldFonts.topText),'topText'); pTR.style.color=pvColor('topText'); pTR.style.fontSize=st/14+'rem';
   pTR.style.fontWeight=topB?'700':''; pTR.style.fontStyle=topI?'italic':'';
   pvMain.textContent=applyFont(main,fieldFonts.mainText); setMainStyle(pvMain);
   pvMain.classList.toggle('pv-main-bold', !!mainB);
   pvMain.classList.toggle('pv-main-italic', !!mainI);
-  pBT.textContent=withStars(applyFont(bottom,fieldFonts.bottomText),'bottomText'); pBT.style.color=colors.bottomText; pBT.style.fontSize=sb/14+'rem';
+  pBT.textContent=withStars(applyFont(bottom,fieldFonts.bottomText),'bottomText'); pBT.style.color=pvColor('bottomText'); pBT.style.fontSize=sb/14+'rem';
   pBT.style.fontWeight=botB?'700':''; pBT.style.fontStyle=botI?'italic':'';
-  pKA.textContent=kaomoji; pKA.style.color=colors.kaomoji; pKA.style.fontSize=sk/14+'rem';
-  pDB.textContent=applyFont(dekoBottom,fieldFonts.dekoBottom); pDB.style.color=colors.dekoBottom; pDB.style.fontSize=sdb/14+'rem';
+  pKA.textContent=kaomoji; pKA.style.color=pvColor('kaomoji'); pKA.style.fontSize=sk/14+'rem';
+  pDB.textContent=applyFont(dekoBottom,fieldFonts.dekoBottom); pDB.style.color=pvColor('dekoBottom'); pDB.style.fontSize=sdb/14+'rem';
 
   // ── reorder support: shared helpers used by stack layouts AND pyramid ──
   const pvMap={dekoTop:pDT,topText:pTR,mainText:pvMain,bottomText:pBT,kaomoji:pKA,dekoBottom:pDB};
