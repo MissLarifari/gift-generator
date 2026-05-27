@@ -525,6 +525,27 @@ input[type="number"]{width:60px;}
 }
 .cbtn:hover{transform:scale(1.12);box-shadow:0 0 8px rgba(255,113,184,.25);}
 
+/* ── "Without" pill: empties the deco field for that row ── */
+.row-without{
+  flex-shrink:0;
+  font-size:10.5px;font-weight:600;letter-spacing:.3px;
+  padding:4px 10px;border-radius:14px;
+  background:transparent;
+  color:var(--muted);
+  border:1px solid var(--b2);
+  cursor:pointer;font-family:inherit;
+  transition:color .15s,border-color .15s,background .15s;
+  white-space:nowrap;
+}
+.row-without:hover{
+  color:var(--red);
+  border-color:var(--red);
+  background:rgba(239,68,68,.08);
+}
+/* Visually "muted" when the field is already empty — same trick used for
+   the quick-edit clear buttons previously. */
+.row:has(input:placeholder-shown) .row-without{opacity:.4;}
+
 /* ── chips ── */
 .chips{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:.5rem;}
 .chip{

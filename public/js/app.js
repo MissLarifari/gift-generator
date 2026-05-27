@@ -296,6 +296,8 @@ const I18N = {
     tip_howto_title:'How It Works',
     fav_empty:'Click ★ on any template to pin it here',
     char_limit_tt:'3dxchat allows up to 240 characters and 255 bytes per gift message. Yellow = warning, red = over limit.',
+    without:'Without',
+    without_tt:'Render this line without decoration (empties the field)',
     expand_all:'Expand all', collapse_all:'Collapse all',
     copy_blocked:'Too long to copy',
     copy_blocked_msg:'Your gift is over the limit. Shorten the text, remove emojis, or use less styling.',
@@ -363,6 +365,8 @@ const I18N = {
     tip_howto_title:'So geht\'s',
     fav_empty:'Klick ★ bei einer Vorlage, um sie hier zu speichern',
     char_limit_tt:'3dxchat erlaubt max. 240 Zeichen und 255 Bytes pro Gift. Gelb = Warnung, Rot = überm Limit.',
+    without:'Ohne',
+    without_tt:'Zeile ohne Deko anzeigen (leert das Feld)',
     expand_all:'Alle ausklappen', collapse_all:'Alle einklappen',
     copy_blocked:'Zu lang zum Kopieren',
     copy_blocked_msg:'Dein Gift ist überm Limit. Kürze den Text, entferne Emojis oder reduziere das Styling.',
@@ -429,6 +433,8 @@ const I18N = {
     tip_howto_title:'Comment ça marche',
     fav_empty:'Clique ★ sur un modèle pour l\'épingler ici',
     char_limit_tt:'3dxchat autorise max. 240 caractères et 255 octets par message cadeau. Jaune = attention, rouge = au-delà.',
+    without:'Sans',
+    without_tt:'Afficher cette ligne sans décoration (vide le champ)',
     expand_all:'Tout déplier', collapse_all:'Tout replier',
     copy_blocked:'Trop long pour copier',
     copy_blocked_msg:'Ton cadeau dépasse la limite. Raccourcis le texte, retire les emojis ou réduis le style.',
@@ -495,6 +501,8 @@ const I18N = {
     tip_howto_title:'Как это работает',
     fav_empty:'Нажми ★ на любом шаблоне, чтобы закрепить его здесь',
     char_limit_tt:'3dxchat допускает до 240 знаков и 255 байт на сообщение подарка. Жёлтый = предупреждение, красный = за лимитом.',
+    without:'Без',
+    without_tt:'Показать строку без декорации (очищает поле)',
     expand_all:'Развернуть всё', collapse_all:'Свернуть всё',
     copy_blocked:'Слишком длинно',
     copy_blocked_msg:'Подарок превышает лимит. Сократи текст, убери эмодзи или уменьши стилизацию.',
@@ -1043,6 +1051,8 @@ function copySymbol(sym){
   toast._tid = setTimeout(() => toast.classList.remove('show'), 1800);
 }
 function setField(id,val){pushUndo();userHasEdited=true;document.getElementById(id).value=val;generate();}
+// Empty a single field (used by the "Without" buttons on the deco rows).
+function setFieldEmpty(id){ setField(id, ''); }
 let lastWasThemed = false;
 const DEFAULT_COLORS = { mainText:'#ff71b8', topText:'#8f8f8f', bottomText:'#8f8f8f' };
 function resetThemeColors(){
