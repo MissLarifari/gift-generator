@@ -299,6 +299,8 @@ const I18N = {
     reorder_btn:'Reorder', reorder_done:'Done',
     undo_btn:'Undo', redo_btn:'Redo',
     undo_title:'Undo last action (Ctrl+Z)', redo_title:'Redo (Ctrl+Y)',
+    qe_top:'Top', qe_main:'Main', qe_bottom:'Bottom',
+    qe_ph_top:'top line', qe_ph_main:'main text', qe_ph_bottom:'bottom line',
     tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Themed templates (Holidays, Celebrations, Vibes) apply matching colors automatically and clear deco lines to stay under the limit.',
     tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly. Use the ★ checkbox next to Deco Top, Top Line or Bottom Line to wrap that line in * stars * — works in every layout.',
     disclaimer:'<strong>Disclaimer</strong><ul><li>Tool provided as-is, with no guarantees</li><li>Not responsible for errors, bugs, or character-limit issues</li><li>Use at your own risk</li><li>All texts are suggestions only</li></ul>',
@@ -363,6 +365,8 @@ const I18N = {
     remove_line:'Zeile entfernen',
     reorder_btn:'Sortieren', reorder_done:'Fertig',
     undo_btn:'Rückgängig', redo_btn:'Wiederholen',
+    qe_top:'Oben', qe_main:'Haupt', qe_bottom:'Unten',
+    qe_ph_top:'obere Zeile', qe_ph_main:'Haupttext', qe_ph_bottom:'untere Zeile',
     undo_title:'Letzte Aktion rückgängig machen (Strg+Z)', redo_title:'Wiederholen (Strg+Y)',
     tip_howto:'Verläufe und lange Deko-Zeilen verbrauchen viele Zeichen. Wird der Zähler <span style="color:var(--red)">rot</span>, probier es mit kürzerem Text, weniger Deko-Zeilen oder ohne Verlauf. Themen-Vorlagen (Feiertage, Anlässe, Vibes) setzen die Farben automatisch passend und leeren die Deko-Zeilen, damit du unterm Limit bleibst.',
     tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt ins passende Feld zu springen. Mit der ★-Checkbox neben Deco Top, Top Line oder Bottom Line kannst du in jedem Layout eine Zeile in * Sternchen * wickeln.',
@@ -427,6 +431,8 @@ const I18N = {
     remove_line:'Supprimer la ligne',
     reorder_btn:'Réordonner', reorder_done:'Terminé',
     undo_btn:'Annuler', redo_btn:'Refaire',
+    qe_top:'Haut', qe_main:'Principal', qe_bottom:'Bas',
+    qe_ph_top:'ligne du haut', qe_ph_main:'texte principal', qe_ph_bottom:'ligne du bas',
     undo_title:'Annuler la dernière action (Ctrl+Z)', redo_title:'Refaire (Ctrl+Y)',
     tip_howto:'Les dégradés et les longues lignes de déco utilisent beaucoup de caractères. Si le compteur devient <span style="color:var(--red)">rouge</span>, essaie un texte plus court, retire des lignes de déco ou désactive les dégradés. Les modèles à thème (Fêtes, Célébrations, Vibes) appliquent automatiquement les bonnes couleurs et vident les lignes de déco pour rester sous la limite.',
     tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier. La case ★ à côté de Deco Top, Top Line ou Bottom Line entoure cette ligne d\'étoiles * — fonctionne dans tous les layouts.',
@@ -491,6 +497,8 @@ const I18N = {
     remove_line:'Удалить строку',
     reorder_btn:'Порядок', reorder_done:'Готово',
     undo_btn:'Отменить', redo_btn:'Повторить',
+    qe_top:'Верх', qe_main:'Основной', qe_bottom:'Низ',
+    qe_ph_top:'верхняя строка', qe_ph_main:'основной текст', qe_ph_bottom:'нижняя строка',
     undo_title:'Отменить последнее действие (Ctrl+Z)', redo_title:'Повторить (Ctrl+Y)',
     tip_howto:'Градиенты и длинные строки декора используют много знаков. Если счётчик стал <span style="color:var(--red)">красным</span>, попробуй сократить текст, убрать строки декора или отключить градиенты. Тематические шаблоны (Праздники, Торжества, Вайбы) автоматически применяют подходящие цвета и очищают строки декора, чтобы остаться в пределах лимита.',
     tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую. Чекбокс ★ рядом с Deco Top, Top Line или Bottom Line оборачивает строку звёздочками * — работает в любом макете.',
@@ -639,12 +647,14 @@ function setLayout(layout) {
   const pvWrap = document.querySelector('.pv-popup');
   const codeLabel = document.querySelector('.code-label');
   const pvLabel = document.querySelector('.pv-label');
+  const qe = document.getElementById('quickEdit');
   if (layout === 'custom') {
     ce.style.display = '';
     ob.style.display = 'none';
     pvWrap.style.display = 'none';
     if (codeLabel) codeLabel.style.display = 'none';
     if (pvLabel) pvLabel.style.display = 'none';
+    if (qe) qe.style.display = 'none';
     // hide optimization tips from previous layout
     const optPanel = document.getElementById('optimizeTips');
     if (optPanel) optPanel.style.display = 'none';
@@ -658,6 +668,7 @@ function setLayout(layout) {
     pvWrap.style.display = '';
     if (codeLabel) codeLabel.style.display = '';
     if (pvLabel) pvLabel.style.display = '';
+    if (qe) qe.style.display = '';
   }
 
   if (!userHasEdited) {
@@ -1317,9 +1328,34 @@ function moveLine(field,dir){
 }
 
 // ── main generate ──
+// ── Quick-Edit sync ──
+// Bidirectional bridge between the always-visible Top/Main/Bottom inputs
+// under the preview and the canonical form fields inside the accordion
+// sections. Editing the quick-edit input writes to the underlying field
+// and re-generates; refreshQuickEdit() mirrors the source-of-truth back
+// after template clicks / undo / reset.
+function syncQuickEdit(field, value){
+  const el = document.getElementById(field);
+  if (!el) return;
+  el.value = value;
+  generate();
+}
+function refreshQuickEdit(){
+  const map = { qeTop:'topText', qeMain:'mainText', qeBottom:'bottomText' };
+  for (const qeId in map) {
+    const qe = document.getElementById(qeId);
+    if (!qe) continue;
+    // Don't trample the cursor of an actively-typed input
+    if (document.activeElement === qe) continue;
+    const src = document.getElementById(map[qeId]);
+    if (src && qe.value !== src.value) qe.value = src.value;
+  }
+}
+
 function generate(){
   // skip auto-generate in custom mode
   if (currentLayout === 'custom') return;
+  refreshQuickEdit();
   const v=f=>document.getElementById(f).value;
   const dekoTop=v('dekoTop'),topText=v('topText'),main=v('mainText'),bottom=v('bottomText'),kaomoji=v('kaomoji'),dekoBottom=v('dekoBottom');
   const size=v('fontSize');
