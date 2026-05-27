@@ -914,10 +914,60 @@ function ceSetSize(sz) {
   ceWrapSize();
 }
 
+// Walks the text outside [s..e] to find the INNERMOST paired tag that
+// wraps the selection — even through other tags. So in
+//   <size=20><color=#ff71b8>welcome ♡</color></size>
+// selecting "welcome ♡" still finds the outer <size=20>...</size>
+// because the color tags balance themselves.
+//
+// openPattern matches the opening tag (capture groups allowed); closePattern
+// matches the closing tag. Both must use forms that don't start with </
+// for opens and start with </ for closes — we use a simple textual check
+// to tell them apart in the combined match.
+function findEnclosingTag(val, s, e, openPattern, closePattern){
+  const combinedSrc = openPattern.source + '|' + closePattern.source;
+  // Walk all tags in val[0..s], maintaining a stack of unmatched opens.
+  const before = val.substring(0, s);
+  const stack = [];
+  const beforeRe = new RegExp(combinedSrc, 'g');
+  let m;
+  while ((m = beforeRe.exec(before)) !== null) {
+    if (m[0].startsWith('</')) {
+      if (stack.length) stack.pop();
+    } else {
+      stack.push({ idx: m.index, len: m[0].length });
+    }
+  }
+  if (!stack.length) return null;
+  const innermost = stack[stack.length - 1];
+
+  // Walk forward from selection end until we hit the unmatched closing tag
+  // (any siblings opened after [s..e] must close before this one does).
+  const after = val.substring(e);
+  const afterRe = new RegExp(combinedSrc, 'g');
+  let depth = 0;
+  while ((m = afterRe.exec(after)) !== null) {
+    if (m[0].startsWith('</')) {
+      if (depth === 0) {
+        return {
+          openStart:  innermost.idx,
+          openEnd:    innermost.idx + innermost.len,
+          closeStart: e + m.index,
+          closeEnd:   e + m.index + m[0].length,
+        };
+      }
+      depth--;
+    } else {
+      depth++;
+    }
+  }
+  return null;
+}
+
 // Smart-wrap that swaps an existing size tag instead of nesting one
 // inside another. Three cases:
 //   1) selection is exactly <size=N>X</size>        → replace N
-//   2) selection sits between <size=N> and </size>  → extend + replace N
+//   2) any <size=N>…</size> wraps the selection     → swap N on that wrapper
 //   3) anything else                                → strip any nested
 //      size tags from the selection, then wrap with new size
 function ceWrapSize() {
@@ -938,17 +988,17 @@ function ceWrapSize() {
     ta.focus(); ceSync(); return;
   }
 
-  // Case 2: there's a <size=N> immediately before and </size> immediately
-  // after the selection — silently extend the selection to include both tags
-  const before = val.substring(0, s).match(/<size=\d+>$/);
-  const after  = val.substring(e).match(/^<\/size>/);
-  if (before && after) {
-    const newStart = s - before[0].length;
-    const newEnd   = e + after[0].length;
-    const wrapped = '<size=' + sz + '>' + sel + '</size>';
-    ta.value = val.substring(0, newStart) + wrapped + val.substring(newEnd);
-    ta.selectionStart = newStart;
-    ta.selectionEnd = newStart + wrapped.length;
+  // Case 2: some <size=N>…</size> wraps the selection (possibly through
+  // intervening color/b/i tags). Swap N on that wrapper, leave the
+  // selection's surrounding markup intact.
+  const enclosing = findEnclosingTag(val, s, e, /<size=\d+>/, /<\/size>/);
+  if (enclosing) {
+    const newOpen = '<size=' + sz + '>';
+    const oldOpenLen = enclosing.openEnd - enclosing.openStart;
+    ta.value = val.substring(0, enclosing.openStart) + newOpen + val.substring(enclosing.openEnd);
+    const shift = newOpen.length - oldOpenLen;
+    ta.selectionStart = s + shift;
+    ta.selectionEnd   = e + shift;
     ta.focus(); ceSync(); return;
   }
 
@@ -981,16 +1031,16 @@ function ceWrapColor() {
     ta.focus(); ceSync(); return;
   }
 
-  // Case 2: selection sits between an opening <color=…> and closing </color>
-  const before = val.substring(0, s).match(/<color=#[0-9a-fA-F]{3,8}>$/);
-  const after  = val.substring(e).match(/^<\/color>/);
-  if (before && after) {
-    const newStart = s - before[0].length;
-    const newEnd   = e + after[0].length;
-    const wrapped = '<color=' + col + '>' + sel + '</color>';
-    ta.value = val.substring(0, newStart) + wrapped + val.substring(newEnd);
-    ta.selectionStart = newStart;
-    ta.selectionEnd = newStart + wrapped.length;
+  // Case 2: some <color=#…>…</color> wraps the selection — swap its hex
+  // (works even through intervening size/b/i tags)
+  const enclosing = findEnclosingTag(val, s, e, /<color=#[0-9a-fA-F]{3,8}>/, /<\/color>/);
+  if (enclosing) {
+    const newOpen = '<color=' + col + '>';
+    const oldOpenLen = enclosing.openEnd - enclosing.openStart;
+    ta.value = val.substring(0, enclosing.openStart) + newOpen + val.substring(enclosing.openEnd);
+    const shift = newOpen.length - oldOpenLen;
+    ta.selectionStart = s + shift;
+    ta.selectionEnd   = e + shift;
     ta.focus(); ceSync(); return;
   }
 
