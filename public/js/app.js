@@ -53,6 +53,8 @@ function applyState(s) {
   if (s._ff) {
     Object.assign(fieldFonts, JSON.parse(s._ff));
     Object.keys(fieldFonts).forEach(f => {
+      const sel = document.getElementById('font_' + f);
+      if (sel) sel.value = fieldFonts[f];
       ['normal','fancy','smallcaps','thai','flipped'].forEach(st => {
         const el = document.getElementById('font_' + f + '_' + st);
         if (el) el.classList.toggle('on', fieldFonts[f] === st);
@@ -1659,12 +1661,16 @@ function setFontStyle(field,style){
   pushUndo();
   fieldFonts[field]=style;
   if(field==='mainText') currentFontStyle=style;
-  // remove active from all 3 variants for this field
+  // New <select> dropdown — sync its value (covers the case where the
+  // change came from elsewhere, like a template or applyState).
+  const sel = document.getElementById('font_' + field);
+  if (sel && sel.value !== style) sel.value = style;
+  // Legacy chip toggle (older code paths may still create chips, e.g.
+  // a Cypress test snapshot or a forked branch — keep harmless).
   ['normal','fancy','smallcaps','thai','flipped'].forEach(function(s){
     var el=document.getElementById('font_'+field+'_'+s);
     if(el) el.classList.remove('on');
   });
-  // add active to selected
   var active=document.getElementById('font_'+field+'_'+style);
   if(active) active.classList.add('on');
   generate();
@@ -2174,10 +2180,15 @@ function generate(){
 
   updateOptimizeTips(chars,bytes,lm,{dekoTop,topText,mainText:main,bottomText:bottom,kaomoji,dekoBottom});
 
-  // per-field char costs + clear-button sync
-  Object.entries(lm).forEach(([f, v]) => {
+  // per-field char count — counts ONLY the user-typed input length,
+  // not the wrapped output (which includes <color>/<size>/<b>/<i> tag
+  // overhead and was confusing — 7-char "so cute" used to read as 46
+  // because of the tag wrap). maximilian's feedback.
+  FIELDS.forEach(f => {
     const badge = document.getElementById('fc_' + f);
-    if (badge) badge.textContent = v ? v.length : 0;
+    if (!badge) return;
+    const inp = document.getElementById(f);
+    badge.textContent = (inp?.value || '').length;
   });
   FIELDS.forEach(f => {
     const inp = document.getElementById(f);
@@ -2548,7 +2559,16 @@ function loadFromURL() {
     FIELDS.forEach(f => { const btn = document.getElementById('btn_' + f); if(!btn) return; const g=grads[f]; btn.style.background = g.on ? `linear-gradient(to right,${g.c1},${g.c2})` : colors[f]; });
     if (state.ff) {
       Object.assign(fieldFonts, state.ff);
-      Object.keys(fieldFonts).forEach(f => { ['normal','fancy','smallcaps','thai','flipped'].forEach(s => { const el = document.getElementById('font_'+f+'_'+s); if(el) el.classList.toggle('on', fieldFonts[f]===s); }); });
+      Object.keys(fieldFonts).forEach(f => {
+        // Sync the new font dropdown (preferred)…
+        const sel = document.getElementById('font_' + f);
+        if (sel) sel.value = fieldFonts[f];
+        // …and legacy chip-style toggles if they still exist.
+        ['normal','fancy','smallcaps','thai','flipped'].forEach(s => {
+          const el = document.getElementById('font_'+f+'_'+s);
+          if(el) el.classList.toggle('on', fieldFonts[f]===s);
+        });
+      });
     }
     if (state.lay) {
       currentLayout = state.lay;

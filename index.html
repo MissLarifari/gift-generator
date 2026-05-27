@@ -185,15 +185,16 @@
             <button type="button" class="row-without" onclick="setFieldEmpty('dekoTop')" data-i18n="without" data-i18n-title="without_tt" title="Render this line without decoration">Without</button>
           </div>
           <div class="meta">
-            <div class="ftoggle">
-              <span class="chip on"  id="font_dekoTop_normal"    onclick="setFontStyle('dekoTop','normal')">Aa</span>
-              <span class="chip"     id="font_dekoTop_fancy"     onclick="setFontStyle('dekoTop','fancy')">αв</span>
-              <span class="chip"     id="font_dekoTop_smallcaps" onclick="setFontStyle('dekoTop','smallcaps')">ꜱᴄ</span>
-              <span class="chip"     id="font_dekoTop_thai"      onclick="setFontStyle('dekoTop','thai')">ล†</span>
-              <span class="chip"     id="font_dekoTop_flipped"   onclick="setFontStyle('dekoTop','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
-            </div>
-            <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeDekoTop" value="12"/>
+            <select class="font-select" id="font_dekoTop" onchange="setFontStyle('dekoTop', this.value)" title="Font style">
+              <option value="normal">Aa Normal</option>
+              <option value="fancy">αв Fancy</option>
+              <option value="smallcaps">ꜱᴄ Small Caps</option>
+              <option value="thai">ล† Thai-Mix</option>
+              <option value="flipped">ɟlıp Upside Down</option>
+            </select>
+            <select class="size-select" id="sizeDekoTop" onchange="generate()" title="Font size">
+              <option>8</option><option>10</option><option selected>12</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
+            </select>
             <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle);margin-left:6px;">
               <input type="checkbox" id="dekoTopStars" onchange="setPyramidStars('dekoTop',this.checked)"/> ★
             </label>
@@ -229,15 +230,16 @@
             </label>
           </div>
           <div class="meta">
-            <div class="ftoggle">
-              <span class="chip on" id="font_topText_normal"    onclick="setFontStyle('topText','normal')">Aa</span>
-              <span class="chip"    id="font_topText_fancy"     onclick="setFontStyle('topText','fancy')">αв</span>
-              <span class="chip"    id="font_topText_smallcaps" onclick="setFontStyle('topText','smallcaps')">ꜱᴄ</span>
-              <span class="chip"    id="font_topText_thai"      onclick="setFontStyle('topText','thai')">ล†</span>
-              <span class="chip"    id="font_topText_flipped"   onclick="setFontStyle('topText','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
-            </div>
-            <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeTopText" value="14"/>
+            <select class="font-select" id="font_topText" onchange="setFontStyle('topText', this.value)" title="Font style">
+              <option value="normal">Aa Normal</option>
+              <option value="fancy">αв Fancy</option>
+              <option value="smallcaps">ꜱᴄ Small Caps</option>
+              <option value="thai">ล† Thai-Mix</option>
+              <option value="flipped">ɟlıp Upside Down</option>
+            </select>
+            <select class="size-select" id="sizeTopText" onchange="generate()" title="Font size">
+              <option>8</option><option>10</option><option>12</option><option selected>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
+            </select>
             <span class="fc-badge" id="fc_topText" title="Chars used">0</span>
           </div>
         </div>
@@ -267,15 +269,16 @@
             </label>
           </div>
           <div class="meta">
-            <div class="ftoggle">
-              <span class="chip on" id="font_mainText_normal"    onclick="setFontStyle('mainText','normal')">Aa</span>
-              <span class="chip"    id="font_mainText_fancy"     onclick="setFontStyle('mainText','fancy')">αв</span>
-              <span class="chip"    id="font_mainText_smallcaps" onclick="setFontStyle('mainText','smallcaps')">ꜱᴄ</span>
-              <span class="chip"    id="font_mainText_thai"      onclick="setFontStyle('mainText','thai')">ล†</span>
-              <span class="chip"    id="font_mainText_flipped"   onclick="setFontStyle('mainText','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
-            </div>
-            <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="fontSize" value="60"/>
+            <select class="font-select" id="font_mainText" onchange="setFontStyle('mainText', this.value)" title="Font style">
+              <option value="normal">Aa Normal</option>
+              <option value="fancy">αв Fancy</option>
+              <option value="smallcaps">ꜱᴄ Small Caps</option>
+              <option value="thai">ล† Thai-Mix</option>
+              <option value="flipped">ɟlıp Upside Down</option>
+            </select>
+            <select class="size-select" id="fontSize" onchange="generate()" title="Font size">
+              <option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option selected>60</option><option>70</option><option>80</option><option>90</option><option>100</option><option>120</option>
+            </select>
             <span class="fc-badge" id="fc_mainText" title="Chars used">0</span>
           </div>
         </div>
@@ -308,15 +311,16 @@
             </label>
           </div>
           <div class="meta">
-            <div class="ftoggle">
-              <span class="chip on" id="font_bottomText_normal"    onclick="setFontStyle('bottomText','normal')">Aa</span>
-              <span class="chip"    id="font_bottomText_fancy"     onclick="setFontStyle('bottomText','fancy')">αв</span>
-              <span class="chip"    id="font_bottomText_smallcaps" onclick="setFontStyle('bottomText','smallcaps')">ꜱᴄ</span>
-              <span class="chip"    id="font_bottomText_thai"      onclick="setFontStyle('bottomText','thai')">ล†</span>
-              <span class="chip"    id="font_bottomText_flipped"   onclick="setFontStyle('bottomText','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
-            </div>
-            <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeBottomText" value="14"/>
+            <select class="font-select" id="font_bottomText" onchange="setFontStyle('bottomText', this.value)" title="Font style">
+              <option value="normal">Aa Normal</option>
+              <option value="fancy">αв Fancy</option>
+              <option value="smallcaps">ꜱᴄ Small Caps</option>
+              <option value="thai">ล† Thai-Mix</option>
+              <option value="flipped">ɟlıp Upside Down</option>
+            </select>
+            <select class="size-select" id="sizeBottomText" onchange="generate()" title="Font size">
+              <option>8</option><option>10</option><option>12</option><option selected>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
+            </select>
             <span class="fc-badge" id="fc_bottomText" title="Chars used">0</span>
           </div>
         </div>
@@ -374,8 +378,9 @@
             <button type="button" class="row-without" onclick="setFieldEmpty('kaomoji')" data-i18n="without" data-i18n-title="without_tt" title="Render this line without decoration">Without</button>
           </div>
           <div class="meta">
-            <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeKaomoji" value="16"/>
+            <select class="size-select" id="sizeKaomoji" onchange="generate()" title="Font size">
+              <option>10</option><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option>
+            </select>
             <span class="fc-badge" id="fc_kaomoji" title="Chars used">0</span>
           </div>
         </div>
@@ -423,15 +428,16 @@
             <button type="button" class="row-without" onclick="setFieldEmpty('dekoBottom')" data-i18n="without" data-i18n-title="without_tt" title="Render this line without decoration">Without</button>
           </div>
           <div class="meta">
-            <div class="ftoggle">
-              <span class="chip on" id="font_dekoBottom_normal"    onclick="setFontStyle('dekoBottom','normal')">Aa</span>
-              <span class="chip"    id="font_dekoBottom_fancy"     onclick="setFontStyle('dekoBottom','fancy')">αв</span>
-              <span class="chip"    id="font_dekoBottom_smallcaps" onclick="setFontStyle('dekoBottom','smallcaps')">ꜱᴄ</span>
-              <span class="chip"    id="font_dekoBottom_thai"      onclick="setFontStyle('dekoBottom','thai')">ล†</span>
-              <span class="chip"    id="font_dekoBottom_flipped"   onclick="setFontStyle('dekoBottom','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
-            </div>
-            <span class="meta-label" data-i18n="size">Size</span>
-            <input type="number" id="sizeDekoBottom" value="12"/>
+            <select class="font-select" id="font_dekoBottom" onchange="setFontStyle('dekoBottom', this.value)" title="Font style">
+              <option value="normal">Aa Normal</option>
+              <option value="fancy">αв Fancy</option>
+              <option value="smallcaps">ꜱᴄ Small Caps</option>
+              <option value="thai">ล† Thai-Mix</option>
+              <option value="flipped">ɟlıp Upside Down</option>
+            </select>
+            <select class="size-select" id="sizeDekoBottom" onchange="generate()" title="Font size">
+              <option>8</option><option>10</option><option selected>12</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
+            </select>
             <span class="fc-badge" id="fc_dekoBottom" title="Chars used">0</span>
           </div>
         </div>
