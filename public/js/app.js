@@ -692,7 +692,9 @@ const layoutDefaults = {
   pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:''},
   // Flipped: a topsy-turvy layout. Default bottomText is meant to be
   // toggled to the 'flipped' font for the 180°-rotated read.
-  flipped: {dekoTop:'.. ↓ ↓ ..', topText:'world flipped today', mainText:'still chose you', bottomText:'.. every single time ♡ ..', kaomoji:'(´ ▽ `)ﾉ', dekoBottom:'.. ↑ ↑ ..'},
+  // Text trimmed so the full code stays within 240 chars / 255 bytes
+  // even with the multibyte arrow/heart decoration. Original was 259B.
+  flipped: {dekoTop:'.. ↓ ..', topText:'world flipped today', mainText:'still chose you', bottomText:'.. always you ♡ ..', kaomoji:'(◡‿◡)', dekoBottom:'.. ↑ ..'},
   custom: {dekoTop:'', topText:'', mainText:'', bottomText:'', kaomoji:'', dekoBottom:''}
 };
 function setLayout(layout) {
@@ -731,6 +733,20 @@ function setLayout(layout) {
   if (!userHasEdited) {
     const d = layoutDefaults[layout];
     if (d) ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(f=>document.getElementById(f).value=d[f]);
+    // 'flipped' is the only layout with a built-in theme palette —
+    // apply its cosmic-pink colours when the user first picks it so the
+    // preview matches the layout's identity (otherwise the user sees
+    // the generic pink + grey defaults and the layout looks identical
+    // to Center).
+    if (layout === 'flipped') {
+      colors.mainText = '#ff4d8c';
+      colors.topText  = '#c4b5fd';
+      colors.bottomText = '#a78bfa';
+      ['mainText','topText','bottomText'].forEach(f => {
+        const btn = document.getElementById('btn_' + f);
+        if (btn) btn.style.background = colors[f];
+      });
+    }
   }
   if(typeof lineOrder!=='undefined') lineOrder=DEFAULT_ORDER.slice();
   generate();
