@@ -599,14 +599,17 @@
           <label class="ce-label" data-i18n="gradient">Gradient</label>
           <input type="color" id="ceGrad1" value="#ff71b8" class="ce-color"/>
           <input type="color" id="ceGrad2" value="#b388ff" class="ce-color"/>
+          <select id="ceGradMode" class="ce-select" title="Apply gradient per…">
+            <option value="letter" data-i18n="grad_per_letter">Per letter</option>
+            <option value="word" selected data-i18n="grad_per_word">Per word</option>
+            <option value="line" data-i18n="grad_per_line">Per line</option>
+            <option value="paragraph" data-i18n="grad_per_para">Per paragraph</option>
+          </select>
+          <label class="ce-grad-mid" title="Keep the first and last segments solid (start/end color); only the middle portion fades from one to the other.">
+            <input type="checkbox" id="ceGradMid"/>
+            <span data-i18n="grad_mid_only_short">Middle only</span>
+          </label>
           <button class="ce-btn" onclick="ceWrapGradient()" title="Apply gradient">Apply</button>
-        </div>
-        <div class="ce-toolbar-group ce-grad-mode">
-          <label class="ce-grad-radio"><input type="radio" name="ceGradMode" value="letter"/> <span data-i18n="grad_per_letter">Per letter</span></label>
-          <label class="ce-grad-radio"><input type="radio" name="ceGradMode" value="word" checked/> <span data-i18n="grad_per_word">Per word</span></label>
-          <label class="ce-grad-radio"><input type="radio" name="ceGradMode" value="line"/> <span data-i18n="grad_per_line">Per line</span></label>
-          <label class="ce-grad-radio"><input type="radio" name="ceGradMode" value="paragraph"/> <span data-i18n="grad_per_para">Per paragraph</span></label>
-          <label class="ce-grad-mid" title="Keep the first and last segments solid (start/end color); only the middle portion fades from one to the other."><input type="checkbox" id="ceGradMid"/> <span data-i18n="grad_mid_only">Gradient only middle part</span> <span class="ce-help">(?)</span></label>
         </div>
       </div>
       <textarea id="ceTextarea" class="ce-textarea" placeholder="Type or paste your gift code here...&#10;Select text and use the toolbar to format it." spellcheck="false"></textarea>

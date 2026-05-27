@@ -315,6 +315,7 @@ const I18N = {
     without_tt:'Render this line without decoration (empties the field)',
     grad_per_letter:'Per letter', grad_per_word:'Per word', grad_per_line:'Per line', grad_per_para:'Per paragraph',
     grad_mid_only:'Gradient only middle part',
+    grad_mid_only_short:'Middle only',
     expand_all:'Expand all', collapse_all:'Collapse all',
     copy_blocked:'Too long to copy',
     copy_blocked_msg:'Your gift is over the limit. Shorten the text, remove emojis, or use less styling.',
@@ -386,6 +387,7 @@ const I18N = {
     without_tt:'Zeile ohne Deko anzeigen (leert das Feld)',
     grad_per_letter:'Pro Buchstabe', grad_per_word:'Pro Wort', grad_per_line:'Pro Zeile', grad_per_para:'Pro Absatz',
     grad_mid_only:'Verlauf nur im Mittelteil',
+    grad_mid_only_short:'Nur Mitte',
     expand_all:'Alle ausklappen', collapse_all:'Alle einklappen',
     copy_blocked:'Zu lang zum Kopieren',
     copy_blocked_msg:'Dein Gift ist überm Limit. Kürze den Text, entferne Emojis oder reduziere das Styling.',
@@ -456,6 +458,7 @@ const I18N = {
     without_tt:'Afficher cette ligne sans décoration (vide le champ)',
     grad_per_letter:'Par lettre', grad_per_word:'Par mot', grad_per_line:'Par ligne', grad_per_para:'Par paragraphe',
     grad_mid_only:'Dégradé uniquement au milieu',
+    grad_mid_only_short:'Milieu uniq.',
     expand_all:'Tout déplier', collapse_all:'Tout replier',
     copy_blocked:'Trop long pour copier',
     copy_blocked_msg:'Ton cadeau dépasse la limite. Raccourcis le texte, retire les emojis ou réduis le style.',
@@ -526,6 +529,7 @@ const I18N = {
     without_tt:'Показать строку без декорации (очищает поле)',
     grad_per_letter:'По буквам', grad_per_word:'По словам', grad_per_line:'По строкам', grad_per_para:'По абзацам',
     grad_mid_only:'Градиент только в середине',
+    grad_mid_only_short:'Только середина',
     expand_all:'Развернуть всё', collapse_all:'Свернуть всё',
     copy_blocked:'Слишком длинно',
     copy_blocked_msg:'Подарок превышает лимит. Сократи текст, убери эмодзи или уменьши стилизацию.',
@@ -1126,7 +1130,7 @@ function ceWrapGradient() {
   const ta = document.getElementById('ceTextarea');
   const c1 = document.getElementById('ceGrad1').value;
   const c2 = document.getElementById('ceGrad2').value;
-  const modeEl = document.querySelector('input[name="ceGradMode"]:checked');
+  const modeEl = document.getElementById('ceGradMode');
   const mode = modeEl ? modeEl.value : 'word';
   const middleOnly = !!document.getElementById('ceGradMid')?.checked;
   const { s, e } = ceGetSel(ta);
