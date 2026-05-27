@@ -864,17 +864,49 @@ function ceApplyFont(style) {
   ceSync();
 }
 
+// Toggle-wrap for simple paired tags (<b>, <i>): if the selection is
+// already wrapped — or sits inside a matching wrapper — strip the tags
+// instead of adding a second nested layer. Three cases mirror the
+// size/color helpers:
+//   1) selection IS <tag>X</tag>            → unwrap to X
+//   2) selection sits between <tag> and </tag> → extend + unwrap
+//   3) anything else                          → wrap as before
 function ceWrap(tag) {
   const ta = document.getElementById('ceTextarea');
   const s = ta.selectionStart, e = ta.selectionEnd;
   if (s === e) return; // no selection
-  const sel = ta.value.substring(s, e);
-  const wrapped = '<' + tag + '>' + sel + '</' + tag + '>';
-  ta.value = ta.value.substring(0, s) + wrapped + ta.value.substring(e);
+  const val = ta.value;
+  const sel = val.substring(s, e);
+  const openLen = tag.length + 2;     // <b> / <i>
+  const closeLen = tag.length + 3;    // </b> / </i>
+  const open = '<' + tag + '>';
+  const close = '</' + tag + '>';
+
+  // Case 1: selection IS already <tag>X</tag> → unwrap to X
+  if (sel.startsWith(open) && sel.endsWith(close)) {
+    const inner = sel.slice(openLen, sel.length - closeLen);
+    ta.value = val.substring(0, s) + inner + val.substring(e);
+    ta.selectionStart = s;
+    ta.selectionEnd = s + inner.length;
+    ta.focus(); ceSync(); return;
+  }
+
+  // Case 2: <tag> sits right before and </tag> right after — strip both
+  if (val.substring(s - openLen, s) === open && val.substring(e, e + closeLen) === close) {
+    const newStart = s - openLen;
+    const newEnd = e + closeLen;
+    ta.value = val.substring(0, newStart) + sel + val.substring(newEnd);
+    ta.selectionStart = newStart;
+    ta.selectionEnd = newStart + sel.length;
+    ta.focus(); ceSync(); return;
+  }
+
+  // Case 3: plain wrap
+  const wrapped = open + sel + close;
+  ta.value = val.substring(0, s) + wrapped + val.substring(e);
   ta.selectionStart = s;
   ta.selectionEnd = s + wrapped.length;
-  ta.focus();
-  ceSync();
+  ta.focus(); ceSync();
 }
 
 function ceSetSize(sz) {
