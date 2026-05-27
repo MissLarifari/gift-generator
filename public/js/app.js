@@ -308,8 +308,8 @@ const I18N = {
     reorder_btn:'Reorder', reorder_done:'Done',
     undo_btn:'Undo', redo_btn:'Redo',
     undo_title:'Undo last action (Ctrl+Z)', redo_title:'Redo (Ctrl+Y)',
-    qe_top:'Top', qe_main:'Main', qe_bottom:'Bottom',
-    qe_ph_top:'top line', qe_ph_main:'main text', qe_ph_bottom:'bottom line',
+    qe_deco_top:'Deco', qe_top:'Top', qe_main:'Main', qe_bottom:'Bottom', qe_kao:'Kao', qe_deco_bottom:'Deco',
+    qe_ph_deco_top:'· deco top ·', qe_ph_top:'top line', qe_ph_main:'main text', qe_ph_bottom:'bottom line', qe_ph_kao:'(❀◡❀)', qe_ph_deco_bottom:'.. ✦ ..',
     qe_clear:'clear',
     qe_clear_all:'Clear all',
     decos_trimmed:(names)=>`Trimmed ${names} to fit the 240/255 limit`,
@@ -378,8 +378,8 @@ const I18N = {
     remove_line:'Zeile entfernen',
     reorder_btn:'Sortieren', reorder_done:'Fertig',
     undo_btn:'Rückgängig', redo_btn:'Wiederholen',
-    qe_top:'Oben', qe_main:'Haupt', qe_bottom:'Unten',
-    qe_ph_top:'obere Zeile', qe_ph_main:'Haupttext', qe_ph_bottom:'untere Zeile',
+    qe_deco_top:'Deko', qe_top:'Oben', qe_main:'Haupt', qe_bottom:'Unten', qe_kao:'Kao', qe_deco_bottom:'Deko',
+    qe_ph_deco_top:'· Deko oben ·', qe_ph_top:'obere Zeile', qe_ph_main:'Haupttext', qe_ph_bottom:'untere Zeile', qe_ph_kao:'(❀◡❀)', qe_ph_deco_bottom:'.. ✦ ..',
     qe_clear:'leeren',
     qe_clear_all:'Alles leeren',
     decos_trimmed:(names)=>`${names} entfernt um ins 240/255-Limit zu passen`,
@@ -448,8 +448,8 @@ const I18N = {
     remove_line:'Supprimer la ligne',
     reorder_btn:'Réordonner', reorder_done:'Terminé',
     undo_btn:'Annuler', redo_btn:'Refaire',
-    qe_top:'Haut', qe_main:'Principal', qe_bottom:'Bas',
-    qe_ph_top:'ligne du haut', qe_ph_main:'texte principal', qe_ph_bottom:'ligne du bas',
+    qe_deco_top:'Déco', qe_top:'Haut', qe_main:'Principal', qe_bottom:'Bas', qe_kao:'Kao', qe_deco_bottom:'Déco',
+    qe_ph_deco_top:'· déco haut ·', qe_ph_top:'ligne du haut', qe_ph_main:'texte principal', qe_ph_bottom:'ligne du bas', qe_ph_kao:'(❀◡❀)', qe_ph_deco_bottom:'.. ✦ ..',
     qe_clear:'effacer',
     qe_clear_all:'Tout effacer',
     decos_trimmed:(names)=>`${names} supprimé(s) pour rester sous la limite 240/255`,
@@ -518,8 +518,8 @@ const I18N = {
     remove_line:'Удалить строку',
     reorder_btn:'Порядок', reorder_done:'Готово',
     undo_btn:'Отменить', redo_btn:'Повторить',
-    qe_top:'Верх', qe_main:'Основной', qe_bottom:'Низ',
-    qe_ph_top:'верхняя строка', qe_ph_main:'основной текст', qe_ph_bottom:'нижняя строка',
+    qe_deco_top:'Деко', qe_top:'Верх', qe_main:'Основной', qe_bottom:'Низ', qe_kao:'Као', qe_deco_bottom:'Деко',
+    qe_ph_deco_top:'· деко сверху ·', qe_ph_top:'верхняя строка', qe_ph_main:'основной текст', qe_ph_bottom:'нижняя строка', qe_ph_kao:'(❀◡❀)', qe_ph_deco_bottom:'.. ✦ ..',
     qe_clear:'очистить',
     qe_clear_all:'Очистить всё',
     decos_trimmed:(names)=>`${names} убрано — чтобы уложиться в лимит 240/255`,
@@ -1452,7 +1452,14 @@ function clearQuickEditField(field){
   generate();
 }
 function refreshQuickEdit(){
-  const map = { qeTop:'topText', qeMain:'mainText', qeBottom:'bottomText' };
+  const map = {
+    qeDekoTop:'dekoTop',
+    qeTop:'topText',
+    qeMain:'mainText',
+    qeBottom:'bottomText',
+    qeKaomoji:'kaomoji',
+    qeDekoBottom:'dekoBottom',
+  };
   for (const qeId in map) {
     const qe = document.getElementById(qeId);
     if (!qe) continue;
