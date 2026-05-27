@@ -1,5 +1,5 @@
 // ── build marker (lets users verify which version is live) ──
-console.log('%c[gift-generator] build 2026-05-26 — resetAll hardened, sans-serif preview', 'color:#7ec87e;font-weight:bold');
+console.log('%c[gift-generator] build 2026-05-27 — reset returns to last template (persisted)', 'color:#7ec87e;font-weight:bold');
 
 // ── debounce helper ──
 function debounce(fn, ms) {
@@ -93,11 +93,17 @@ function pushUndo() {
 }
 
 // Tracks the most recently clicked template so Reset can return to that
-// state instead of the factory default. Cleared on hard "factory" resets
-// (i.e. a Reset when no template has been picked this session).
+// state instead of the factory default. Persisted to localStorage so an
+// accidental page reload doesn't lose the "what should Reset restore?"
+// info between sessions.
 let lastTemplate = null;
+try {
+  const raw = localStorage.getItem('giftLastTemplate');
+  if (raw) lastTemplate = JSON.parse(raw);
+} catch(e) { lastTemplate = null; }
 function applyTemplate(fnName, main, top, bottom){
   lastTemplate = { fnName, main, top, bottom };
+  try { localStorage.setItem('giftLastTemplate', JSON.stringify(lastTemplate)); } catch(e) {}
   const fn = window[fnName];
   if (typeof fn === 'function') fn(main, top, bottom);
 }
