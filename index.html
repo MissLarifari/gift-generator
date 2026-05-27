@@ -543,15 +543,18 @@
     <div class="quick-edit" id="quickEdit">
       <div class="qe-row">
         <label class="qe-lbl" for="qeTop" data-i18n="qe_top">Top</label>
-        <input id="qeTop" type="text" autocomplete="off" oninput="syncQuickEdit('topText',this.value)" data-i18n-ph="qe_ph_top" placeholder="top line"/>
+        <input id="qeTop" type="text" autocomplete="off" oninput="syncQuickEdit('topText',this.value)" onblur="endQuickEditSession()" data-i18n-ph="qe_ph_top" placeholder="top line"/>
+        <button type="button" class="qe-clear" onclick="clearQuickEditField('topText')" tabindex="-1" data-i18n-title="qe_clear" title="clear">×</button>
       </div>
       <div class="qe-row">
         <label class="qe-lbl qe-lbl-main" for="qeMain" data-i18n="qe_main">Main</label>
-        <input id="qeMain" type="text" autocomplete="off" oninput="syncQuickEdit('mainText',this.value)" data-i18n-ph="qe_ph_main" placeholder="main text"/>
+        <input id="qeMain" type="text" autocomplete="off" oninput="syncQuickEdit('mainText',this.value)" onblur="endQuickEditSession()" data-i18n-ph="qe_ph_main" placeholder="main text"/>
+        <button type="button" class="qe-clear" onclick="clearQuickEditField('mainText')" tabindex="-1" data-i18n-title="qe_clear" title="clear">×</button>
       </div>
       <div class="qe-row">
         <label class="qe-lbl" for="qeBottom" data-i18n="qe_bottom">Bottom</label>
-        <input id="qeBottom" type="text" autocomplete="off" oninput="syncQuickEdit('bottomText',this.value)" data-i18n-ph="qe_ph_bottom" placeholder="bottom line"/>
+        <input id="qeBottom" type="text" autocomplete="off" oninput="syncQuickEdit('bottomText',this.value)" onblur="endQuickEditSession()" data-i18n-ph="qe_ph_bottom" placeholder="bottom line"/>
+        <button type="button" class="qe-clear" onclick="clearQuickEditField('bottomText')" tabindex="-1" data-i18n-title="qe_clear" title="clear">×</button>
       </div>
     </div>
 

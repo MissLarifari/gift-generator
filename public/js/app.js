@@ -7,6 +7,12 @@ function debounce(fn, ms) {
   return function(...args) { clearTimeout(tid); tid = setTimeout(() => fn.apply(this, args), ms); };
 }
 
+// ── shared TextEncoder (UTF-8 byte length) ──
+// Re-instantiating TextEncoder every call is wasteful; encode() is hot in
+// generate() / counter / trim-check, so we keep one instance module-wide.
+const TEXT_ENCODER = new TextEncoder();
+const byteLen = s => TEXT_ENCODER.encode(s || '').length;
+
 // ── undo / redo ──
 const UNDO_STACK = [];
 const REDO_STACK = [];
@@ -69,6 +75,9 @@ function pushUndo() {
   if (UNDO_STACK.length > MAX_UNDO) UNDO_STACK.shift();
   REDO_STACK.length = 0;
   updateUndoBtns();
+  // Any externally-triggered undo entry ends any active quick-edit
+  // typing session, so the next keystroke captures a fresh baseline.
+  if (typeof _qeSession !== 'undefined') _qeSession = false;
 }
 
 function undo() {
@@ -301,6 +310,9 @@ const I18N = {
     undo_title:'Undo last action (Ctrl+Z)', redo_title:'Redo (Ctrl+Y)',
     qe_top:'Top', qe_main:'Main', qe_bottom:'Bottom',
     qe_ph_top:'top line', qe_ph_main:'main text', qe_ph_bottom:'bottom line',
+    qe_clear:'clear',
+    decos_trimmed:(names)=>`Trimmed ${names} to fit the 240/255 limit`,
+    byte_breakdown:'Per-field bytes',
     tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Themed templates (Holidays, Celebrations, Vibes) apply matching colors automatically and clear deco lines to stay under the limit.',
     tip_howto2:'All fields show examples — click any line in the preview to jump to the matching field and edit it directly. Use the ★ checkbox next to Deco Top, Top Line or Bottom Line to wrap that line in * stars * — works in every layout.',
     disclaimer:'<strong>Disclaimer</strong><ul><li>Tool provided as-is, with no guarantees</li><li>Not responsible for errors, bugs, or character-limit issues</li><li>Use at your own risk</li><li>All texts are suggestions only</li></ul>',
@@ -367,6 +379,9 @@ const I18N = {
     undo_btn:'Rückgängig', redo_btn:'Wiederholen',
     qe_top:'Oben', qe_main:'Haupt', qe_bottom:'Unten',
     qe_ph_top:'obere Zeile', qe_ph_main:'Haupttext', qe_ph_bottom:'untere Zeile',
+    qe_clear:'leeren',
+    decos_trimmed:(names)=>`${names} entfernt um ins 240/255-Limit zu passen`,
+    byte_breakdown:'Bytes pro Feld',
     undo_title:'Letzte Aktion rückgängig machen (Strg+Z)', redo_title:'Wiederholen (Strg+Y)',
     tip_howto:'Verläufe und lange Deko-Zeilen verbrauchen viele Zeichen. Wird der Zähler <span style="color:var(--red)">rot</span>, probier es mit kürzerem Text, weniger Deko-Zeilen oder ohne Verlauf. Themen-Vorlagen (Feiertage, Anlässe, Vibes) setzen die Farben automatisch passend und leeren die Deko-Zeilen, damit du unterm Limit bleibst.',
     tip_howto2:'Alle Felder zeigen Beispiele — klick eine Zeile in der Vorschau, um direkt ins passende Feld zu springen. Mit der ★-Checkbox neben Deco Top, Top Line oder Bottom Line kannst du in jedem Layout eine Zeile in * Sternchen * wickeln.',
@@ -433,6 +448,9 @@ const I18N = {
     undo_btn:'Annuler', redo_btn:'Refaire',
     qe_top:'Haut', qe_main:'Principal', qe_bottom:'Bas',
     qe_ph_top:'ligne du haut', qe_ph_main:'texte principal', qe_ph_bottom:'ligne du bas',
+    qe_clear:'effacer',
+    decos_trimmed:(names)=>`${names} supprimé(s) pour rester sous la limite 240/255`,
+    byte_breakdown:'Octets par champ',
     undo_title:'Annuler la dernière action (Ctrl+Z)', redo_title:'Refaire (Ctrl+Y)',
     tip_howto:'Les dégradés et les longues lignes de déco utilisent beaucoup de caractères. Si le compteur devient <span style="color:var(--red)">rouge</span>, essaie un texte plus court, retire des lignes de déco ou désactive les dégradés. Les modèles à thème (Fêtes, Célébrations, Vibes) appliquent automatiquement les bonnes couleurs et vident les lignes de déco pour rester sous la limite.',
     tip_howto2:'Tous les champs montrent des exemples — clique n\'importe quelle ligne dans l\'aperçu pour sauter au champ correspondant et le modifier. La case ★ à côté de Deco Top, Top Line ou Bottom Line entoure cette ligne d\'étoiles * — fonctionne dans tous les layouts.',
@@ -499,6 +517,9 @@ const I18N = {
     undo_btn:'Отменить', redo_btn:'Повторить',
     qe_top:'Верх', qe_main:'Основной', qe_bottom:'Низ',
     qe_ph_top:'верхняя строка', qe_ph_main:'основной текст', qe_ph_bottom:'нижняя строка',
+    qe_clear:'очистить',
+    decos_trimmed:(names)=>`${names} убрано — чтобы уложиться в лимит 240/255`,
+    byte_breakdown:'Байты по полям',
     undo_title:'Отменить последнее действие (Ctrl+Z)', redo_title:'Повторить (Ctrl+Y)',
     tip_howto:'Градиенты и длинные строки декора используют много знаков. Если счётчик стал <span style="color:var(--red)">красным</span>, попробуй сократить текст, убрать строки декора или отключить градиенты. Тематические шаблоны (Праздники, Торжества, Вайбы) автоматически применяют подходящие цвета и очищают строки декора, чтобы остаться в пределах лимита.',
     tip_howto2:'Все поля показывают примеры — кликни по любой строке в предпросмотре, чтобы перейти к соответствующему полю и редактировать его напрямую. Чекбокс ★ рядом с Deco Top, Top Line или Bottom Line оборачивает строку звёздочками * — работает в любом макете.',
@@ -902,7 +923,7 @@ function ceSync() {
   const code = document.getElementById('ceTextarea').value;
   document.getElementById('outputBox').textContent = code;
   // update counters
-  const chars = code.length, bytes = new TextEncoder().encode(code).length;
+  const chars = code.length, bytes = byteLen(code);
   const cc = document.getElementById('charCount'), bc = document.getElementById('byteCount');
   cc.textContent = chars; bc.textContent = bytes;
   cc.className = 'cv ' + (chars > 240 ? 'over-v' : chars > 210 ? 'warn-v' : 'ok');
@@ -1084,16 +1105,24 @@ function _isCodeOverLimit(){
   const el = document.getElementById('outputBox');
   if (!el) return false;
   const code = el.textContent || '';
-  return code.length > 240 || new TextEncoder().encode(code).length > 255;
+  return code.length > 240 || byteLen(code) > 255;
 }
 function trimDecoToFit(){
   const ids = ['kaomoji','dekoBottom','dekoTop'];
+  const cleared = [];
   for (const id of ids) {
-    if (!_isCodeOverLimit()) return;
+    if (!_isCodeOverLimit()) break;
     const el = document.getElementById(id);
     if (!el || !el.value) continue;
     el.value = '';
+    cleared.push(id);
     generate();
+  }
+  // Inform the user that decos were stripped — otherwise it looks like
+  // a bug when a template appears without its kaomoji/deco lines.
+  if (cleared.length && typeof showToast === 'function') {
+    const names = cleared.map(id => t('fl_'+id, id)).join(', ');
+    showToast('<i class="fa-icon" data-icon="warning"></i> <span>'+t('decos_trimmed',names)+'</span>');
   }
 }
 
@@ -1120,27 +1149,55 @@ function setSpruch(main,top,bottom,decos){
   generate();
   trimDecoToFit();
 }
-function setBday(main,top,bottom){
-  setSpruch(main,top,bottom,DECO_BDAY);
-  grads.mainText={on:true,c1:'#FFD700',c2:'#FF8C00'};
-  colors.topText='#FFD700';colors.bottomText='#FFB300';
-  document.getElementById('btn_mainText').style.background='linear-gradient(to right,#FFD700,#FF8C00)';
-  document.getElementById('btn_topText').style.background='#FFD700';
-  document.getElementById('btn_bottomText').style.background='#FFB300';
+// Unified preset applier — replaces the near-duplicate setBday / applyTheme
+// / setPride blocks. One source of truth for the "click a themed template"
+// behaviour.
+//
+//   main/top/bottom : line texts
+//   decos           : { dekoTop, dekoBottom, kaomoji } preset
+//   topColor        : flat colour for the top line     (required)
+//   botColor        : flat colour for the bottom line  (required)
+//   mainColor       : flat colour for the main line    (when no gradient)
+//   mainGrad        : { c1, c2, rainbow? } when main should use a gradient
+//   mainBtnBg       : CSS background for the main color button (defaults
+//                     to a flat `mainColor` or a `c1→c2` gradient string)
+//   resetFonts      : true → revert topText/mainText/bottomText fonts to 'normal'
+function applyPreset({main, top, bottom, decos, mainColor, topColor, botColor, mainGrad, mainBtnBg, resetFonts}){
+  setSpruch(main, top, bottom, decos);
+
+  if (mainGrad) {
+    grads.mainText = { on: true, c1: mainGrad.c1, c2: mainGrad.c2, rainbow: !!mainGrad.rainbow };
+  } else if (mainColor) {
+    grads.mainText = { on: false, c1: mainColor, c2: mainColor };
+    colors.mainText = mainColor;
+  }
+  if (topColor) colors.topText = topColor;
+  if (botColor) colors.bottomText = botColor;
+  if (resetFonts) ['topText','mainText','bottomText'].forEach(f => { fieldFonts[f] = 'normal'; });
+
+  const btnMain = mainBtnBg
+    || (mainGrad ? `linear-gradient(to right,${mainGrad.c1},${mainGrad.c2})` : mainColor);
+  if (btnMain)  document.getElementById('btn_mainText').style.background = btnMain;
+  if (topColor) document.getElementById('btn_topText').style.background = topColor;
+  if (botColor) document.getElementById('btn_bottomText').style.background = botColor;
+
   lastWasThemed = true;
   generate();
   trimDecoToFit();
 }
-function applyTheme(main,top,bottom,cMain,cTop,cBot,decos){
-  setSpruch(main,top,bottom,decos);
-  grads.mainText={on:false,c1:cMain,c2:cMain};
-  colors.mainText=cMain;colors.topText=cTop;colors.bottomText=cBot;
-  document.getElementById('btn_mainText').style.background=cMain;
-  document.getElementById('btn_topText').style.background=cTop;
-  document.getElementById('btn_bottomText').style.background=cBot;
-  lastWasThemed = true;
-  generate();
-  trimDecoToFit();
+
+function setBday(main, top, bottom){
+  applyPreset({
+    main, top, bottom, decos: DECO_BDAY,
+    mainGrad: { c1:'#FFD700', c2:'#FF8C00' },
+    topColor: '#FFD700', botColor: '#FFB300',
+  });
+}
+function applyTheme(main, top, bottom, cMain, cTop, cBot, decos){
+  applyPreset({
+    main, top, bottom, decos,
+    mainColor: cMain, topColor: cTop, botColor: cBot,
+  });
 }
 function setXmas(main,top,bottom){         applyTheme(main,top,bottom,'#ef4444','#16a34a','#f59e0b', DECO_XMAS); }
 function setHalloween(main,top,bottom){    applyTheme(main,top,bottom,'#fb923c','#a855f7','#7c3aed', DECO_HALLOWEEN); }
@@ -1159,18 +1216,15 @@ function setDrunk(main,top,bottom){        applyTheme(main,top,bottom,'#f59e0b',
 function setSoft(main,top,bottom){         applyTheme(main,top,bottom,'#86efac','#fbcfe8','#fde68a', DECO_SOFT); }
 function setThanksgiving(main,top,bottom){ applyTheme(main,top,bottom,'#d97706','#92400e','#fbbf24', DECO_THANKSGIV); }
 function setAnniv(main,top,bottom){        applyTheme(main,top,bottom,'#e8b4b8','#d4af37','#f9d5e5', DECO_ANNIV); }
-function setPride(main,top,bottom){
-  setSpruch(main,top,bottom,DECO_PRIDE);
-  // rainbow + fancy font would overflow the byte limit — force normal font on text fields
-  ['topText','mainText','bottomText'].forEach(f=>{ fieldFonts[f]='normal'; });
-  grads.mainText={on:true,rainbow:true,c1:'#ffadad',c2:'#bdb2ff'};
-  colors.topText='#f9a8d4';colors.bottomText='#a0c4ff';
-  document.getElementById('btn_mainText').style.background='linear-gradient(to right,#ffadad,#ffd6a5,#fdffb6,#caffbf,#a0c4ff,#bdb2ff)';
-  document.getElementById('btn_topText').style.background='#f9a8d4';
-  document.getElementById('btn_bottomText').style.background='#a0c4ff';
-  lastWasThemed = true;
-  generate();
-  trimDecoToFit();
+function setPride(main, top, bottom){
+  applyPreset({
+    main, top, bottom, decos: DECO_PRIDE,
+    mainGrad: { c1:'#ffadad', c2:'#bdb2ff', rainbow:true },
+    topColor: '#f9a8d4', botColor: '#a0c4ff',
+    // 6-stop pastel rainbow swatch for the main-color button
+    mainBtnBg: 'linear-gradient(to right,#ffadad,#ffd6a5,#fdffb6,#caffbf,#a0c4ff,#bdb2ff)',
+    resetFonts: true,  // fancy fonts + rainbow blow the byte budget
+  });
 }
 function setKaoMode(on){
   pushUndo();
@@ -1334,10 +1388,27 @@ function moveLine(field,dir){
 // sections. Editing the quick-edit input writes to the underlying field
 // and re-generates; refreshQuickEdit() mirrors the source-of-truth back
 // after template clicks / undo / reset.
+// Push undo once per editing session so a quick-edit run produces ONE
+// undo entry total, not one per keystroke. _qeSession resets on blur or
+// whenever the model state otherwise changes (template click etc).
+let _qeSession = false;
 function syncQuickEdit(field, value){
+  if (!_qeSession) { pushUndo(); _qeSession = true; }
   const el = document.getElementById(field);
   if (!el) return;
   el.value = value;
+  userHasEdited = true;
+  // use the same 80ms debounce as the canonical form inputs to avoid
+  // rebuilding the whole preview DOM on every keystroke
+  if (typeof generateDebounced === 'function') generateDebounced();
+  else generate();
+}
+function endQuickEditSession(){ _qeSession = false; }
+function clearQuickEditField(field){
+  pushUndo();
+  _qeSession = false;
+  const el = document.getElementById(field);
+  if (el) el.value = '';
   generate();
 }
 function refreshQuickEdit(){
@@ -1377,13 +1448,23 @@ function generate(){
   const code=applyLayout(lm);
   document.getElementById('outputBox').textContent=code;
 
-  const chars=code.length, bytes=new TextEncoder().encode(code).length;
+  const chars=code.length, bytes=byteLen(code);
   const cc=document.getElementById('charCount'),bc=document.getElementById('byteCount');
   cc.textContent=chars; bc.textContent=bytes;
   cc.className='cv '+(chars>240?'over-v':chars>210?'warn-v':'ok');
   bc.className='cv '+(bytes>255?'over-v':bytes>230?'warn-v':'ok');
   const bar=document.getElementById('counterBar');
   bar.className='tb-counter '+(chars>240||bytes>255?'over':chars>210||bytes>230?'warn':'');
+
+  // Per-field byte breakdown shown on hover — lets the user see which
+  // field is eating the budget instead of guessing.
+  const breakdown = Object.entries(lm)
+    .filter(([,v]) => v)
+    .map(([f,v]) => [f, byteLen(v)])
+    .sort((a,b) => b[1]-a[1])
+    .map(([f,b]) => `${t('fl_'+f, f)}: ${b} B`)
+    .join('\n');
+  bar.title = `${t('char_limit_tt')}\n\n${t('byte_breakdown')}:\n${breakdown}`;
 
   // sync copy button — disabled look when over limit, plus label swap
   const copyBtn = document.querySelector('.btn-copy');
@@ -1598,7 +1679,7 @@ function showToast(html, type){
 
 function copyCode(){
   const text=document.getElementById('outputBox').textContent;
-  const chars=text.length, bytes=new TextEncoder().encode(text).length;
+  const chars=text.length, bytes=byteLen(text);
   if (chars > 240 || bytes > 255) {
     showToast('<i class="fa-icon" data-icon="warning"></i> <span><b>' + t('copy_blocked') + '</b><br>' + t('copy_blocked_msg') + '</span>', 'warn');
     return;
@@ -1625,15 +1706,14 @@ function updateOptimizeTips(chars,bytes,lm,raw){
   panel.style.display='block';
   panel.className='opt-panel '+(isOver?'over-state':isWarn?'warn-state':'');
   const tips=[];
-  const enc=new TextEncoder();
 
   // ── font byte overhead analysis ──
   Object.entries(fieldFonts).forEach(([field,font])=>{
     if(font==='normal') return;
     const text=raw[field]||'';
     if(!text) return;
-    const normalBytes=enc.encode(text).length;
-    const styledBytes=enc.encode(applyFont(text,font)).length;
+    const normalBytes=byteLen(text);
+    const styledBytes=byteLen(applyFont(text,font));
     const overhead=styledBytes-normalBytes;
     if(overhead>3){
       if(bytes>220) tips.push({lvl:'action',field:field,fontAction:true,msg:t('opt_rm_font',fieldLabel(field),overhead)});

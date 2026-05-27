@@ -652,6 +652,22 @@ input[type="number"]{width:60px;}
   box-shadow:0 0 0 2px rgba(255,113,184,.18);
   outline:none;
 }
+.qe-clear{
+  flex-shrink:0;
+  width:22px;height:22px;
+  border-radius:50%;
+  border:1px solid var(--b1);
+  background:var(--bg);
+  color:var(--muted);
+  font-size:15px;line-height:1;
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;padding:0;
+  transition:color .15s,border-color .15s,background .15s,opacity .15s;
+}
+.qe-clear:hover{
+  color:var(--red);border-color:var(--red);background:rgba(239,68,68,.08);
+}
+.qe-row:has(input:placeholder-shown) .qe-clear{opacity:.25;pointer-events:none;}
 
 /* ── kao toggle ── */
 .kao-toggle{display:flex;gap:4px;margin-bottom:.6rem;}
