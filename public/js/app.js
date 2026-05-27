@@ -882,32 +882,93 @@ function ceSetSize(sz) {
   ceWrapSize();
 }
 
+// Smart-wrap that swaps an existing size tag instead of nesting one
+// inside another. Three cases:
+//   1) selection is exactly <size=N>X</size>        → replace N
+//   2) selection sits between <size=N> and </size>  → extend + replace N
+//   3) anything else                                → strip any nested
+//      size tags from the selection, then wrap with new size
 function ceWrapSize() {
   const ta = document.getElementById('ceTextarea');
   const sz = document.getElementById('ceSize').value;
   const s = ta.selectionStart, e = ta.selectionEnd;
   if (s === e) return;
-  const sel = ta.value.substring(s, e);
+  const val = ta.value;
+  let sel = val.substring(s, e);
+
+  // Case 1: selection IS already a complete <size=N>...</size> — just swap N
+  const full = sel.match(/^<size=\d+>([\s\S]*)<\/size>$/);
+  if (full) {
+    const wrapped = '<size=' + sz + '>' + full[1] + '</size>';
+    ta.value = val.substring(0, s) + wrapped + val.substring(e);
+    ta.selectionStart = s;
+    ta.selectionEnd = s + wrapped.length;
+    ta.focus(); ceSync(); return;
+  }
+
+  // Case 2: there's a <size=N> immediately before and </size> immediately
+  // after the selection — silently extend the selection to include both tags
+  const before = val.substring(0, s).match(/<size=\d+>$/);
+  const after  = val.substring(e).match(/^<\/size>/);
+  if (before && after) {
+    const newStart = s - before[0].length;
+    const newEnd   = e + after[0].length;
+    const wrapped = '<size=' + sz + '>' + sel + '</size>';
+    ta.value = val.substring(0, newStart) + wrapped + val.substring(newEnd);
+    ta.selectionStart = newStart;
+    ta.selectionEnd = newStart + wrapped.length;
+    ta.focus(); ceSync(); return;
+  }
+
+  // Case 3: ordinary wrap — strip any nested size tags from the selection
+  // first so we don't pile up <size=A><size=B>x</size></size>.
+  sel = sel.replace(/<\/?size(=\d+)?>/g, '');
   const wrapped = '<size=' + sz + '>' + sel + '</size>';
-  ta.value = ta.value.substring(0, s) + wrapped + ta.value.substring(e);
+  ta.value = val.substring(0, s) + wrapped + val.substring(e);
   ta.selectionStart = s;
   ta.selectionEnd = s + wrapped.length;
-  ta.focus();
-  ceSync();
+  ta.focus(); ceSync();
 }
 
+// Same tag-swap logic as ceWrapSize but for <color=#hex>...</color>.
 function ceWrapColor() {
   const ta = document.getElementById('ceTextarea');
   const col = document.getElementById('ceColor').value;
   const s = ta.selectionStart, e = ta.selectionEnd;
   if (s === e) return;
-  const sel = ta.value.substring(s, e);
+  const val = ta.value;
+  let sel = val.substring(s, e);
+
+  // Case 1: selection IS a complete <color=#xxx>...</color> — swap the colour
+  const full = sel.match(/^<color=#[0-9a-fA-F]{3,8}>([\s\S]*)<\/color>$/);
+  if (full) {
+    const wrapped = '<color=' + col + '>' + full[1] + '</color>';
+    ta.value = val.substring(0, s) + wrapped + val.substring(e);
+    ta.selectionStart = s;
+    ta.selectionEnd = s + wrapped.length;
+    ta.focus(); ceSync(); return;
+  }
+
+  // Case 2: selection sits between an opening <color=…> and closing </color>
+  const before = val.substring(0, s).match(/<color=#[0-9a-fA-F]{3,8}>$/);
+  const after  = val.substring(e).match(/^<\/color>/);
+  if (before && after) {
+    const newStart = s - before[0].length;
+    const newEnd   = e + after[0].length;
+    const wrapped = '<color=' + col + '>' + sel + '</color>';
+    ta.value = val.substring(0, newStart) + wrapped + val.substring(newEnd);
+    ta.selectionStart = newStart;
+    ta.selectionEnd = newStart + wrapped.length;
+    ta.focus(); ceSync(); return;
+  }
+
+  // Case 3: strip nested colour tags, then wrap
+  sel = sel.replace(/<\/?color(=#[0-9a-fA-F]{3,8})?>/g, '');
   const wrapped = '<color=' + col + '>' + sel + '</color>';
-  ta.value = ta.value.substring(0, s) + wrapped + ta.value.substring(e);
+  ta.value = val.substring(0, s) + wrapped + val.substring(e);
   ta.selectionStart = s;
   ta.selectionEnd = s + wrapped.length;
-  ta.focus();
-  ceSync();
+  ta.focus(); ceSync();
 }
 
 function ceWrapGradient() {
