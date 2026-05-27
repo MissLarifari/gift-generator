@@ -737,6 +737,17 @@ textarea{resize:vertical;min-height:33px;line-height:1.35;}
    line breaks — needed for the Flipped layout where topText holds
    "3 wᴀsɴ'ᴛ\nᴇɴᴏᴜɢʜ ᴀᴘᴘᴀʀᴇɴᴛʟʏ..." as a two-line phrase. */
 .pvc{cursor:pointer;border-radius:4px;padding:2px 8px;transition:background .15s;min-height:4px;position:relative;white-space:pre-wrap;}
+/* In-place editing: clicking a preview text element makes it
+   contentEditable so the user can type right there, then Enter/blur
+   syncs back to the underlying field. Visual outline + tinted bg make
+   the edit state obvious. */
+.pvc.pv-editing{
+  outline:2px solid var(--pink);outline-offset:2px;
+  background:rgba(255,113,184,.08);
+  cursor:text;
+  caret-color:var(--pink);
+}
+.pvc.pv-editing:focus{outline-color:var(--pink);}
 
 /* Flipped layout: the trailing \n in topText creates an explicit blank
    line in the gift code (so 3dxchat renders "...apparently..." then a

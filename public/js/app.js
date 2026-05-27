@@ -1889,23 +1889,87 @@ function setKaoMode(on){
   generate();
 }
 let _pvActive=null;
+// Map field id → preview element id, used to make the previewed text
+// directly editable when clicked. Falls back to focusing the left-
+// column input if the preview element isn't found (e.g. mkS spans in
+// inline/compact layouts which don't have stable IDs).
+const PV_ID_MAP = {
+  dekoTop:    'pvDekoTop',
+  topText:    'pvTopRow',
+  mainText:   'pvMain',
+  bottomText: 'pvBottom',
+  kaomoji:    'pvKaomoji',
+  dekoBottom: 'pvDekoBottom',
+};
+
 function pvClick(id){
-  const el=document.getElementById(id); if(!el) return;
-  // find the sec-body that contains this field
-  let secBody=null,p=el.parentElement;
-  while(p){if(p.classList.contains('sec-body')){secBody=p;break;}p=p.parentElement;}
-  // second click on same field while its section is open → close it
-  if(_pvActive===id && secBody && secBody.classList.contains('open')){
-    if(document.activeElement===el) el.blur();
-    secBody.classList.remove('open');
-    const h=secBody.previousElementSibling;
-    if(h && h.classList.contains('sec-head')) h.classList.remove('open');
-    _pvActive=null;
+  const fieldEl = document.getElementById(id);
+  if (!fieldEl) return;
+  // Reorder mode swallows the click — let the existing handlers run.
+  if (document.querySelector('.pv-card.reorder-mode')) return;
+  const pvEl = document.getElementById(PV_ID_MAP[id]);
+  if (pvEl) {
+    pvMakeEditable(pvEl, id);
     return;
   }
-  // first click (or different field) → open & focus
-  _pvActive=id;
+  // Fallback: no matching preview element, just focus the input.
+  _pvActive = id;
   focusField(id);
+}
+
+// Make a preview text span editable in-place. On commit (Enter/blur),
+// write the new text back to the corresponding input field and trigger
+// generate() so the rest of the UI (counters, code box) re-renders.
+// Esc cancels without saving.
+function pvMakeEditable(pvEl, fieldId){
+  if (pvEl.isContentEditable) return; // already editing — ignore extra clicks
+  pushUndo();
+  const input = document.getElementById(fieldId);
+  const original = input ? input.value : pvEl.textContent;
+  pvEl.contentEditable = 'true';
+  pvEl.classList.add('pv-editing');
+  // textContent → ensure no stray child elements (reorder ctrl etc.)
+  // inside the editable area when we focus. The reorder controls are
+  // already hidden via the reorder-mode guard above, but just in case.
+  pvEl.focus();
+  // Select the whole content so typing replaces it. Range API instead
+  // of execCommand because the latter is deprecated.
+  try {
+    const range = document.createRange();
+    range.selectNodeContents(pvEl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch(e) {}
+
+  function commit(save){
+    pvEl.contentEditable = 'false';
+    pvEl.classList.remove('pv-editing');
+    pvEl.removeEventListener('blur', onBlur);
+    pvEl.removeEventListener('keydown', onKey);
+    if (!input) return;
+    const newText = save ? pvEl.textContent : original;
+    if (!save) pvEl.textContent = original;
+    if (input.value !== newText) {
+      input.value = newText;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      userHasEdited = true;
+      if (typeof generate === 'function') generate();
+    }
+  }
+  function onBlur(){ commit(true); }
+  function onKey(e){
+    if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+    // Enter without Shift commits. Shift+Enter inserts a newline (only
+    // useful for fields whose backing input supports \n — currently
+    // just topText which is a textarea).
+    else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      commit(true);
+    }
+  }
+  pvEl.addEventListener('blur', onBlur);
+  pvEl.addEventListener('keydown', onKey);
 }
 function focusField(id){
   const el=document.getElementById(id); if(!el) return;
