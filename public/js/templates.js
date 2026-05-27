@@ -317,18 +317,6 @@ const TEMPLATES = {
       ['choose you',     'every time',       'id pick you again every',           '.. single time honestly ..'],
       ['anniversary',    'happy us day',     'happy anniversary to the love',     '.. of my entire life ..'],
     ]},
-    { icon: 'arrows-rotate', label: 'Flipped', titleStyle: 'color:#ff4d8c;text-shadow:0 0 14px rgba(255,77,140,.55)', chipExtra: 'pink', setFn: 'setFlipped', items: [
-      ['world flipped',  'still chose you',     'world flipped today and i',         '.. still chose you ♡ ..'],
-      ['upside down',    'right side up',       'world is upside down but you',      '.. keep me right side up ..'],
-      ['gravity gone',   'still falling',       'gravity left the building but',     '.. im still falling for you ..'],
-      ['spinning',       'still my center',     'the whole world is spinning',       '.. youre still my center ..'],
-      ['try four',       'number 4',            '3 wasnt enough apparently so',      '.. here comes number 4 ♡ ..'],
-      ['everything off', 'except us',           'everythings off today honestly',    '.. except for us two ..'],
-      ['compass broken', 'still find you',      'my compass is broken but i',        '.. still find my way to you ..'],
-      ['sideways',       'sideways but here',   'world tilted sideways and im',      '.. honestly still here for you ..'],
-      ['no gravity',     'still pulling',       'no gravity in the room but',        '.. youre still pulling me in ..'],
-      ['stars wrong',    'still aligned',       'the stars are upside down but',     '.. ours are still aligned ..'],
-    ]},
     { icon: 'cake', label: 'Birthday', titleStyle: 'color:#ffd84d;text-shadow:0 0 14px rgba(255,216,77,.5)', bday: true, chipExtra: 'gold', items: [
       ['happy birthday','happy birthday','wishing you all the best','.. today and always ..'],
       ['its your day',  'its your day',  'celebrate yourself',      '.. you deserve it ..'],
@@ -343,18 +331,7 @@ const TEMPLATES = {
 function esc(s){return s.replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function renderTemplatePanel(panel, sections){
-  // Flipped section uses smallcaps + upside-down chars that only read
-  // correctly inside the Flipped layout. Hide it everywhere else so the
-  // right panel doesn't show templates that look broken in the active
-  // layout. setLayout() calls renderAllTemplates() so the panel
-  // refreshes when the user switches in or out of Flipped.
-  const filtered = sections.filter(sec => {
-    if (sec.setFn === 'setFlipped' || sec.label === 'Flipped') {
-      return typeof currentLayout !== 'undefined' && currentLayout === 'flipped';
-    }
-    return true;
-  });
-  panel.innerHTML = filtered.map(sec => {
+  panel.innerHTML = sections.map(sec => {
     const fn = sec.setFn || (sec.bday ? 'setBday' : 'setSpruch');
     const titleAttr = sec.titleStyle ? ` style="${sec.titleStyle}"` : '';
     const chipCls = 'chip t' + (sec.chipExtra ? ' ' + sec.chipExtra : '');

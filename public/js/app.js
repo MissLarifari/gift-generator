@@ -791,12 +791,6 @@ function setLayout(layout) {
     const d = layoutDefaults[layout];
     lineOrder = (d && d.lineOrder) ? d.lineOrder.slice() : DEFAULT_ORDER.slice();
   }
-  // Re-render the templates panel so the Flipped section appears only
-  // when the user is in the Flipped layout (those sprüche use upside-
-  // down chars that only read right in that layout).
-  if (typeof renderAllTemplates === 'function') {
-    try { renderAllTemplates(); } catch(e) {}
-  }
   generate();
 }
 // Wrap a field's text in `* X *` if its star checkbox is on.
