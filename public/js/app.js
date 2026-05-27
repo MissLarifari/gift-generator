@@ -313,6 +313,8 @@ const I18N = {
     char_limit_tt:'3dxchat allows up to 240 characters and 255 bytes per gift message. Yellow = warning, red = over limit.',
     without:'Without',
     without_tt:'Render this line without decoration (empties the field)',
+    grad_per_letter:'Per letter', grad_per_word:'Per word', grad_per_line:'Per line', grad_per_para:'Per paragraph',
+    grad_mid_only:'Gradient only middle part',
     expand_all:'Expand all', collapse_all:'Collapse all',
     copy_blocked:'Too long to copy',
     copy_blocked_msg:'Your gift is over the limit. Shorten the text, remove emojis, or use less styling.',
@@ -382,6 +384,8 @@ const I18N = {
     char_limit_tt:'3dxchat erlaubt max. 240 Zeichen und 255 Bytes pro Gift. Gelb = Warnung, Rot = überm Limit.',
     without:'Ohne',
     without_tt:'Zeile ohne Deko anzeigen (leert das Feld)',
+    grad_per_letter:'Pro Buchstabe', grad_per_word:'Pro Wort', grad_per_line:'Pro Zeile', grad_per_para:'Pro Absatz',
+    grad_mid_only:'Verlauf nur im Mittelteil',
     expand_all:'Alle ausklappen', collapse_all:'Alle einklappen',
     copy_blocked:'Zu lang zum Kopieren',
     copy_blocked_msg:'Dein Gift ist überm Limit. Kürze den Text, entferne Emojis oder reduziere das Styling.',
@@ -450,6 +454,8 @@ const I18N = {
     char_limit_tt:'3dxchat autorise max. 240 caractères et 255 octets par message cadeau. Jaune = attention, rouge = au-delà.',
     without:'Sans',
     without_tt:'Afficher cette ligne sans décoration (vide le champ)',
+    grad_per_letter:'Par lettre', grad_per_word:'Par mot', grad_per_line:'Par ligne', grad_per_para:'Par paragraphe',
+    grad_mid_only:'Dégradé uniquement au milieu',
     expand_all:'Tout déplier', collapse_all:'Tout replier',
     copy_blocked:'Trop long pour copier',
     copy_blocked_msg:'Ton cadeau dépasse la limite. Raccourcis le texte, retire les emojis ou réduis le style.',
@@ -518,6 +524,8 @@ const I18N = {
     char_limit_tt:'3dxchat допускает до 240 знаков и 255 байт на сообщение подарка. Жёлтый = предупреждение, красный = за лимитом.',
     without:'Без',
     without_tt:'Показать строку без декорации (очищает поле)',
+    grad_per_letter:'По буквам', grad_per_word:'По словам', grad_per_line:'По строкам', grad_per_para:'По абзацам',
+    grad_mid_only:'Градиент только в середине',
     expand_all:'Развернуть всё', collapse_all:'Свернуть всё',
     copy_blocked:'Слишком длинно',
     copy_blocked_msg:'Подарок превышает лимит. Сократи текст, убери эмодзи или уменьши стилизацию.',
@@ -1087,10 +1095,40 @@ function ceGetSel(ta){
   return { s, e };
 }
 
+// Build a gradient over an array of segments (letters / words / lines /
+// paragraphs). If middleOnly=true, the first and last segments stay
+// pinned to c1/c2 respectively and only the segments in between fade
+// across — matches the 3dxchat profile editor's "Gradient only middle
+// part" checkbox.
+function _buildGradientSegments(segments, c1, c2, middleOnly){
+  const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
+  const n = segments.length;
+  if (n === 0) return [];
+  if (n === 1) return [{ hex: c1, txt: segments[0] }];
+
+  return segments.map((txt, i) => {
+    let f;
+    if (middleOnly) {
+      // first stays c1, last stays c2, middle is linearly interpolated
+      if (i === 0) f = 0;
+      else if (i === n - 1) f = 1;
+      else if (n <= 2) f = i / (n - 1);
+      else f = (i - 1) / (n - 1 - 1 || 1);   // (n-2) middle slots, indices 1..n-2
+    } else {
+      f = i / (n - 1);
+    }
+    const hex = rgbToHex(r1.r + (r2.r - r1.r) * f, r1.g + (r2.g - r1.g) * f, r1.b + (r2.b - r1.b) * f);
+    return { hex, txt };
+  });
+}
+
 function ceWrapGradient() {
   const ta = document.getElementById('ceTextarea');
   const c1 = document.getElementById('ceGrad1').value;
   const c2 = document.getElementById('ceGrad2').value;
+  const modeEl = document.querySelector('input[name="ceGradMode"]:checked');
+  const mode = modeEl ? modeEl.value : 'word';
+  const middleOnly = !!document.getElementById('ceGradMid')?.checked;
   const { s, e } = ceGetSel(ta);
   if (s === e) return;
 
@@ -1114,20 +1152,45 @@ function ceWrapGradient() {
     baseE = e - openLen;
   }
 
-  // split selected text into words and apply gradient colors
-  const words = sel.split(' ').filter(w => w.length > 0);
-  if (!words.length) return;
-  const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
-  let wrapped;
-  if (words.length === 1) {
-    wrapped = '<color=' + c1 + '>' + words[0] + '</color>';
+  // ── split into segments per mode ───────────────────────────────────
+  // For each split we keep the SEPARATOR string so it can be re-inserted
+  // verbatim between the colored segments (preserves spacing/newlines).
+  let segments;     // strings to color
+  let separators;   // joined back between segments
+  if (mode === 'letter') {
+    // Use Array.from to handle surrogate pairs correctly (e.g. emoji).
+    segments = Array.from(sel);
+    separators = segments.map(() => '');
+    separators.pop();
+  } else if (mode === 'line') {
+    segments = sel.split('\n');
+    separators = segments.map(() => '\n'); separators.pop();
+  } else if (mode === 'paragraph') {
+    // Paragraphs are separated by one or more blank lines.
+    segments = sel.split(/\n\s*\n/);
+    separators = segments.map((_, i) => i < segments.length - 1 ? '\n\n' : ''); separators.pop();
   } else {
-    wrapped = words.map((w, i) => {
-      const f = i / (words.length - 1);
-      const hex = rgbToHex(r1.r+(r2.r-r1.r)*f, r1.g+(r2.g-r1.g)*f, r1.b+(r2.b-r1.b)*f);
-      return '<color=' + hex + '>' + w + '</color>';
-    }).join(' ');
+    // word (default)
+    // Preserve runs of whitespace between words.
+    const parts = sel.split(/(\s+)/);
+    segments = [];
+    separators = [];
+    for (let i = 0; i < parts.length; i++) {
+      if (i % 2 === 0) { if (parts[i].length) segments.push(parts[i]); else if (i + 1 < parts.length) separators.push(parts[i+1]); }
+      else { if (segments.length) separators.push(parts[i]); }
+    }
   }
+  segments = segments.filter(seg => seg.length > 0);
+  if (!segments.length) return;
+
+  const colored = _buildGradientSegments(segments, c1, c2, middleOnly);
+
+  let wrapped = '';
+  for (let i = 0; i < colored.length; i++) {
+    wrapped += '<color=' + colored[i].hex + '>' + colored[i].txt + '</color>';
+    if (i < colored.length - 1) wrapped += (separators[i] || '');
+  }
+
   ta.value = baseVal.substring(0, baseS) + wrapped + baseVal.substring(baseE);
   ta.selectionStart = baseS;
   ta.selectionEnd = baseS + wrapped.length;

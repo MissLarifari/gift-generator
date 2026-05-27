@@ -1182,6 +1182,28 @@ input[type="checkbox"]:focus-visible{
 .ce-font-btn:hover{border-color:var(--gold);color:var(--gold);}
 .ce-size{width:50px;padding:3px 6px;font-size:12px;background:var(--s3);color:var(--text);border:1px solid var(--b2);border-radius:4px;text-align:center;}
 .ce-color{width:28px;height:24px;padding:0;border:1px solid var(--b2);border-radius:4px;cursor:pointer;background:none;}
+/* gradient mode row — sits below the gradient color/Apply row */
+.ce-grad-mode{
+  flex-wrap:wrap;gap:8px 14px;
+  border-right:none;padding-right:0;padding-top:6px;
+  font-size:11px;color:var(--subtle);
+  border-top:1px solid var(--b1);margin-top:6px;flex-basis:100%;
+}
+.ce-grad-radio,.ce-grad-mid{display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none;}
+.ce-grad-radio input[type="radio"]{
+  appearance:none;-webkit-appearance:none;
+  width:12px;height:12px;border-radius:50%;
+  border:1.5px solid var(--b2);background:var(--bg);
+  margin:0;cursor:pointer;flex-shrink:0;
+  transition:border-color .15s;
+}
+.ce-grad-radio input[type="radio"]:checked{
+  border-color:var(--pink);
+  background:radial-gradient(circle,var(--pink) 0 4px,transparent 5px);
+}
+.ce-grad-radio:hover{color:var(--text);}
+.ce-grad-mid input[type="checkbox"]{margin:0;flex-shrink:0;}
+.ce-grad-mid .ce-help{color:var(--muted);font-size:10px;cursor:help;text-decoration:underline dotted;}
 .ce-textarea{
   width:100%;min-height:180px;max-height:400px;resize:vertical;
   padding:12px 14px;font-family:'Consolas','Monaco','Courier New',monospace;
