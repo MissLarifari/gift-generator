@@ -556,6 +556,9 @@
         <input id="qeBottom" type="text" autocomplete="off" oninput="syncQuickEdit('bottomText',this.value)" onblur="endQuickEditSession()" data-i18n-ph="qe_ph_bottom" placeholder="bottom line"/>
         <button type="button" class="qe-clear" onclick="clearQuickEditField('bottomText')" tabindex="-1" data-i18n-title="qe_clear" title="clear">×</button>
       </div>
+      <div class="qe-footer">
+        <button type="button" class="qe-clear-all" onclick="clearAllText()" data-i18n="qe_clear_all" title="clear all 6 lines (text + deco + kaomoji)">Clear all</button>
+      </div>
     </div>
 
     <div class="code-label" data-i18n="code">Code</div>

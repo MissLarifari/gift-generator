@@ -311,6 +311,7 @@ const I18N = {
     qe_top:'Top', qe_main:'Main', qe_bottom:'Bottom',
     qe_ph_top:'top line', qe_ph_main:'main text', qe_ph_bottom:'bottom line',
     qe_clear:'clear',
+    qe_clear_all:'Clear all',
     decos_trimmed:(names)=>`Trimmed ${names} to fit the 240/255 limit`,
     byte_breakdown:'Per-field bytes',
     tip_howto:'Gradients &amp; long deco lines use lots of characters. If the counter turns <span style="color:var(--red)">red</span>, try shorter text, remove deco lines, or disable gradients. Themed templates (Holidays, Celebrations, Vibes) apply matching colors automatically and clear deco lines to stay under the limit.',
@@ -380,6 +381,7 @@ const I18N = {
     qe_top:'Oben', qe_main:'Haupt', qe_bottom:'Unten',
     qe_ph_top:'obere Zeile', qe_ph_main:'Haupttext', qe_ph_bottom:'untere Zeile',
     qe_clear:'leeren',
+    qe_clear_all:'Alles leeren',
     decos_trimmed:(names)=>`${names} entfernt um ins 240/255-Limit zu passen`,
     byte_breakdown:'Bytes pro Feld',
     undo_title:'Letzte Aktion rückgängig machen (Strg+Z)', redo_title:'Wiederholen (Strg+Y)',
@@ -449,6 +451,7 @@ const I18N = {
     qe_top:'Haut', qe_main:'Principal', qe_bottom:'Bas',
     qe_ph_top:'ligne du haut', qe_ph_main:'texte principal', qe_ph_bottom:'ligne du bas',
     qe_clear:'effacer',
+    qe_clear_all:'Tout effacer',
     decos_trimmed:(names)=>`${names} supprimé(s) pour rester sous la limite 240/255`,
     byte_breakdown:'Octets par champ',
     undo_title:'Annuler la dernière action (Ctrl+Z)', redo_title:'Refaire (Ctrl+Y)',
@@ -518,6 +521,7 @@ const I18N = {
     qe_top:'Верх', qe_main:'Основной', qe_bottom:'Низ',
     qe_ph_top:'верхняя строка', qe_ph_main:'основной текст', qe_ph_bottom:'нижняя строка',
     qe_clear:'очистить',
+    qe_clear_all:'Очистить всё',
     decos_trimmed:(names)=>`${names} убрано — чтобы уложиться в лимит 240/255`,
     byte_breakdown:'Байты по полям',
     undo_title:'Отменить последнее действие (Ctrl+Z)', redo_title:'Повторить (Ctrl+Y)',
@@ -1426,6 +1430,19 @@ function syncQuickEdit(field, value){
   else generate();
 }
 function endQuickEditSession(){ _qeSession = false; }
+
+// Wipe ALL six text fields (top/main/bottom + decoTop/decoBottom/kaomoji)
+// in one undo-able action — gives the user a true blank canvas in one
+// click instead of requiring six separate clears.
+function clearAllText(){
+  pushUndo();
+  _qeSession = false;
+  ['dekoTop','topText','mainText','bottomText','kaomoji','dekoBottom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  generate();
+}
 function clearQuickEditField(field){
   pushUndo();
   _qeSession = false;

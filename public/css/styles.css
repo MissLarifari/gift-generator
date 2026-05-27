@@ -668,6 +668,18 @@ input[type="number"]{width:60px;}
   color:var(--red);border-color:var(--red);background:rgba(239,68,68,.08);
 }
 .qe-row:has(input:placeholder-shown) .qe-clear{opacity:.25;pointer-events:none;}
+.qe-footer{display:flex;justify-content:flex-end;padding-top:4px;}
+.qe-clear-all{
+  font-size:10.5px;font-weight:600;letter-spacing:.3px;
+  padding:4px 10px;border-radius:14px;
+  background:transparent;color:var(--muted);
+  border:1px solid var(--b1);
+  cursor:pointer;font-family:inherit;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.qe-clear-all:hover{
+  color:var(--red);border-color:var(--red);background:rgba(239,68,68,.08);
+}
 
 /* ── kao toggle ── */
 .kao-toggle{display:flex;gap:4px;margin-bottom:.6rem;}
