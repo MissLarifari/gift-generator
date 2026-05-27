@@ -1127,6 +1127,20 @@ function ceWrapColor() {
 // textarea selection at that point, making s === e and the early-return
 // trap fire).
 let _ceLastSel = { s: 0, e: 0 };
+
+// Snapshot of the last gradient apply: lets a SECOND click on Apply
+// behave as "remove the gradient" when nothing relevant has changed
+// (selection, textarea value, gradient params all identical). Cleared
+// when the user types or picks a different region.
+let _ceLastGradApply = null;
+function _ceGradParams(){
+  return {
+    c1: document.getElementById('ceGrad1')?.value || '',
+    c2: document.getElementById('ceGrad2')?.value || '',
+    mode: document.getElementById('ceGradMode')?.value || 'word',
+    mid: !!document.getElementById('ceGradMid')?.checked,
+  };
+}
 function ceRememberSel(){
   const ta = document.getElementById('ceTextarea');
   if (!ta) return;
@@ -1179,6 +1193,30 @@ function ceWrapGradient() {
   const middleOnly = !!document.getElementById('ceGradMid')?.checked;
   const { s, e } = ceGetSel(ta);
   if (s === e) return;
+
+  // Toggle-off: if nothing has changed since the previous Apply
+  // (same textarea content, same selection, same gradient params)
+  // then a second Apply click removes the gradient instead of
+  // re-applying it. Matches Sophey's spec.
+  const params = { c1, c2, mode, mid: middleOnly };
+  if (_ceLastGradApply &&
+      _ceLastGradApply.val === ta.value &&
+      _ceLastGradApply.s   === s &&
+      _ceLastGradApply.e   === e &&
+      _ceLastGradApply.params.c1   === params.c1 &&
+      _ceLastGradApply.params.c2   === params.c2 &&
+      _ceLastGradApply.params.mode === params.mode &&
+      _ceLastGradApply.params.mid  === params.mid) {
+    const rawSel = ta.value.substring(s, e);
+    const stripped = rawSel.replace(/<\/?color(=#[0-9a-fA-F]{3,8})?>/g, '');
+    ta.value = ta.value.substring(0, s) + stripped + ta.value.substring(e);
+    ta.selectionStart = s;
+    ta.selectionEnd = s + stripped.length;
+    _ceLastSel = { s, e: s + stripped.length };
+    _ceLastGradApply = null;
+    ta.focus(); ceSync();
+    return;
+  }
 
   // Pull selection. Strip any existing <color=…>…</color> tags inside it
   // so we don't nest a gradient inside an outer color (the outer one
@@ -1263,6 +1301,14 @@ function ceWrapGradient() {
   ta.selectionStart = baseS;
   ta.selectionEnd = baseS + wrapped.length;
   _ceLastSel = { s: baseS, e: baseS + wrapped.length };
+  // Snapshot so the next Apply click on the same selection / params
+  // toggles the gradient off.
+  _ceLastGradApply = {
+    val: ta.value,
+    s: baseS,
+    e: baseS + wrapped.length,
+    params: { c1, c2, mode, mid: middleOnly },
+  };
   ta.focus();
   ceSync();
 }
@@ -2235,6 +2281,9 @@ FIELDS.forEach(f => {
 
 // custom editor sync
 document.getElementById('ceTextarea')?.addEventListener('input', ceSync);
+// Any user typing invalidates the gradient-apply snapshot so the next
+// Apply click re-applies fresh instead of trying to strip stale state.
+document.getElementById('ceTextarea')?.addEventListener('input', () => { _ceLastGradApply = null; });
 // Keep _ceLastSel in sync so Apply buttons can recover when focus drift
 // during color-picker / button-click collapses the textarea selection.
 ['select','mouseup','keyup','blur','input'].forEach(ev => {
