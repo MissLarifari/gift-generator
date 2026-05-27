@@ -223,16 +223,6 @@ a{color:inherit;text-decoration:none;}
   font-size:11px;
   margin-top:2px;
 }
-.tb-thanks-haters{
-  color:#ff9a3d !important;
-  font-style:italic;font-weight:500 !important;
-  font-size:11px;
-  display:inline-flex;align-items:center;gap:5px;
-}
-.tb-thanks-haters .fa-icon{
-  color:#ff9a3d;
-  font-size:11px;
-}
 .tb-thanks-foot{
   font-size:10px;color:#8d8da8;letter-spacing:.4px;
   padding-top:8px;margin-top:2px;
@@ -240,7 +230,7 @@ a{color:inherit;text-decoration:none;}
   width:100%;text-align:center;
   display:inline-flex;align-items:center;gap:5px;justify-content:center;
 }
-.tb-thanks-foot .fa-icon{color:#ff71b8;font-size:10px;}
+.tb-thanks-foot .fa-icon{color:var(--green);font-size:10px;}
 
 .tb-brand-sep{width:1px;height:20px;background:var(--b2);}
 .tb-proto{
