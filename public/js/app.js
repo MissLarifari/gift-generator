@@ -690,13 +690,17 @@ const layoutDefaults = {
   framed:  {dekoTop:'❀ · ❀ · ❀', topText:'du bist mein', mainText:'liebling', bottomText:'· kein scherz ·', kaomoji:'', dekoBottom:''},
   minimal: {dekoTop:'', topText:'', mainText:'nur wir', bottomText:'', kaomoji:'(❀◡❀)', dekoBottom:''},
   pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:''},
-  // Flipped: a topsy-turvy layout matching the "Number 4" screenshot
-  // — small-caps top, big small-caps main, upside-down bottom + flower
-  // kaomoji. The 'fonts' key tells setLayout to apply per-field font
-  // defaults (smallcaps / flipped) on first pick. Text kept tight so
-  // smallcaps multibyte expansion + flipped chars still fit 240/255.
-  flipped: {dekoTop:'.. ↓ ..', topText:'3 wasnt enough', mainText:'number 4*', bottomText:'just for you ♡', kaomoji:'(✿◡✿)', dekoBottom:'',
-            fonts:{topText:'smallcaps', mainText:'smallcaps', bottomText:'flipped'}},
+  // Flipped: matches Sophey's "Number 4" screenshot — characters are
+  // pre-baked Unicode in the default strings rather than applied via
+  // font transforms. Lets us mix flipped + normal in one bottomText
+  // ('ʇsnɾ for you ♡' — only "just" is rotated). All field fonts are
+  // forced to 'normal' so pre-baked chars survive unchanged through
+  // applyFont. Topbar inputs strip \n so the screenshot's two-line
+  // topText ("3 wasn't enough apparently / so here comes") becomes one
+  // line — kept "apparently" since it's more distinctive than the
+  // bridge phrase. Byte budget right at the edge (~251/255).
+  flipped: {dekoTop:'.. ↓ ..', topText:'3 ᴡᴀsɴᴛ ᴇɴᴏᴜɢʜ ᴀᴘᴘᴀʀᴇɴᴛʟʏ', mainText:'ɴᴜᴍʙᴇʀ 4*', bottomText:'ʇsnɾ for you ♡', kaomoji:'(✿◡✿)', dekoBottom:'',
+            fonts:{dekoTop:'normal', topText:'normal', mainText:'normal', bottomText:'normal', kaomoji:'normal', dekoBottom:'normal'}},
   custom: {dekoTop:'', topText:'', mainText:'', bottomText:'', kaomoji:'', dekoBottom:''}
 };
 function setLayout(layout) {
