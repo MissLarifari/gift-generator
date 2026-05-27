@@ -1187,6 +1187,17 @@ function ceWrapGradient() {
   segments = segments.filter(seg => seg.length > 0);
   if (!segments.length) return;
 
+  // If the chosen mode doesn't yield ≥2 segments (e.g. "Per word" on a
+  // single word, "Per line" on a one-line selection), silently fall
+  // back to per-letter so the user always gets a visible gradient
+  // instead of a single-colour wrap.
+  if (segments.length < 2 && mode !== 'letter') {
+    segments = Array.from(sel);
+    separators = segments.map(() => '');
+    separators.pop();
+    segments = segments.filter(seg => seg.length > 0);
+  }
+
   const colored = _buildGradientSegments(segments, c1, c2, middleOnly);
 
   let wrapped = '';
