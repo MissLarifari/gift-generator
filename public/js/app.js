@@ -1913,14 +1913,38 @@ function pvClick(id){
   if (!fieldEl) return;
   // Reorder mode swallows the click — let the existing handlers run.
   if (document.querySelector('.pv-card.reorder-mode')) return;
-  const pvEl = document.getElementById(PV_ID_MAP[id]);
-  if (pvEl) {
-    pvMakeEditable(pvEl, id);
-    return;
-  }
-  // Fallback: no matching preview element, just focus the input.
+  // Always open the corresponding left-column section so the user can
+  // reach the colour / font / size / star controls. The in-place edit
+  // below handles quick text changes; the section stays open for
+  // anything else.
   _pvActive = id;
-  focusField(id);
+  pvOpenSectionOnly(id);
+  // Then make the preview text directly editable for fast inline edits.
+  const pvEl = document.getElementById(PV_ID_MAP[id]);
+  if (pvEl) pvMakeEditable(pvEl, id);
+}
+
+// Open the sec-body that contains the given field's input — without
+// stealing focus from the preview span (so the contentEditable edit
+// stays usable). Separated from focusField() because focusField()
+// scrollIntoViews + focuses + selects, which conflicts with the
+// in-place editing flow.
+function pvOpenSectionOnly(id){
+  const el = document.getElementById(id);
+  if (!el) return;
+  let p = el.parentElement;
+  while (p) {
+    if (p.classList && p.classList.contains('sec-body')) {
+      if (!p.classList.contains('open')) {
+        p.classList.add('open');
+        const head = p.previousElementSibling;
+        if (head && head.classList.contains('sec-head')) head.classList.add('open');
+        try { localStorage.setItem('sec_' + (p.closest('.sec')?.id || ''), '1'); } catch(e) {}
+      }
+      return;
+    }
+    p = p.parentElement;
+  }
 }
 
 // Make a preview text span editable in-place. On commit (Enter/blur),
