@@ -853,7 +853,7 @@ function ceApplyFontPreservingTags(text, style){
 
 function ceApplyFont(style) {
   const ta = document.getElementById('ceTextarea');
-  const s = ta.selectionStart, e = ta.selectionEnd;
+  const { s, e } = ceGetSel(ta);
   if (s === e) return;
   const sel = ta.value.substring(s, e);
   const converted = ceApplyFontPreservingTags(sel, style);
@@ -875,7 +875,7 @@ function ceApplyFont(style) {
 //   3) no wrapper found                                 → add fresh wrap
 function ceWrap(tag) {
   const ta = document.getElementById('ceTextarea');
-  const s = ta.selectionStart, e = ta.selectionEnd;
+  const { s, e } = ceGetSel(ta);
   if (s === e) return; // no selection
   const val = ta.value;
   const sel = val.substring(s, e);
@@ -986,7 +986,7 @@ function findEnclosingTag(val, s, e, openPattern, closePattern){
 function ceWrapSize() {
   const ta = document.getElementById('ceTextarea');
   const sz = document.getElementById('ceSize').value;
-  const s = ta.selectionStart, e = ta.selectionEnd;
+  const { s, e } = ceGetSel(ta);
   if (s === e) return;
   const val = ta.value;
   let sel = val.substring(s, e);
@@ -1029,7 +1029,7 @@ function ceWrapSize() {
 function ceWrapColor() {
   const ta = document.getElementById('ceTextarea');
   const col = document.getElementById('ceColor').value;
-  const s = ta.selectionStart, e = ta.selectionEnd;
+  const { s, e } = ceGetSel(ta);
   if (s === e) return;
   const val = ta.value;
   let sel = val.substring(s, e);
@@ -1066,13 +1066,54 @@ function ceWrapColor() {
   ta.focus(); ceSync();
 }
 
+// Last non-empty textarea selection — restored when the focus has drifted
+// to the color picker or an Apply button (some browsers collapse the
+// textarea selection at that point, making s === e and the early-return
+// trap fire).
+let _ceLastSel = { s: 0, e: 0 };
+function ceRememberSel(){
+  const ta = document.getElementById('ceTextarea');
+  if (!ta) return;
+  if (ta.selectionStart !== ta.selectionEnd) {
+    _ceLastSel = { s: ta.selectionStart, e: ta.selectionEnd };
+  }
+}
+function ceGetSel(ta){
+  let s = ta.selectionStart, e = ta.selectionEnd;
+  if (s === e && _ceLastSel.e > _ceLastSel.s) {
+    s = _ceLastSel.s; e = _ceLastSel.e;
+    try { ta.setSelectionRange(s, e); } catch(_) {}
+  }
+  return { s, e };
+}
+
 function ceWrapGradient() {
   const ta = document.getElementById('ceTextarea');
   const c1 = document.getElementById('ceGrad1').value;
   const c2 = document.getElementById('ceGrad2').value;
-  const s = ta.selectionStart, e = ta.selectionEnd;
+  const { s, e } = ceGetSel(ta);
   if (s === e) return;
-  const sel = ta.value.substring(s, e);
+
+  // Pull selection. Strip any existing <color=…>…</color> tags inside it
+  // so we don't nest a gradient inside an outer color (the outer one
+  // wins in Unity, which is what made gradients silently 'not work').
+  let sel = ta.value.substring(s, e).replace(/<\/?color(=#[0-9a-fA-F]{3,8})?>/g, '');
+
+  // If an enclosing <color=…>…</color> wraps the selection (through
+  // intervening tags), strip it too — same reason.
+  const val0 = ta.value;
+  const enclosingColor = findEnclosingTag(val0, s, e, /<color=#[0-9a-fA-F]{3,8}>/, /<\/color>/);
+  let baseVal = val0;
+  let baseS = s, baseE = e;
+  if (enclosingColor) {
+    const openLen = enclosingColor.openEnd - enclosingColor.openStart;
+    baseVal = val0.substring(0, enclosingColor.openStart)
+            + val0.substring(enclosingColor.openEnd, enclosingColor.closeStart)
+            + val0.substring(enclosingColor.closeEnd);
+    baseS = s - openLen;
+    baseE = e - openLen;
+  }
+
   // split selected text into words and apply gradient colors
   const words = sel.split(' ').filter(w => w.length > 0);
   if (!words.length) return;
@@ -1087,9 +1128,10 @@ function ceWrapGradient() {
       return '<color=' + hex + '>' + w + '</color>';
     }).join(' ');
   }
-  ta.value = ta.value.substring(0, s) + wrapped + ta.value.substring(e);
-  ta.selectionStart = s;
-  ta.selectionEnd = s + wrapped.length;
+  ta.value = baseVal.substring(0, baseS) + wrapped + baseVal.substring(baseE);
+  ta.selectionStart = baseS;
+  ta.selectionEnd = baseS + wrapped.length;
+  _ceLastSel = { s: baseS, e: baseS + wrapped.length };
   ta.focus();
   ceSync();
 }
@@ -2062,6 +2104,11 @@ FIELDS.forEach(f => {
 
 // custom editor sync
 document.getElementById('ceTextarea')?.addEventListener('input', ceSync);
+// Keep _ceLastSel in sync so Apply buttons can recover when focus drift
+// during color-picker / button-click collapses the textarea selection.
+['select','mouseup','keyup','blur','input'].forEach(ev => {
+  document.getElementById('ceTextarea')?.addEventListener(ev, ceRememberSel);
+});
 
 // keyboard shortcuts — Ctrl/Cmd + S (share), Ctrl/Cmd + Shift + C (copy code), Ctrl/Cmd + Z handled natively in inputs
 document.addEventListener('keydown', e => {
