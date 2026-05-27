@@ -869,6 +869,11 @@ function rainbowText(text){
 function ceApplyFontPreservingTags(text, style){
   return text.split(/(<[^>]*>)/).map(part => {
     if (part.startsWith('<') && part.endsWith('>')) return part;
+    // 'normal' explicitly resets variant chars back to plain ASCII (the
+    // outer applyFont() leaves 'normal' text untouched so pasted variant
+    // chars survive in regular fields — but here in the custom editor
+    // a user clicking the Normal button clearly WANTS ASCII back).
+    if (style === 'normal') return normalizeFontChars(part);
     return applyFont(part, style);
   }).join('');
 }
