@@ -4,7 +4,7 @@
 //   label = plain text title shown next to the icon
 const TEMPLATES = {
   en: [
-    { icon: 'candy',   label: 'Sweet', titleStyle: 'color:#ff9ec7;text-shadow:0 0 12px rgba(255,158,199,.3)', items: [
+    { icon: 'candy',   label: 'Sweet', titleStyle: 'color:#ffa6cf;text-shadow:0 0 14px rgba(255,166,207,.5)', items: [
       ['stay close',      'stay close',           'please always',         '.. stay close to me ..'],
       ['feel safe',       'you make me feel safe','every single day',      '.. thank you for that ..'],
       ['so cute',         'so cute',              'you are honestly',      '.. i cant handle it ..'],
@@ -17,7 +17,7 @@ const TEMPLATES = {
       ['safe place',      'safe place',           'you are my',            '.. and i am yours ..'],
       ['forever us',      'forever us',           'always you and me',     '.. no matter what ..'],
     ]},
-    { icon: 'users', label: 'Friends', titleStyle: 'color:var(--green);text-shadow:0 0 12px rgba(126,200,126,.3)', items: [
+    { icon: 'users', label: 'Friends', titleStyle: 'color:#7ee0a2;text-shadow:0 0 14px rgba(126,224,162,.5)', items: [
       ['best friend',       'best friend',       'you are simply',     '.. the best ..'],
       ['we are a team',     'we are a team',     'always have been',   '.. and always will be ..'],
       ['without you',       'without you',       'everything would be','.. only half as fun ..'],
@@ -27,7 +27,7 @@ const TEMPLATES = {
       ['hard to find',      'friends like you',  'are hard to find',   '.. so i am keeping you ..'],
       ['i miss us',         'i miss us',         'our little moments', '.. the best ones ..'],
     ]},
-    { icon: 'face-smile', label: 'Funny', titleStyle: 'color:var(--purple);text-shadow:0 0 12px rgba(179,136,255,.3)', items: [
+    { icon: 'face-smile', label: 'Funny', titleStyle: 'color:#c4a7ff;text-shadow:0 0 14px rgba(196,167,255,.5)', items: [
       ['i like you',     'i like you',     'even though you drive me','.. completely crazy ..'],
       ['you annoy me',   'you annoy me',   'but please',              '.. never ever stop ..'],
       ['only you',       'only you',       'are allowed to',          '.. drive me this crazy ..'],
@@ -38,7 +38,7 @@ const TEMPLATES = {
       ['too late',       'too late',       'youre already',           '.. stuck with me ..'],
       ['pookie wookie',  'pookie wookie',  'i hope your poo poo time','.. went well today ..'],
     ]},
-    { icon: 'face-laugh', label: 'Funny / Chaotic', titleStyle: 'color:var(--gold);text-shadow:0 0 12px rgba(255,216,77,.2)', items: [
+    { icon: 'face-laugh', label: 'Funny / Chaotic', titleStyle: 'color:#ffd84d;text-shadow:0 0 14px rgba(255,216,77,.45)', items: [
       ['annoying',         'annoying but cute',  'youre annoying',           '.. but kinda cute ..'],
       ['playing cool',     'then you appeared',  'i was playing it cool',    '.. then there was you ..'],
       ['owe me',           'you owe me',         'i dropped my drink',       '.. staring at you ..'],
@@ -56,7 +56,7 @@ const TEMPLATES = {
       ['the problem',      'im the problem',     'id fix your issues',       '.. but im one ..'],
       ['weird',            'i like weird',       'youre weird and',          '.. i love that ..'],
     ]},
-    { icon: 'skull', label: 'Friends / Roast', titleStyle: 'color:#cc6666;text-shadow:0 0 12px rgba(204,102,102,.25)', chipExtra: 'danger', items: [
+    { icon: 'skull', label: 'Friends / Roast', titleStyle: 'color:#ff5a5a;text-shadow:0 0 14px rgba(255,90,90,.5)', chipExtra: 'danger', items: [
       ['still single',     'explains a lot',     'still single huh',         '.. that explains stuff ..'],
       ['loading',          'loading screen',     'you flirt like a',         '.. broken loading bar ..'],
       ['life roasted',     'life did it',        'id roast you but',         '.. life already did ..'],
@@ -78,7 +78,7 @@ const TEMPLATES = {
       ['smart dumb',       'smart and dumb',     'somehow youre both',       '.. at the same time ..'],
       ['ego',              'catch up someday',   'one day your personality', '.. will catch up to your ego ..'],
     ]},
-    { icon: 'heart', label: 'Flirty', titleStyle: 'color:#ff8fb3;text-shadow:0 0 12px rgba(255,143,179,.3)', items: [
+    { icon: 'heart', label: 'Flirty', titleStyle: 'color:#ff6ba0;text-shadow:0 0 14px rgba(255,107,160,.5)', items: [
       ['just us',    'just us',    'no one else',         '.. you and me ..'],
       ['kiss me',    'kiss me',    'please',              '.. just once ..'],
       ['dont go',    'dont go',    'please just',         '.. stay with me ..'],
@@ -89,7 +89,7 @@ const TEMPLATES = {
       ['dangerous',  'dangerous',  'you are so',          '.. for my heart ..'],
       ['be mine',    'be mine',    'please just',         '.. say yes ..'],
     ]},
-    { icon: 'kiss', label: 'Flirty bold', titleStyle: 'color:var(--pink);text-shadow:0 0 12px rgba(255,113,184,.3)', chipExtra: 'pink', items: [
+    { icon: 'kiss', label: 'Flirty bold', titleStyle: 'color:#ff4d9d;text-shadow:0 0 14px rgba(255,77,157,.55)', chipExtra: 'pink', items: [
       ['lingerie',      'walk by again',      'love at first sight or',      '.. should i walk by in lingerie ..'],
       ['so hot',        'so hot',             'you made my dirty thoughts',  '.. actually blush ..'],
       ['not flirting',  'just describing',    'im not flirting',             '.. what id do to you ..'],
@@ -107,7 +107,7 @@ const TEMPLATES = {
       ['that look',     'that look',          'you had me at',               '.. just one look ..'],
       ['obsessed',      'but damn',           'not saying im obsessed',      '.. but damn ..'],
     ]},
-    { icon: 'hat-wizard', label: 'Wicked', titleStyle: 'color:#d946ef;text-shadow:0 0 12px rgba(217,70,239,.35)', chipExtra: 'wicked', items: [
+    { icon: 'hat-wizard', label: 'Wicked', titleStyle: 'color:#e879f9;text-shadow:0 0 14px rgba(232,121,249,.5)', chipExtra: 'wicked', items: [
       ['no halo',         'lost my halo',     'i lost my halo on the way',         '.. somewhere fun probably ..'],
       ['wicked mind',     'wicked thoughts',  'my mind goes places that',          '.. you would not believe ..'],
       ['little devil',    'tiny devil',       'i look like trouble because',       '.. i am trouble actually ..'],
@@ -119,14 +119,14 @@ const TEMPLATES = {
       ['mischief',        'pure mischief',    'fully powered today by',            '.. mischief and nothing else ..'],
       ['trouble',         'big trouble',      'someone should hang a sign on me',  '.. saying trouble incoming ..'],
     ]},
-    { icon: 'fire', label: 'Dominant', titleStyle: 'color:#ff7a7a;text-shadow:0 0 12px rgba(255,77,77,.3)', chipExtra: 'red', items: [
+    { icon: 'fire', label: 'Dominant', titleStyle: 'color:#ff4d4d;text-shadow:0 0 14px rgba(255,77,77,.55)', chipExtra: 'red', items: [
       ['follow me',     'follow me',          'good girls follow rules',     '.. bad girls follow me ..'],
       ['lipstick',      'ruin your lipstick', 'i wanna',                     '.. not your life ..'],
       ['pin you',       'pinned to the wall', 'you talk cute for someone',   '.. who should be pinned ..'],
       ['i win',         'either way i win',   'behave or dont',              '.. i still win ..'],
       ['behave',        'where is the fun',   'i can behave but',            '.. honestly in that ..'],
     ]},
-    { icon: 'handcuffs', label: 'Submissive', titleStyle: 'color:#ec4899;text-shadow:0 0 12px rgba(236,72,153,.3)', chipExtra: 'sub', setFn: 'setSub', items: [
+    { icon: 'handcuffs', label: 'Submissive', titleStyle: 'color:#f472b6;text-shadow:0 0 14px rgba(244,114,182,.5)', chipExtra: 'sub', setFn: 'setSub', items: [
       ['kneel',         'on my knees',        'tell me what to do and ill',  '.. happily kneel for you ..'],
       ['yes please',    'good girl',          'good girls always say',       '.. yes please ..'],
       ['follow',        'leading me',         'just tell me what you want',  '.. ill follow your lead ..'],
@@ -136,7 +136,7 @@ const TEMPLATES = {
       ['yours',         'all yours',          'completely and entirely',     '.. yours to command ..'],
       ['please',        'pretty please',      'please is honestly my favorite','.. word to say to you ..'],
     ]},
-    { icon: 'pepper', label: 'Spicy', titleStyle: 'color:#ffa566;text-shadow:0 0 12px rgba(255,165,102,.3)', chipExtra: 'spicy', items: [
+    { icon: 'pepper', label: 'Spicy', titleStyle: 'color:#ff9933;text-shadow:0 0 14px rgba(255,153,51,.5)', chipExtra: 'spicy', items: [
       ['no innocence',  'impossible',         'you make innocent thoughts',  '.. completely impossible ..'],
       ['one kiss',      'both in trouble',    'one kiss and were',           '.. both in trouble ..'],
       ['fantasies',     'better than dreams', 'you look way better',         '.. than my fantasies ..'],
@@ -146,13 +146,13 @@ const TEMPLATES = {
       ['dessert',       'sweet tooth',        'who needs dinner when i could have','.. you for dessert instead ..'],
       ['no lipstick',   'lipstick issue',     'wearing lipstick around you is honestly','.. a complete waste of time ..'],
     ]},
-    { icon: 'eye', label: 'Voyeur', titleStyle: 'color:#c084fc;text-shadow:0 0 12px rgba(192,132,252,.3)', chipExtra: 'spicy', items: [
+    { icon: 'eye', label: 'Voyeur', titleStyle: 'color:#a855f7;text-shadow:0 0 14px rgba(168,85,247,.5)', chipExtra: 'spicy', items: [
       ['front row',     'vip viewing',     'don’t mind me enjoying',                 '.. the view from over here ..'],
       ['mental notes',  'not behaving',    'i swear my mind instantly went',         '.. somewhere completely inappropriate ..'],
       ['better than tv','too distracting', 'watching you two interact is honestly',  '.. turning into my favorite hobby ..'],
       ['cant look away','stuck watching',  'every time i try looking away',          '.. something hotter happens instead ..'],
     ]},
-    { icon: 'mug-hot', label: 'Aftercare', titleStyle: 'color:#fcd34d;text-shadow:0 0 12px rgba(252,211,77,.3)', chipExtra: 'aftercare', setFn: 'setAftercare', items: [
+    { icon: 'mug-hot', label: 'Aftercare', titleStyle: 'color:#fcd34d;text-shadow:0 0 14px rgba(252,211,77,.5)', chipExtra: 'aftercare', setFn: 'setAftercare', items: [
       ['hold me',       'cuddle close',    'just hold me close and dont',            '.. let go for a while ..'],
       ['water',         'hydrate me',      'pass me water and a hug',                '.. in that exact order ..'],
       ['blanket',       'warm blanket',    'wrap me in a blanket and',               '.. never let me leave ..'],
@@ -162,7 +162,7 @@ const TEMPLATES = {
       ['snacks',        'snack run',       'snacks cuddles and you are',             '.. all i really need now ..'],
       ['no rush',       'take your time',  'no need to rush this i can',             '.. lay here all night ..'],
     ]},
-    { icon: 'spider', label: 'Goth / Dark', titleStyle: 'color:#a855f7;text-shadow:0 0 12px rgba(168,85,247,.3)', chipExtra: 'goth', setFn: 'setGoth', divider: 'Vibes', items: [
+    { icon: 'spider', label: 'Goth / Dark', titleStyle: 'color:#9333ea;text-shadow:0 0 14px rgba(147,51,234,.5)', chipExtra: 'goth', setFn: 'setGoth', divider: 'Vibes', items: [
       ['sun who',         'avoid sunlight',  'whats a sun ive only ever',         '.. seen the moon ..'],
       ['heart beats',     'i have a heart',  'yes i wear black but',              '.. my heart still beats for you ..'],
       ['my coffin',       'reserved seat',   'theres room in my coffin',          '.. just for you ..'],
@@ -172,7 +172,7 @@ const TEMPLATES = {
       ['midnight',        'moonlight vibes', 'meet me at midnight and',           '.. ill explain my soul ..'],
       ['bite worthy',     'vampire energy',  'youre giving major',                '.. bite worthy energy tonight ..'],
     ]},
-    { icon: 'wine-glass', label: 'Drunk vibes', titleStyle: 'color:#f59e0b;text-shadow:0 0 12px rgba(245,158,11,.3)', chipExtra: 'drunk', setFn: 'setDrunk', items: [
+    { icon: 'wine-glass', label: 'Drunk vibes', titleStyle: 'color:#fbbf24;text-shadow:0 0 14px rgba(251,191,36,.5)', chipExtra: 'drunk', setFn: 'setDrunk', items: [
       ['ily',             'love drunk',      'just so you know i love you',       '.. like a lot a lot ..'],
       ['hot tonight',     'so hot',          'you look so good right now',        '.. or maybe its the wine ..'],
       ['kiss u',          'kiss attempt',    'im gonna kiss you so hard',         '.. just give me a second ..'],
@@ -182,7 +182,7 @@ const TEMPLATES = {
       ['drunk dial',      'sorry not sorry', 'sorry for the drunk dial but',      '.. i really miss you tonight ..'],
       ['dance with me',   'dance floor',     'come dance with me before i',       '.. trip over my own feet ..'],
     ]},
-    { icon: 'leaf', label: 'Soft / Cottagecore', titleStyle: 'color:#86efac;text-shadow:0 0 12px rgba(134,239,172,.3)', chipExtra: 'soft', setFn: 'setSoft', items: [
+    { icon: 'leaf', label: 'Soft / Cottagecore', titleStyle: 'color:#4ade80;text-shadow:0 0 14px rgba(74,222,128,.5)', chipExtra: 'soft', setFn: 'setSoft', items: [
       ['flowers',         'pick flowers',    'wanna go pick flowers and',         '.. forget the world today ..'],
       ['tiny picnic',     'picnic mood',     'lets have a tiny picnic and',       '.. pretend its still summer ..'],
       ['cottage',         'tiny cottage',    'a tiny cottage with you',           '.. would honestly be enough ..'],
@@ -192,7 +192,7 @@ const TEMPLATES = {
       ['garden',          'tend the garden', 'come tend the garden with me',      '.. just for an hour ..'],
       ['storybook',       'storybook life',  'living like its a storybook',       '.. would suit us perfectly ..'],
     ]},
-    { icon: 'rainbow', label: 'Pride', titleStyle: 'color:#ec4899;text-shadow:0 0 12px rgba(236,72,153,.35)', chipExtra: 'pride', setFn: 'setPride', items: [
+    { icon: 'rainbow', label: 'Pride', titleStyle: 'color:#f472b6;text-shadow:0 0 14px rgba(244,114,182,.55)', chipExtra: 'pride', setFn: 'setPride', items: [
       ['love wins',       'love wins',       'love wins every single time',       '.. and youre the proof ..'],
       ['proud of you',    'so proud',        'just so you know im proud',         '.. of exactly who you are ..'],
       ['all colors',      'rainbow',         'youre every color of the',          '.. rainbow rolled into one ..'],
@@ -202,7 +202,7 @@ const TEMPLATES = {
       ['on agenda',       'gay agenda',      'kissing you is honestly',           '.. always on my agenda ..'],
       ['shine bright',    'shine on',        'shine as bright as you want',       '.. youre worth every color ..'],
     ]},
-    { icon: 'tree', label: 'Christmas', titleStyle: 'color:#ff5252;text-shadow:0 0 12px rgba(76,175,80,.35)', chipExtra: 'xmas', setFn: 'setXmas', divider: 'Holidays', items: [
+    { icon: 'tree', label: 'Christmas', titleStyle: 'color:#ef4444;text-shadow:0 0 14px rgba(239,68,68,.5)', chipExtra: 'xmas', setFn: 'setXmas', divider: 'Holidays', items: [
       ['merry xmas',     'merry christmas',  'wishing you all the warm',          '.. christmas magic this year ..'],
       ['under tree',     'under the tree',   'youre honestly the best gift',      '.. anyone could ever find ..'],
       ['cocoa weather',  'cuddle season',    'cuddle season is finally',          '.. officially open ..'],
@@ -212,7 +212,7 @@ const TEMPLATES = {
       ['snow day',       'stay in bed',      'finally cold enough to',            '.. stay in bed all day ..'],
       ['xmas list',      'top of the list',  'youve been on my list',             '.. since january honestly ..'],
     ]},
-    { icon: 'ghost', label: 'Halloween', titleStyle: 'color:#ff8c3a;text-shadow:0 0 12px rgba(168,85,247,.35)', chipExtra: 'halloween', setFn: 'setHalloween', items: [
+    { icon: 'ghost', label: 'Halloween', titleStyle: 'color:#ff8c3a;text-shadow:0 0 14px rgba(255,140,58,.55)', chipExtra: 'halloween', setFn: 'setHalloween', items: [
       ['boo babe',       'boo',              'youre the only thing tonight',      '.. thats scary in a good way ..'],
       ['trick treat',    'mostly trick',     'happy halloween, im mostly',        '.. trick with a little treat ..'],
       ['witchy vibes',   'witchy mood',      'feeling extra witchy tonight',      '.. you better behave ..'],
@@ -222,7 +222,7 @@ const TEMPLATES = {
       ['one bite',       'i bite',           'careful with me tonight',           '.. i might just bite ..'],
       ['scary cute',     'still cute',       'your scariest costume is',          '.. still way too cute ..'],
     ]},
-    { icon: 'egg', label: 'Easter', titleStyle: 'color:#f9a8d4;text-shadow:0 0 12px rgba(196,181,253,.4)', chipExtra: 'easter', setFn: 'setEaster', items: [
+    { icon: 'egg', label: 'Easter', titleStyle: 'color:#f9a8d4;text-shadow:0 0 14px rgba(249,168,212,.5)', chipExtra: 'easter', setFn: 'setEaster', items: [
       ['hoppy easter',   'hoppy easter',     'wishing you a really really',       '.. hoppy easter today ..'],
       ['my bunny',       'cutest bunny',     'youre cuter than every',            '.. bunny ill see today ..'],
       ['egg hunt',       'only one egg',     'the only egg im hunting',           '.. is honestly just yours ..'],
@@ -231,7 +231,7 @@ const TEMPLATES = {
       ['spring vibes',   'spring is here',   'spring is here and so is',          '.. your cute energy ..'],
       ['choco fix',      'better than choc', 'youre way better than any',         '.. easter chocolate ..'],
     ]},
-    { icon: 'clover', label: 'St Patricks', titleStyle: 'color:#22c55e;text-shadow:0 0 12px rgba(34,197,94,.35)', chipExtra: 'stpat', setFn: 'setStPatricks', items: [
+    { icon: 'clover', label: 'St Patricks', titleStyle: 'color:#22c55e;text-shadow:0 0 14px rgba(34,197,94,.5)', chipExtra: 'stpat', setFn: 'setStPatricks', items: [
       ['lucky',          'feeling lucky',    'feeling extra lucky today',         '.. because i have you ..'],
       ['four leaf',      'rare find',        'finding you was like finding',      '.. a four leaf clover ..'],
       ['pot of gold',    'worth more',       'youre honestly worth more than',    '.. any pot of gold ..'],
@@ -240,7 +240,7 @@ const TEMPLATES = {
       ['rainbow',        'end of rainbow',   'youre exactly what i found',        '.. at the end of the rainbow ..'],
       ['leprechaun',     'tiny menace',      'youre cuter than any',              '.. cheeky little leprechaun ..'],
     ]},
-    { icon: 'heart-pulse', label: 'Valentine', titleStyle: 'color:#ff4d6d;text-shadow:0 0 12px rgba(255,77,109,.35)', chipExtra: 'valentine', setFn: 'setValentine', items: [
+    { icon: 'heart-pulse', label: 'Valentine', titleStyle: 'color:#ff4d6d;text-shadow:0 0 14px rgba(255,77,109,.55)', chipExtra: 'valentine', setFn: 'setValentine', items: [
       ['be mine',        'be my valentine',  'no overthinking it this year',      '.. just be my valentine ..'],
       ['only you',       'same person',      'every valentines i pick is',        '.. honestly the same person ..'],
       ['still yours',    'heart check',      'just checking in, my heart is',     '.. somehow still yours ..'],
@@ -249,7 +249,7 @@ const TEMPLATES = {
       ['cupid aim',      'good aim',         'cupid clearly aimed for me',        '.. and somehow hit twice ..'],
       ['sweet enough',   'no chocolate',     'i dont need chocolate when',        '.. youre already this sweet ..'],
     ]},
-    { icon: 'venus', label: 'Womens Day', titleStyle: 'color:#c084fc;text-shadow:0 0 12px rgba(192,132,252,.35)', chipExtra: 'womans', setFn: 'setWomansDay', items: [
+    { icon: 'venus', label: 'Womens Day', titleStyle: 'color:#c084fc;text-shadow:0 0 14px rgba(192,132,252,.5)', chipExtra: 'womans', setFn: 'setWomansDay', items: [
       ['queen',          'pure queen',       'just so you remember today',        '.. youre a complete queen ..'],
       ['unstoppable',    'cant stop her',    'youre honestly something',          '.. completely unstoppable ..'],
       ['so proud',       'proud of you',     'just want you to know im',          '.. so proud of you today ..'],
@@ -259,7 +259,7 @@ const TEMPLATES = {
       ['lead on',        'born to lead',     'keep leading the way',              '.. like you always do ..'],
       ['celebrate you',  'today is yours',   'today is one whole day to',         '.. celebrate all of you ..'],
     ]},
-    { icon: 'flag-usa', label: '4th of July', titleStyle: 'color:#60a5fa;text-shadow:0 0 12px rgba(239,68,68,.35)', chipExtra: 'july4', setFn: 'setJuly4', items: [
+    { icon: 'flag-usa', label: '4th of July', titleStyle: 'color:#60a5fa;text-shadow:0 0 14px rgba(96,165,250,.5)', chipExtra: 'july4', setFn: 'setJuly4', items: [
       ['freedom',        'freedom mode',     'wishing you a really loud',         '.. independence day this year ..'],
       ['fireworks',      'better than fw',   'honestly youre way more',           '.. exciting than any firework ..'],
       ['bbq vibes',      'grill on',         'grill is on and so is',             '.. the july energy today ..'],
@@ -268,7 +268,7 @@ const TEMPLATES = {
       ['burgers beer',   'classic combo',    'nothing beats burgers, beer',       '.. and great company ..'],
       ['extra color',    'one more color',   'red white blue and one more',       '.. color called happy ..'],
     ]},
-    { icon: 'drumstick', label: 'Thanksgiving', titleStyle: 'color:#d97706;text-shadow:0 0 12px rgba(217,119,6,.35)', chipExtra: 'thanksgiving', setFn: 'setThanksgiving', items: [
+    { icon: 'drumstick', label: 'Thanksgiving', titleStyle: 'color:#ea580c;text-shadow:0 0 14px rgba(234,88,12,.5)', chipExtra: 'thanksgiving', setFn: 'setThanksgiving', items: [
       ['grateful',       'thankful for you', 'just so you know im grateful',      '.. for you every day ..'],
       ['pass plate',     'pass the plate',   'pass me the plate and also',        '.. a hug if youre near ..'],
       ['pie first',      'pie before all',   'forget the turkey i need',          '.. pie and you first ..'],
@@ -278,7 +278,7 @@ const TEMPLATES = {
       ['thankful for',   'list of thanks',   'on my list of thanks tonight',      '.. you take the top spot ..'],
       ['cozy day',       'cozy thanks',      'cozy day, full plate and',          '.. you across the table ..'],
     ]},
-    { icon: 'star-of-david', label: 'Hanukkah', titleStyle: 'color:#7dd3fc;text-shadow:0 0 12px rgba(125,211,252,.35)', chipExtra: 'hanukkah', setFn: 'setHanukkah', items: [
+    { icon: 'star-of-david', label: 'Hanukkah', titleStyle: 'color:#7dd3fc;text-shadow:0 0 14px rgba(125,211,252,.55)', chipExtra: 'hanukkah', setFn: 'setHanukkah', items: [
       ['happy hanukkah', 'happy hanukkah',   'wishing you the warmest',           '.. happiest hanukkah ever ..'],
       ['eight nights',   'nights of joy',    'eight nights of light and',         '.. honestly so much joy ..'],
       ['light it up',    'candle by candle', 'lighting them up one by one',       '.. and thinking of you ..'],
@@ -287,7 +287,7 @@ const TEMPLATES = {
       ['extra latkes',   'latke fan',        'extra latkes for everyone',         '.. and extra love for you ..'],
       ['dreidel spin',   'spin to win',      'spin the dreidel and wish',         '.. for a great year ahead ..'],
     ]},
-    { icon: 'champagne-glasses', label: 'New Year', titleStyle: 'color:#fbbf24;text-shadow:0 0 12px rgba(251,191,36,.4)', chipExtra: 'newyear', setFn: 'setNewYear', items: [
+    { icon: 'champagne-glasses', label: 'New Year', titleStyle: 'color:#fbbf24;text-shadow:0 0 14px rgba(251,191,36,.55)', chipExtra: 'newyear', setFn: 'setNewYear', items: [
       ['happy new year', 'happy new year',   'wishing you the brightest',         '.. new year ever ..'],
       ['cheers',         'glass up',         'raising a glass to you and',        '.. another great year ..'],
       ['midnight kiss',  'kiss me',          'find me at midnight i want',        '.. that new year kiss ..'],
@@ -297,7 +297,7 @@ const TEMPLATES = {
       ['countdown',      'three two one',    'counting down to midnight and',     '.. straight into your arms ..'],
       ['fresh start',    'shiny new year',   'wishing you a really shiny',        '.. fresh start this year ..'],
     ]},
-    { icon: 'ring', label: 'Wedding', titleStyle: 'color:#d4af37;text-shadow:0 0 12px rgba(212,175,55,.35)', chipExtra: 'wedding', setFn: 'setWedding', divider: 'Celebrations', items: [
+    { icon: 'ring', label: 'Wedding', titleStyle: 'color:#e0b94a;text-shadow:0 0 14px rgba(224,185,74,.5)', chipExtra: 'wedding', setFn: 'setWedding', divider: 'Celebrations', items: [
       ['big day',        'big day finally',  'today is finally the day you',      '.. start your forever ..'],
       ['just married',   'married vibes',    'wishing you both a really',         '.. happy married life ..'],
       ['forever',        'forever starts',   'forever officially starts',         '.. for the two of you today ..'],
@@ -307,7 +307,7 @@ const TEMPLATES = {
       ['cheers couple',  'to the couple',    'raising a glass to the couple',     '.. of the whole year ..'],
       ['hugs',           'best wishes',      'sending all my love and',           '.. happiest wishes today ..'],
     ]},
-    { icon: 'gem', label: 'Anniversary', titleStyle: 'color:#e8b4b8;text-shadow:0 0 12px rgba(232,180,184,.35)', chipExtra: 'anniv', setFn: 'setAnniv', items: [
+    { icon: 'gem', label: 'Anniversary', titleStyle: 'color:#fda4af;text-shadow:0 0 14px rgba(253,164,175,.5)', chipExtra: 'anniv', setFn: 'setAnniv', items: [
       ['year more',      'one more year',    'another year of us and im',         '.. still completely obsessed ..'],
       ['us forever',     'still us',         'somehow still picking you',         '.. every single year ..'],
       ['my favorite',    'favorite person',  'still my favorite person',          '.. after all this time ..'],
@@ -317,7 +317,7 @@ const TEMPLATES = {
       ['choose you',     'pick you again',   'id pick you again every',           '.. single time honestly ..'],
       ['anniversary',    'happy anniv',      'happy anniversary to the love',     '.. of my entire life ..'],
     ]},
-    { icon: 'cake', label: 'Birthday', titleStyle: 'color:var(--gold);text-shadow:0 0 12px rgba(255,216,77,.2)', bday: true, chipExtra: 'gold', items: [
+    { icon: 'cake', label: 'Birthday', titleStyle: 'color:#ffd84d;text-shadow:0 0 14px rgba(255,216,77,.5)', bday: true, chipExtra: 'gold', items: [
       ['happy birthday','happy birthday','wishing you all the best','.. today and always ..'],
       ['its your day',  'its your day',  'celebrate yourself',      '.. you deserve it ..'],
       ['make a wish',   'make a wish',   'the cake is ready',       '.. its all yours ..'],
