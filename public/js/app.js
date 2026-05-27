@@ -45,7 +45,7 @@ function applyState(s) {
   if (s._ff) {
     Object.assign(fieldFonts, JSON.parse(s._ff));
     Object.keys(fieldFonts).forEach(f => {
-      ['normal','fancy','smallcaps','thai'].forEach(st => {
+      ['normal','fancy','smallcaps','thai','flipped'].forEach(st => {
         const el = document.getElementById('font_' + f + '_' + st);
         if (el) el.classList.toggle('on', fieldFonts[f] === st);
       });
@@ -257,7 +257,7 @@ function restoreGiftState() {
     if (state.fieldFonts) {
       Object.assign(fieldFonts, state.fieldFonts);
       Object.keys(fieldFonts).forEach(f => {
-        ['normal','fancy','smallcaps','thai'].forEach(s => {
+        ['normal','fancy','smallcaps','thai','flipped'].forEach(s => {
           const el = document.getElementById('font_' + f + '_' + s);
           if (el) el.classList.toggle('on', fieldFonts[f] === s);
         });
@@ -313,7 +313,7 @@ const I18N = {
     layout:'Layout',
     layout_center:'Center', layout_inline:'Inline', layout_compact:'Compact',
     layout_framed:'Framed', layout_minimal:'Minimal', layout_pyramid:'Pyramid',
-    layout_custom:'Custom',
+    layout_flipped:'Flipped', layout_custom:'Custom',
     reset_all:'Reset All',
     deco_top:'Deco Top', top_line:'Top Line', main_text:'Main Text',
     bottom_line:'Bottom Line', kaomoji:'Kaomoji', deco_bottom:'Deco Bottom', symbols:'Symbols',
@@ -385,7 +385,7 @@ const I18N = {
     layout:'Layout',
     layout_center:'Zentriert', layout_inline:'Inline', layout_compact:'Kompakt',
     layout_framed:'Mit Rahmen', layout_minimal:'Minimal', layout_pyramid:'Pyramide',
-    layout_custom:'Eigenes',
+    layout_flipped:'Gedreht', layout_custom:'Eigenes',
     reset_all:'Alles zurücksetzen',
     deco_top:'Deko oben', top_line:'Obere Zeile', main_text:'Haupttext',
     bottom_line:'Untere Zeile', kaomoji:'Kaomoji', deco_bottom:'Deko unten', symbols:'Symbole',
@@ -456,7 +456,7 @@ const I18N = {
     layout:'Disposition',
     layout_center:'Centré', layout_inline:'En ligne', layout_compact:'Compact',
     layout_framed:'Encadré', layout_minimal:'Minimal', layout_pyramid:'Pyramide',
-    layout_custom:'Perso',
+    layout_flipped:'Renversé', layout_custom:'Perso',
     reset_all:'Tout réinitialiser',
     deco_top:'Déco haut', top_line:'Ligne haut', main_text:'Texte principal',
     bottom_line:'Ligne bas', kaomoji:'Kaomoji', deco_bottom:'Déco bas', symbols:'Symboles',
@@ -527,7 +527,7 @@ const I18N = {
     layout:'Макет',
     layout_center:'Центр', layout_inline:'Строка', layout_compact:'Компактный',
     layout_framed:'Рамка', layout_minimal:'Минимал', layout_pyramid:'Пирамида',
-    layout_custom:'Своё',
+    layout_flipped:'Перевёрнутый', layout_custom:'Своё',
     reset_all:'Сбросить всё',
     deco_top:'Декор сверху', top_line:'Верхняя строка', main_text:'Основной текст',
     bottom_line:'Нижняя строка', kaomoji:'Каомодзи', deco_bottom:'Декор снизу', symbols:'Символы',
@@ -690,6 +690,9 @@ const layoutDefaults = {
   framed:  {dekoTop:'❀ · ❀ · ❀', topText:'du bist mein', mainText:'liebling', bottomText:'· kein scherz ·', kaomoji:'', dekoBottom:''},
   minimal: {dekoTop:'', topText:'', mainText:'nur wir', bottomText:'', kaomoji:'(❀◡❀)', dekoBottom:''},
   pyramid: {dekoTop:'✦ · ✦', topText:'.. stop being ..', mainText:'so cute', bottomText:'.. i cant handle it ..', kaomoji:'(❀◡❀)', dekoBottom:''},
+  // Flipped: a topsy-turvy layout. Default bottomText is meant to be
+  // toggled to the 'flipped' font for the 180°-rotated read.
+  flipped: {dekoTop:'.. ↓ ↓ ..', topText:'world flipped today', mainText:'still chose you', bottomText:'.. every single time ♡ ..', kaomoji:'(´ ▽ `)ﾉ', dekoBottom:'.. ↑ ↑ ..'},
   custom: {dekoTop:'', topText:'', mainText:'', bottomText:'', kaomoji:'', dekoBottom:''}
 };
 function setLayout(layout) {
@@ -750,7 +753,10 @@ function applyLayout(lm) {
     kaomoji:    lm.kaomoji,
     dekoBottom: lm.dekoBottom,
   };
-  if(currentLayout==='center')  return ord.map(f=>w[f]).filter(Boolean).join('\n');
+  // 'flipped' uses the same vertical stack as center — the layout's
+  // identity comes from font/colour defaults + dedicated templates, not
+  // a different geometric arrangement.
+  if(currentLayout==='center' || currentLayout==='flipped') return ord.map(f=>w[f]).filter(Boolean).join('\n');
   if(currentLayout==='inline')  return [[w.dekoTop,w.topText,w.mainText,w.dekoTop].filter(Boolean).join(' '),w.bottomText,w.kaomoji,w.dekoBottom].filter(Boolean).join('\n');
   if(currentLayout==='compact') return [w.dekoTop,[w.topText,w.mainText,w.bottomText].filter(Boolean).join(' · '),w.kaomoji,w.dekoBottom].filter(Boolean).join('\n');
   if(currentLayout==='framed'){
@@ -1533,13 +1539,32 @@ function colorTag(text,field){const g=grads[field];if(g?.rainbow)return rainbowT
 const FM={'a':'α','b':'в','c':'¢','d':'∂','e':'є','f':'f','g':'g','h':'н','i':'ι','j':'נ','k':'к','l':'ℓ','m':'м','n':'η','o':'σ','p':'ρ','q':'q','r':'я','s':'ѕ','t':'т','u':'υ','v':'ν','w':'ω','x':'χ','y':'у','z':'z'};
 const SM={'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'};
 const TM={'a':'ล','b':'в','c':'¢','d':'∂','e':'э','f':'ƒ','g':'φ','h':'ђ','i':'เ','j':'נ','k':'к','l':'ℓ','m':'м','n':'и','o':'๏','p':'ק','q':'ợ','r':'я','s':'ร','t':'†','u':'µ','v':'√','w':'ω','x':'җ','y':'ý','z':'ž'};
+// Upside-down map — for the 'flipped' font. Output is read 180° rotated:
+// "just" → "ʇsnɾ". Implementation reverses the per-line order AND maps
+// each char to its upside-down twin. Some flips happen to be plain ASCII
+// (n↔u, p↔d, b↔q, …) which is why we deliberately EXCLUDE those from
+// FONT_REVERSE — letting them populate the reverse map would break
+// normal-letter typing in every other font.
+const UM={
+  'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ı','j':'ɾ',
+  'k':'ʞ','l':'ʃ','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ',
+  'u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z',
+  '0':'0','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6',
+  '.':'˙',',':'\'','?':'¿','!':'¡','(':')',')':'(','[':']',']':'[','{':'}','}':'{','<':'>','>':'<','&':'⅋','_':'‾'
+};
 // Reverse map: every variant char back to its ASCII source. Lets the user
 // switch from one font to another without first clearing — applyFont
 // normalises to ASCII before re-applying so e.g. fancy → smallcaps works
-// even on text that's already fancy.
+// even on text that's already fancy. We skip identity mappings AND any
+// mapping whose value is a plain ASCII letter (UM has plenty: n→u, p→d,
+// etc) — letting those into FONT_REVERSE would convert normal typed
+// 'n' into 'u' silently across every font.
 const FONT_REVERSE = (() => {
   const r = {};
-  [FM, SM, TM].forEach(m => Object.keys(m).forEach(k => { if (m[k] !== k) r[m[k]] = k; }));
+  [FM, SM, TM, UM].forEach(m => Object.keys(m).forEach(k => {
+    const v = m[k];
+    if (v !== k && !/^[a-zA-Z]$/.test(v)) r[v] = k;
+  }));
   return r;
 })();
 function normalizeFontChars(text){ return text.split('').map(c => FONT_REVERSE[c] || c).join(''); }
@@ -1556,6 +1581,12 @@ function applyFont(text,style){
   if(style==='fancy')    return ascii.split('').map(c=>FM[c.toLowerCase()]||c).join('');
   if(style==='smallcaps')return ascii.split('').map(c=>SM[c.toLowerCase()]||c).join('');
   if(style==='thai')     return ascii.split('').map(c=>TM[c.toLowerCase()]||c).join('');
+  // Flipped: per-line reverse + per-char upside-down. Preserves \n
+  // boundaries so multi-line text still renders as a 180° rotation of
+  // each visible line rather than one giant reversed blob.
+  if(style==='flipped')  return ascii.split('\n').map(line =>
+    line.split('').map(c => UM[c.toLowerCase()] || c).reverse().join('')
+  ).join('\n');
   return ascii;
 }
 function setFontStyle(field,style){
@@ -1563,7 +1594,7 @@ function setFontStyle(field,style){
   fieldFonts[field]=style;
   if(field==='mainText') currentFontStyle=style;
   // remove active from all 3 variants for this field
-  ['normal','fancy','smallcaps','thai'].forEach(function(s){
+  ['normal','fancy','smallcaps','thai','flipped'].forEach(function(s){
     var el=document.getElementById('font_'+field+'_'+s);
     if(el) el.classList.remove('on');
   });
@@ -1768,6 +1799,11 @@ function setWicked(main,top,bottom){       applyTheme(main,top,bottom,'#e879f9',
 function setDominant(main,top,bottom){     applyTheme(main,top,bottom,'#ff4d4d','#fca5a5','#991b1b'); }
 function setSpicy(main,top,bottom){        applyTheme(main,top,bottom,'#ff9933','#fdba74','#9a3412'); }
 function setVoyeur(main,top,bottom){       applyTheme(main,top,bottom,'#a855f7','#c084fc','#6b21a8'); }
+// Flipped: cosmic-pink palette for the upside-down layout. Each template
+// in this section reads as a flowing thought, written with the
+// 'world flipped / still us' vibe so the spruch makes sense even before
+// the user toggles the ɟlıp font on a field.
+function setFlipped(main,top,bottom){      applyTheme(main,top,bottom,'#ff4d8c','#c4b5fd','#a78bfa'); }
 function setPride(main, top, bottom){
   applyPreset({
     main, top, bottom, decos: DECO_PRIDE,
@@ -2017,7 +2053,7 @@ function generate(){
   FIELDS.forEach(f => {
     const text = document.getElementById(f)?.value || 'abc';
     const preview = text.substring(0, 20);
-    ['normal','fancy','smallcaps','thai'].forEach(s => {
+    ['normal','fancy','smallcaps','thai','flipped'].forEach(s => {
       const btn = document.getElementById('font_' + f + '_' + s);
       if (btn) btn.title = applyFont(preview, s);
     });
@@ -2364,7 +2400,7 @@ function loadFromURL() {
     FIELDS.forEach(f => { const btn = document.getElementById('btn_' + f); if(!btn) return; const g=grads[f]; btn.style.background = g.on ? `linear-gradient(to right,${g.c1},${g.c2})` : colors[f]; });
     if (state.ff) {
       Object.assign(fieldFonts, state.ff);
-      Object.keys(fieldFonts).forEach(f => { ['normal','fancy','smallcaps','thai'].forEach(s => { const el = document.getElementById('font_'+f+'_'+s); if(el) el.classList.toggle('on', fieldFonts[f]===s); }); });
+      Object.keys(fieldFonts).forEach(f => { ['normal','fancy','smallcaps','thai','flipped'].forEach(s => { const el = document.getElementById('font_'+f+'_'+s); if(el) el.classList.toggle('on', fieldFonts[f]===s); }); });
     }
     if (state.lay) {
       currentLayout = state.lay;

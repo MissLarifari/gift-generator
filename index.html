@@ -137,6 +137,7 @@
           <div class="lbtn"    id="lay_framed"  onclick="setLayout('framed')"  data-i18n="layout_framed">Framed</div>
           <div class="lbtn"    id="lay_minimal" onclick="setLayout('minimal')" data-i18n="layout_minimal">Minimal</div>
           <div class="lbtn"    id="lay_pyramid" onclick="setLayout('pyramid')" data-i18n="layout_pyramid">Pyramid</div>
+          <div class="lbtn"    id="lay_flipped" onclick="setLayout('flipped')" data-i18n="layout_flipped">Flipped</div>
           <div class="lbtn"    id="lay_custom"  onclick="setLayout('custom')"  data-i18n="layout_custom">Custom</div>
         </div>
       </div>
@@ -190,6 +191,7 @@
               <span class="chip"     id="font_dekoTop_fancy"     onclick="setFontStyle('dekoTop','fancy')">αв</span>
               <span class="chip"     id="font_dekoTop_smallcaps" onclick="setFontStyle('dekoTop','smallcaps')">ꜱᴄ</span>
               <span class="chip"     id="font_dekoTop_thai"      onclick="setFontStyle('dekoTop','thai')">ล†</span>
+              <span class="chip"     id="font_dekoTop_flipped"   onclick="setFontStyle('dekoTop','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
             <input type="number" id="sizeDekoTop" value="12"/>
@@ -233,6 +235,7 @@
               <span class="chip"    id="font_topText_fancy"     onclick="setFontStyle('topText','fancy')">αв</span>
               <span class="chip"    id="font_topText_smallcaps" onclick="setFontStyle('topText','smallcaps')">ꜱᴄ</span>
               <span class="chip"    id="font_topText_thai"      onclick="setFontStyle('topText','thai')">ล†</span>
+              <span class="chip"    id="font_topText_flipped"   onclick="setFontStyle('topText','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
             <input type="number" id="sizeTopText" value="14"/>
@@ -270,6 +273,7 @@
               <span class="chip"    id="font_mainText_fancy"     onclick="setFontStyle('mainText','fancy')">αв</span>
               <span class="chip"    id="font_mainText_smallcaps" onclick="setFontStyle('mainText','smallcaps')">ꜱᴄ</span>
               <span class="chip"    id="font_mainText_thai"      onclick="setFontStyle('mainText','thai')">ล†</span>
+              <span class="chip"    id="font_mainText_flipped"   onclick="setFontStyle('mainText','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
             <input type="number" id="fontSize" value="60"/>
@@ -310,6 +314,7 @@
               <span class="chip"    id="font_bottomText_fancy"     onclick="setFontStyle('bottomText','fancy')">αв</span>
               <span class="chip"    id="font_bottomText_smallcaps" onclick="setFontStyle('bottomText','smallcaps')">ꜱᴄ</span>
               <span class="chip"    id="font_bottomText_thai"      onclick="setFontStyle('bottomText','thai')">ล†</span>
+              <span class="chip"    id="font_bottomText_flipped"   onclick="setFontStyle('bottomText','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
             <input type="number" id="sizeBottomText" value="14"/>
@@ -425,6 +430,7 @@
               <span class="chip"    id="font_dekoBottom_fancy"     onclick="setFontStyle('dekoBottom','fancy')">αв</span>
               <span class="chip"    id="font_dekoBottom_smallcaps" onclick="setFontStyle('dekoBottom','smallcaps')">ꜱᴄ</span>
               <span class="chip"    id="font_dekoBottom_thai"      onclick="setFontStyle('dekoBottom','thai')">ล†</span>
+              <span class="chip"    id="font_dekoBottom_flipped"   onclick="setFontStyle('dekoBottom','flipped')" title="Upside-down (ɟʃıddǝp)">ɟlıp</span>
             </div>
             <span class="meta-label" data-i18n="size">Size</span>
             <input type="number" id="sizeDekoBottom" value="12"/>
@@ -583,6 +589,7 @@
           <button class="ce-btn ce-font-btn" onclick="ceApplyFont('fancy')" title="Fancy (αв¢∂є)">αв</button>
           <button class="ce-btn ce-font-btn" onclick="ceApplyFont('smallcaps')" title="Small Caps (ꜱᴄ)">ꜱᴄ</button>
           <button class="ce-btn ce-font-btn" onclick="ceApplyFont('thai')" title="Thai-Mix (ล†)">ล†</button>
+          <button class="ce-btn ce-font-btn" onclick="ceApplyFont('flipped')" title="Upside-down (ɟlıp)">ɟlıp</button>
         </div>
         <div class="ce-toolbar-group">
           <label class="ce-label">Size</label>

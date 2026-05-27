@@ -141,6 +141,7 @@ function stateForSetFn(name, main, top, bottom) {
     setDominant:     ['#ff4d4d','#fca5a5','#991b1b'],
     setSpicy:        ['#ff9933','#fdba74','#9a3412'],
     setVoyeur:       ['#a855f7','#c084fc','#6b21a8'],
+    setFlipped:      ['#ff4d8c','#c4b5fd','#a78bfa'],
   };
   if (themeColors[name]) {
     const [cMain, cTop, cBot] = themeColors[name];
