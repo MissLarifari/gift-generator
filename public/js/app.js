@@ -1391,25 +1391,24 @@ function ceEsc(s) {
 function ceRenderPreview(code) {
   const pv = document.getElementById('cePreviewContent');
   if (!pv) return;
-  const lines = code.split('\n');
-  pv.innerHTML = lines.map(line => {
-    if (!line.trim()) return '<div class="ce-line">&nbsp;</div>';
-    let html = ceEsc(line);
-    // <size=N>…</size> → scaled span
-    html = html.replace(/&lt;size=(\d+)&gt;([\s\S]*?)&lt;\/size&gt;/gi, (_, sz, inner) => {
-      const rem = Math.max(0.5, parseInt(sz) / 14);
-      return '<span style="font-size:' + rem + 'rem">' + inner + '</span>';
-    });
-    // <color=#HEX>…</color> → colored span
-    html = html.replace(/&lt;color=(#[0-9a-fA-F]{3,8})&gt;([\s\S]*?)&lt;\/color&gt;/gi, (_, col, inner) => {
-      return '<span style="color:' + col + '">' + inner + '</span>';
-    });
-    // <b>…</b>
-    html = html.replace(/&lt;b&gt;([\s\S]*?)&lt;\/b&gt;/gi, (_, inner) => '<b>' + inner + '</b>');
-    // <i>…</i>
-    html = html.replace(/&lt;i&gt;([\s\S]*?)&lt;\/i&gt;/gi, (_, inner) => '<i>' + inner + '</i>');
-    return '<div class="ce-line">' + html + '</div>';
-  }).join('');
+  // Render the whole code at once so tags that span newlines
+  // (e.g. <size=40>foo\nbar</size>) still match. The previous version
+  // split by \n first, which broke any multi-line wrap into a half-open
+  // tag on the first line and a half-close on the next — the regexes
+  // matched neither, so the tags rendered as literal text.
+  let html = ceEsc(code);
+  html = html.replace(/&lt;size=(\d+)&gt;([\s\S]*?)&lt;\/size&gt;/gi, (_, sz, inner) => {
+    const rem = Math.max(0.5, parseInt(sz) / 14);
+    return '<span style="font-size:' + rem + 'rem">' + inner + '</span>';
+  });
+  html = html.replace(/&lt;color=(#[0-9a-fA-F]{3,8})&gt;([\s\S]*?)&lt;\/color&gt;/gi, (_, col, inner) => {
+    return '<span style="color:' + col + '">' + inner + '</span>';
+  });
+  html = html.replace(/&lt;b&gt;([\s\S]*?)&lt;\/b&gt;/gi, (_, inner) => '<b>' + inner + '</b>');
+  html = html.replace(/&lt;i&gt;([\s\S]*?)&lt;\/i&gt;/gi, (_, inner) => '<i>' + inner + '</i>');
+  // .ce-line has white-space:pre-wrap so the raw \n in the source
+  // becomes visible line breaks; spaces stay intact.
+  pv.innerHTML = '<div class="ce-line">' + html + '</div>';
 }
 
 function colorTag(text,field){const g=grads[field];if(g?.rainbow)return rainbowText(text);if(g?.on)return gradientText(text,g.c1,g.c2);if(noColor[field])return text;return`<color=${colors[field]}>${text}</color>`;}
