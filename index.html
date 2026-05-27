@@ -708,11 +708,19 @@
 <script>
   // Stamp today's date into the gift-preview "sender date" boxes.
   // Format mirrors 3dxchat's in-game popup: "May, 24 2026".
-  (function setPreviewDate(){
+  // setInterval re-runs once a minute so a tab left open across midnight
+  // ticks over to the new day on its own — no reload needed.
+  (function setupPreviewDate(){
     const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const d = new Date();
-    const s = m[d.getMonth()] + ', ' + d.getDate() + ' ' + d.getFullYear();
-    document.querySelectorAll('.pv-popup-sender-date').forEach(el => { el.textContent = s; });
+    function stamp(){
+      const d = new Date();
+      const s = m[d.getMonth()] + ', ' + d.getDate() + ' ' + d.getFullYear();
+      document.querySelectorAll('.pv-popup-sender-date').forEach(el => {
+        if (el.textContent !== s) el.textContent = s;
+      });
+    }
+    stamp();
+    setInterval(stamp, 60_000);
   })();
   renderAllTemplates();initUILang();restoreSectionStates();renderFavPanel();
 </script>
