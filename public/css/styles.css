@@ -437,13 +437,13 @@ a{color:inherit;text-decoration:none;}
 }
 .sec-head.open .sec-title{color:#9fdcff;}
 .sec-title{
-  font-size:10px;font-weight:600;letter-spacing:2px;
-  text-transform:uppercase;color:var(--muted);
+  font-size:10.5px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:#d8d8e8;
   display:flex;align-items:center;gap:.5rem;
 }
-.sec-title-icon{font-size:12px;opacity:.85;flex-shrink:0;}
+.sec-title-icon{font-size:12px;opacity:1;flex-shrink:0;}
 .sec-arrow{
-  font-size:11px;color:var(--muted);flex-shrink:0;
+  font-size:11px;color:#a0a0b8;flex-shrink:0;
   display:inline-flex;align-items:center;justify-content:center;
   transition:transform .2s;
 }
@@ -479,7 +479,7 @@ a{color:inherit;text-decoration:none;}
 /* ── field ── */
 .field{margin-bottom:.7rem;}
 .field:last-child{margin-bottom:0;}
-.field-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;display:block;}
+.field-label{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#d8d8e8;margin-bottom:.35rem;display:block;}
 
 /* ── inputs ── */
 input[type="text"],input[type="number"]{
@@ -583,7 +583,7 @@ input[type="number"]{width:60px;}
 
 /* ── meta row ── */
 .meta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-top:.4rem;}
-.meta-label{font-size:10px;color:var(--muted);}
+.meta-label{font-size:10.5px;font-weight:600;color:#c8c8d8;letter-spacing:.5px;}
 
 /* ── layout grid ── */
 .layout-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:.6rem;}
@@ -639,7 +639,7 @@ input[type="number"]{width:60px;}
 .div{height:1px;background:var(--b1);margin:.5rem 0;}
 
 /* ── sym label ── */
-.sym-label{font-size:11px;color:var(--muted);margin-bottom:4px;margin-top:6px;font-weight:600;letter-spacing:.4px;}
+.sym-label{font-size:11.5px;color:#d8d8e8;margin-bottom:4px;margin-top:6px;font-weight:700;letter-spacing:.5px;}
 .sym-label:first-child{margin-top:0;}
 
 /* ── symbol chips: bigger so the glyphs are actually readable ── */
@@ -1169,7 +1169,7 @@ input[type="checkbox"]:focus-visible{
 }
 .ce-toolbar-group{display:flex;align-items:center;gap:4px;padding-right:8px;border-right:1px solid var(--b1);}
 .ce-toolbar-group:last-child{border-right:none;padding-right:0;}
-.ce-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+.ce-label{font-size:10.5px;color:#d8d8e8;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
 .ce-btn{
   padding:4px 10px;font-size:12px;background:var(--s3);color:var(--text);
   border:1px solid var(--b2);border-radius:4px;cursor:pointer;
