@@ -2531,6 +2531,41 @@ document.addEventListener('keydown', function(e) {
 
 // ── debounced generate for input events (80ms) ──
 const generateDebounced = debounce(generate, 80);
+// Typing-aware undo: snapshot the BEFORE-typing state on the first
+// keystroke of a typing burst, idle out after 500ms so a sentence of
+// typing collapses to ONE undo step instead of 50. Without this, the
+// undo stack was mostly empty (only template / layout / colour clicks
+// ever pushed), so the Undo button vanished as soon as the single
+// snapshot was used.
+let _typingActive = false;
+let _typingIdleTimer = null;
+function _typingSnapshotIfIdle(){
+  if (!_typingActive) {
+    UNDO_STACK.push(captureState());
+    if (UNDO_STACK.length > MAX_UNDO) UNDO_STACK.shift();
+    REDO_STACK.length = 0;
+    updateUndoBtns();
+    _typingActive = true;
+  }
+}
+function _typingMarkActivity(){
+  clearTimeout(_typingIdleTimer);
+  _typingIdleTimer = setTimeout(() => { _typingActive = false; }, 500);
+}
+document.querySelectorAll('input[type="text"],textarea').forEach(el => {
+  // Skip the custom-editor textarea — it has its own undo coverage via
+  // ceWrap / ceApplyFont / ceWrapSize / ceWrapColor / ceWrapGradient.
+  if (el.id === 'ceTextarea') return;
+  el.addEventListener('keydown', e => {
+    // Ignore modifier-only / nav keys that don't change content.
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key;
+    if (k && k.length > 1 && !['Backspace','Delete','Enter'].includes(k)) return;
+    _typingSnapshotIfIdle();
+  });
+  el.addEventListener('input', _typingMarkActivity);
+});
+
 document.querySelectorAll('input[type="text"],input[type="number"]').forEach(el=>{
   el.addEventListener('input',generateDebounced);
   el.addEventListener('input',()=>{ userHasEdited=true; });
