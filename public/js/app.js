@@ -1688,6 +1688,23 @@ function setDrunk(main,top,bottom){        applyTheme(main,top,bottom,'#f59e0b',
 function setSoft(main,top,bottom){         applyTheme(main,top,bottom,'#86efac','#fbcfe8','#fde68a', DECO_SOFT); }
 function setThanksgiving(main,top,bottom){ applyTheme(main,top,bottom,'#d97706','#92400e','#fbbf24', DECO_THANKSGIV); }
 function setAnniv(main,top,bottom){        applyTheme(main,top,bottom,'#e8b4b8','#d4af37','#f9d5e5', DECO_ANNIV); }
+// Theme-matched colour sets for the previously un-themed sections. These
+// were using setSpruch (text only, default pink/grey palette) — Sophey
+// pointed out that clicking e.g. a Wicked or Spicy template should
+// actually apply Wicked / Spicy colours in the preview + code box.
+// Decos default to the current layout so we don't break any byte
+// budgets — these are colour-only themes.
+function setSweet(main,top,bottom){        applyTheme(main,top,bottom,'#ff9ec7','#fce7f3','#be185d'); }
+function setFriends(main,top,bottom){      applyTheme(main,top,bottom,'#7ee0a2','#bbf7d0','#16a34a'); }
+function setFunny(main,top,bottom){        applyTheme(main,top,bottom,'#c4a7ff','#e9d5ff','#7c3aed'); }
+function setFunnyChaotic(main,top,bottom){ applyTheme(main,top,bottom,'#ffd84d','#fef3c7','#b45309'); }
+function setRoast(main,top,bottom){        applyTheme(main,top,bottom,'#ff5a5a','#fca5a5','#991b1b'); }
+function setFlirty(main,top,bottom){       applyTheme(main,top,bottom,'#ff6ba0','#fbcfe8','#be185d'); }
+function setFlirtyBold(main,top,bottom){   applyTheme(main,top,bottom,'#ff4d9d','#fbcfe8','#9d174d'); }
+function setWicked(main,top,bottom){       applyTheme(main,top,bottom,'#e879f9','#d8b4fe','#7e22ce'); }
+function setDominant(main,top,bottom){     applyTheme(main,top,bottom,'#ff4d4d','#fca5a5','#991b1b'); }
+function setSpicy(main,top,bottom){        applyTheme(main,top,bottom,'#ff9933','#fdba74','#9a3412'); }
+function setVoyeur(main,top,bottom){       applyTheme(main,top,bottom,'#a855f7','#c084fc','#6b21a8'); }
 function setPride(main, top, bottom){
   applyPreset({
     main, top, bottom, decos: DECO_PRIDE,

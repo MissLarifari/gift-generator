@@ -129,6 +129,18 @@ function stateForSetFn(name, main, top, bottom) {
     setSoft:        ['#86efac','#fbcfe8','#fde68a'],
     setThanksgiving:['#d97706','#92400e','#fbbf24'],
     setAnniv:       ['#e8b4b8','#d4af37','#f9d5e5'],
+    // Categories that used to be plain setSpruch, now themed.
+    setSweet:        ['#ff9ec7','#fce7f3','#be185d'],
+    setFriends:      ['#7ee0a2','#bbf7d0','#16a34a'],
+    setFunny:        ['#c4a7ff','#e9d5ff','#7c3aed'],
+    setFunnyChaotic: ['#ffd84d','#fef3c7','#b45309'],
+    setRoast:        ['#ff5a5a','#fca5a5','#991b1b'],
+    setFlirty:       ['#ff6ba0','#fbcfe8','#be185d'],
+    setFlirtyBold:   ['#ff4d9d','#fbcfe8','#9d174d'],
+    setWicked:       ['#e879f9','#d8b4fe','#7e22ce'],
+    setDominant:     ['#ff4d4d','#fca5a5','#991b1b'],
+    setSpicy:        ['#ff9933','#fdba74','#9a3412'],
+    setVoyeur:       ['#a855f7','#c084fc','#6b21a8'],
   };
   if (themeColors[name]) {
     const [cMain, cTop, cBot] = themeColors[name];

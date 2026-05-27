@@ -4,7 +4,7 @@
 //   label = plain text title shown next to the icon
 const TEMPLATES = {
   en: [
-    { icon: 'candy',   label: 'Sweet', titleStyle: 'color:#ffa6cf;text-shadow:0 0 14px rgba(255,166,207,.5)', items: [
+    { icon: 'candy',   label: 'Sweet', titleStyle: 'color:#ffa6cf;text-shadow:0 0 14px rgba(255,166,207,.5)', setFn: 'setSweet', items: [
       ['stay close',      'stay close',           'please always',         '.. stay close to me ..'],
       ['feel safe',       'you make me feel safe','every single day',      '.. thank you for that ..'],
       ['so cute',         'so cute',              'you are honestly',      '.. i cant handle it ..'],
@@ -17,7 +17,7 @@ const TEMPLATES = {
       ['safe place',      'safe place',           'you are my',            '.. and i am yours ..'],
       ['forever us',      'forever us',           'always you and me',     '.. no matter what ..'],
     ]},
-    { icon: 'users', label: 'Friends', titleStyle: 'color:#7ee0a2;text-shadow:0 0 14px rgba(126,224,162,.5)', items: [
+    { icon: 'users', label: 'Friends', titleStyle: 'color:#7ee0a2;text-shadow:0 0 14px rgba(126,224,162,.5)', setFn: 'setFriends', items: [
       ['best friend',       'best friend',       'you are simply',     '.. the best ..'],
       ['we are a team',     'we are a team',     'always have been',   '.. and always will be ..'],
       ['without you',       'without you',       'everything would be','.. only half as fun ..'],
@@ -27,7 +27,7 @@ const TEMPLATES = {
       ['hard to find',      'friends like you',  'are hard to find',   '.. so i am keeping you ..'],
       ['i miss us',         'i miss us',         'our little moments', '.. the best ones ..'],
     ]},
-    { icon: 'face-smile', label: 'Funny', titleStyle: 'color:#c4a7ff;text-shadow:0 0 14px rgba(196,167,255,.5)', items: [
+    { icon: 'face-smile', label: 'Funny', titleStyle: 'color:#c4a7ff;text-shadow:0 0 14px rgba(196,167,255,.5)', setFn: 'setFunny', items: [
       ['i like you',     'i like you',     'even though you drive me','.. completely crazy ..'],
       ['you annoy me',   'you annoy me',   'but please',              '.. never ever stop ..'],
       ['only you',       'only you',       'are allowed to',          '.. drive me this crazy ..'],
@@ -38,7 +38,7 @@ const TEMPLATES = {
       ['too late',       'too late',       'youre already',           '.. stuck with me ..'],
       ['pookie wookie',  'pookie wookie',  'i hope your poo poo time','.. went well today ..'],
     ]},
-    { icon: 'face-laugh', label: 'Funny / Chaotic', titleStyle: 'color:#ffd84d;text-shadow:0 0 14px rgba(255,216,77,.45)', items: [
+    { icon: 'face-laugh', label: 'Funny / Chaotic', titleStyle: 'color:#ffd84d;text-shadow:0 0 14px rgba(255,216,77,.45)', setFn: 'setFunnyChaotic', items: [
       ['annoying',         'annoying but cute',  'youre annoying',           '.. but kinda cute ..'],
       ['playing cool',     'then you appeared',  'i was playing it cool',    '.. then there was you ..'],
       ['owe me',           'you owe me',         'i dropped my drink',       '.. staring at you ..'],
@@ -56,7 +56,7 @@ const TEMPLATES = {
       ['the problem',      'im the problem',     'id fix your issues',       '.. but im one ..'],
       ['weird',            'i like weird',       'youre weird and',          '.. i love that ..'],
     ]},
-    { icon: 'skull', label: 'Friends / Roast', titleStyle: 'color:#ff5a5a;text-shadow:0 0 14px rgba(255,90,90,.5)', chipExtra: 'danger', items: [
+    { icon: 'skull', label: 'Friends / Roast', titleStyle: 'color:#ff5a5a;text-shadow:0 0 14px rgba(255,90,90,.5)', chipExtra: 'danger', setFn: 'setRoast', items: [
       ['still single',     'explains a lot',     'still single huh',         '.. that explains stuff ..'],
       ['loading',          'loading screen',     'you flirt like a',         '.. broken loading bar ..'],
       ['life roasted',     'life did it',        'id roast you but',         '.. life already did ..'],
@@ -78,7 +78,7 @@ const TEMPLATES = {
       ['smart dumb',       'smart and dumb',     'somehow youre both',       '.. at the same time ..'],
       ['ego',              'catch up someday',   'one day your personality', '.. will catch up to your ego ..'],
     ]},
-    { icon: 'heart', label: 'Flirty', titleStyle: 'color:#ff6ba0;text-shadow:0 0 14px rgba(255,107,160,.5)', items: [
+    { icon: 'heart', label: 'Flirty', titleStyle: 'color:#ff6ba0;text-shadow:0 0 14px rgba(255,107,160,.5)', setFn: 'setFlirty', items: [
       ['just us',    'just us',    'no one else',         '.. you and me ..'],
       ['kiss me',    'kiss me',    'please',              '.. just once ..'],
       ['dont go',    'dont go',    'please just',         '.. stay with me ..'],
@@ -89,7 +89,7 @@ const TEMPLATES = {
       ['dangerous',  'dangerous',  'you are so',          '.. for my heart ..'],
       ['be mine',    'be mine',    'please just',         '.. say yes ..'],
     ]},
-    { icon: 'kiss', label: 'Flirty bold', titleStyle: 'color:#ff4d9d;text-shadow:0 0 14px rgba(255,77,157,.55)', chipExtra: 'pink', items: [
+    { icon: 'kiss', label: 'Flirty bold', titleStyle: 'color:#ff4d9d;text-shadow:0 0 14px rgba(255,77,157,.55)', chipExtra: 'pink', setFn: 'setFlirtyBold', items: [
       ['lingerie',      'walk by again',      'love at first sight or',      '.. should i walk by in lingerie ..'],
       ['so hot',        'so hot',             'you made my dirty thoughts',  '.. actually blush ..'],
       ['not flirting',  'just describing',    'im not flirting',             '.. what id do to you ..'],
@@ -107,7 +107,7 @@ const TEMPLATES = {
       ['that look',     'that look',          'you had me at',               '.. just one look ..'],
       ['obsessed',      'but damn',           'not saying im obsessed',      '.. but damn ..'],
     ]},
-    { icon: 'hat-wizard', label: 'Wicked', titleStyle: 'color:#e879f9;text-shadow:0 0 14px rgba(232,121,249,.5)', chipExtra: 'wicked', items: [
+    { icon: 'hat-wizard', label: 'Wicked', titleStyle: 'color:#e879f9;text-shadow:0 0 14px rgba(232,121,249,.5)', chipExtra: 'wicked', setFn: 'setWicked', items: [
       ['no halo',         'lost my halo',     'i lost my halo on the way',         '.. somewhere fun probably ..'],
       ['wicked mind',     'wicked thoughts',  'my mind goes places that',          '.. you would not believe ..'],
       ['little devil',    'tiny devil',       'i look like trouble because',       '.. i am trouble actually ..'],
@@ -119,7 +119,7 @@ const TEMPLATES = {
       ['mischief',        'pure mischief',    'fully powered today by',            '.. mischief and nothing else ..'],
       ['trouble',         'big trouble',      'someone should hang a sign on me',  '.. saying trouble incoming ..'],
     ]},
-    { icon: 'fire', label: 'Dominant', titleStyle: 'color:#ff4d4d;text-shadow:0 0 14px rgba(255,77,77,.55)', chipExtra: 'red', items: [
+    { icon: 'fire', label: 'Dominant', titleStyle: 'color:#ff4d4d;text-shadow:0 0 14px rgba(255,77,77,.55)', chipExtra: 'red', setFn: 'setDominant', items: [
       ['follow me',     'follow me',          'good girls follow rules',     '.. bad girls follow me ..'],
       ['lipstick',      'ruin your lipstick', 'i wanna',                     '.. not your life ..'],
       ['pin you',       'pinned to the wall', 'you talk cute for someone',   '.. who should be pinned ..'],
@@ -136,7 +136,7 @@ const TEMPLATES = {
       ['yours',         'all yours',          'completely and entirely',     '.. yours to command ..'],
       ['please',        'pretty please',      'please is honestly my favorite','.. word to say to you ..'],
     ]},
-    { icon: 'pepper', label: 'Spicy', titleStyle: 'color:#ff9933;text-shadow:0 0 14px rgba(255,153,51,.5)', chipExtra: 'spicy', items: [
+    { icon: 'pepper', label: 'Spicy', titleStyle: 'color:#ff9933;text-shadow:0 0 14px rgba(255,153,51,.5)', chipExtra: 'spicy', setFn: 'setSpicy', items: [
       ['no innocence',  'impossible',         'you make innocent thoughts',  '.. completely impossible ..'],
       ['one kiss',      'both in trouble',    'one kiss and were',           '.. both in trouble ..'],
       ['fantasies',     'better than dreams', 'you look way better',         '.. than my fantasies ..'],
@@ -146,7 +146,7 @@ const TEMPLATES = {
       ['dessert',       'sweet tooth',        'who needs dinner when i could have','.. you for dessert instead ..'],
       ['no lipstick',   'lipstick issue',     'wearing lipstick around you is honestly','.. a complete waste of time ..'],
     ]},
-    { icon: 'eye', label: 'Voyeur', titleStyle: 'color:#a855f7;text-shadow:0 0 14px rgba(168,85,247,.5)', chipExtra: 'spicy', items: [
+    { icon: 'eye', label: 'Voyeur', titleStyle: 'color:#a855f7;text-shadow:0 0 14px rgba(168,85,247,.5)', chipExtra: 'spicy', setFn: 'setVoyeur', items: [
       ['front row',     'vip viewing',     'don’t mind me enjoying',                 '.. the view from over here ..'],
       ['mental notes',  'not behaving',    'i swear my mind instantly went',         '.. somewhere completely inappropriate ..'],
       ['better than tv','too distracting', 'watching you two interact is honestly',  '.. turning into my favorite hobby ..'],
