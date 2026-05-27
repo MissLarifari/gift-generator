@@ -1392,12 +1392,34 @@ function moveLine(field,dir){
 // undo entry total, not one per keystroke. _qeSession resets on blur or
 // whenever the model state otherwise changes (template click etc).
 let _qeSession = false;
+
+// Cascade: once ALL three main text lines are empty, wipe the surrounding
+// decorations too. Otherwise the preview shows orphaned deco-top + kaomoji
+// + deco-bottom floating on their own — looks like leftover junk rather
+// than a deliberate blank slate. Returns true if it cleared anything.
+function cascadeClearDecosIfTextEmpty(){
+  const allEmpty = ['topText','mainText','bottomText'].every(id => {
+    const e = document.getElementById(id);
+    return !e || !e.value;
+  });
+  if (!allEmpty) return false;
+  let cleared = false;
+  ['dekoTop','dekoBottom','kaomoji'].forEach(id => {
+    const e = document.getElementById(id);
+    if (e && e.value) { e.value = ''; cleared = true; }
+  });
+  return cleared;
+}
+
 function syncQuickEdit(field, value){
   if (!_qeSession) { pushUndo(); _qeSession = true; }
   const el = document.getElementById(field);
   if (!el) return;
   el.value = value;
   userHasEdited = true;
+  // Only worth running the cascade when the field was emptied — typing
+  // a non-empty value can't possibly trigger the all-empty case.
+  if (!value) cascadeClearDecosIfTextEmpty();
   // use the same 80ms debounce as the canonical form inputs to avoid
   // rebuilding the whole preview DOM on every keystroke
   if (typeof generateDebounced === 'function') generateDebounced();
@@ -1409,6 +1431,7 @@ function clearQuickEditField(field){
   _qeSession = false;
   const el = document.getElementById(field);
   if (el) el.value = '';
+  cascadeClearDecosIfTextEmpty();
   generate();
 }
 function refreshQuickEdit(){
@@ -1887,6 +1910,16 @@ const generateDebounced = debounce(generate, 80);
 document.querySelectorAll('input[type="text"],input[type="number"]').forEach(el=>{
   el.addEventListener('input',generateDebounced);
   el.addEventListener('input',()=>{ userHasEdited=true; });
+});
+// Same cascade-clear logic as the quick-edit path: when the user empties
+// the top/main/bottom inputs in their accordion sections too, also wipe
+// the decorations so the preview doesn't end up with orphaned deco-only.
+['topText','mainText','bottomText'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    if (!el.value && cascadeClearDecosIfTextEmpty()) generateDebounced();
+  });
 });
 // save state after every generate — debounced to avoid thrashing
 const _saveDebounced = debounce(saveGiftState, 200);
