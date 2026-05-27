@@ -934,7 +934,51 @@ function ceWrap(tag) {
   ta.focus(); ceSync();
 }
 
+// S / M / L presets — clicking the SAME preset that's already applied
+// to the selection STRIPS the size tag instead of re-applying it.
+// This matches the Bold/Italic toggle behaviour Sophey asked for so
+// users can quickly remove a preset they no longer want.
 function ceSetSize(sz) {
+  const ta = document.getElementById('ceTextarea');
+  const { s, e } = ceGetSel(ta);
+  if (s !== e) {
+    const val = ta.value;
+    const sel = val.substring(s, e);
+
+    // Case 1: selection IS already <size=sz>X</size> with the EXACT same N
+    const m1 = sel.match(/^<size=(\d+)>([\s\S]*)<\/size>$/);
+    if (m1 && parseInt(m1[1], 10) === sz) {
+      const inner = m1[2];
+      ta.value = val.substring(0, s) + inner + val.substring(e);
+      ta.selectionStart = s;
+      ta.selectionEnd = s + inner.length;
+      _ceLastSel = { s, e: s + inner.length };
+      ta.focus(); ceSync(); return;
+    }
+
+    // Case 2: an enclosing <size=N>…</size> wraps the selection AND that
+    // N is exactly our preset → unwrap it. Different N → fall through to
+    // normal apply (which will swap the N via ceWrapSize's logic).
+    const enclosing = findEnclosingTag(val, s, e, /<size=\d+>/, /<\/size>/);
+    if (enclosing) {
+      const openText = val.substring(enclosing.openStart, enclosing.openEnd);
+      const m2 = openText.match(/<size=(\d+)>/);
+      if (m2 && parseInt(m2[1], 10) === sz) {
+        const newVal = val.substring(0, enclosing.openStart)
+                     + val.substring(enclosing.openEnd, enclosing.closeStart)
+                     + val.substring(enclosing.closeEnd);
+        ta.value = newVal;
+        const openLen = enclosing.openEnd - enclosing.openStart;
+        ta.selectionStart = s - openLen;
+        ta.selectionEnd   = e - openLen;
+        _ceLastSel = { s: s - openLen, e: e - openLen };
+        ta.focus(); ceSync(); return;
+      }
+    }
+  }
+
+  // Otherwise: just apply the preset normally (ceWrapSize handles
+  // swapping any existing different size).
   document.getElementById('ceSize').value = sz;
   ceWrapSize();
 }
