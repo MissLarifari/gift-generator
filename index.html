@@ -186,7 +186,6 @@
           </div>
           <div class="row">
             <input type="text" id="dekoTop" value="· ily ·←" placeholder="deco top…" data-i18n-ph="ph_deco_top"/>
-            <div class="cbtn" id="btn_dekoTop" style="background:#555" onclick="openModal('dekoTop')"></div>
             <button type="button" class="row-without" onclick="setFieldEmpty('dekoTop')" data-i18n="without" data-i18n-title="without_tt" title="Render this line without decoration">Without</button>
           </div>
           <div class="meta">
@@ -200,6 +199,7 @@
             <select class="size-select" id="sizeDekoTop" onchange="generate()" title="Font size">
               <option>8</option><option>10</option><option selected>12</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
             </select>
+            <div class="cbtn" id="btn_dekoTop" style="background:#555" onclick="openModal('dekoTop')"></div>
             <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle);margin-left:6px;">
               <input type="checkbox" id="dekoTopStars" onchange="setPyramidStars('dekoTop',this.checked)"/> ★
             </label>
@@ -221,7 +221,6 @@
         <div class="field">
           <div class="row">
             <textarea id="topText" rows="1" placeholder="top line…" data-i18n-ph="ph_top">.. stop being ..</textarea>
-            <div class="cbtn" id="btn_topText" style="background:#8f8f8f" onclick="openModal('topText')"></div>
           </div>
           <div class="meta">
             <select class="font-select" id="font_topText" onchange="setFontStyle('topText', this.value)" title="Font style">
@@ -234,7 +233,7 @@
             <select class="size-select" id="sizeTopText" onchange="generate()" title="Font size">
               <option>8</option><option>10</option><option>12</option><option selected>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
             </select>
-            <span class="fc-badge" id="fc_topText" title="Chars used">0</span>
+            <div class="cbtn" id="btn_topText" style="background:#8f8f8f" onclick="openModal('topText')"></div>
           </div>
           <div class="meta" style="margin-top:.4rem">
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
@@ -246,6 +245,7 @@
             <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
               <input type="checkbox" id="topStars" onchange="setPyramidStars('topText',this.checked)"/> ★
             </label>
+            <span class="fc-badge" id="fc_topText" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -263,7 +263,6 @@
         <div class="field">
           <div class="row">
             <input type="text" id="mainText" value="so cute" placeholder="main text…" data-i18n-ph="ph_main"/>
-            <div class="cbtn" id="btn_mainText" style="background:var(--pink)" onclick="openModal('mainText')"></div>
           </div>
           <div class="meta">
             <select class="font-select" id="font_mainText" onchange="setFontStyle('mainText', this.value)" title="Font style">
@@ -276,7 +275,7 @@
             <select class="size-select" id="fontSize" onchange="generate()" title="Font size">
               <option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option selected>60</option><option>70</option><option>80</option><option>90</option><option>100</option><option>120</option>
             </select>
-            <span class="fc-badge" id="fc_mainText" title="Chars used">0</span>
+            <div class="cbtn" id="btn_mainText" style="background:var(--pink)" onclick="openModal('mainText')"></div>
           </div>
           <div class="meta" style="margin-top:.4rem">
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
@@ -285,6 +284,7 @@
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
               <input type="checkbox" id="mainItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
             </label>
+            <span class="fc-badge" id="fc_mainText" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -302,7 +302,6 @@
         <div class="field">
           <div class="row">
             <input type="text" id="bottomText" value=".. i cant handle it .." placeholder="bottom line…" data-i18n-ph="ph_bottom"/>
-            <div class="cbtn" id="btn_bottomText" style="background:#8f8f8f" onclick="openModal('bottomText')"></div>
           </div>
           <div class="meta">
             <select class="font-select" id="font_bottomText" onchange="setFontStyle('bottomText', this.value)" title="Font style">
@@ -315,7 +314,7 @@
             <select class="size-select" id="sizeBottomText" onchange="generate()" title="Font size">
               <option>8</option><option>10</option><option>12</option><option selected>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
             </select>
-            <span class="fc-badge" id="fc_bottomText" title="Chars used">0</span>
+            <div class="cbtn" id="btn_bottomText" style="background:#8f8f8f" onclick="openModal('bottomText')"></div>
           </div>
           <div class="meta" style="margin-top:.4rem">
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
@@ -327,6 +326,7 @@
             <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
               <input type="checkbox" id="bottomStars" onchange="setPyramidStars('bottomText',this.checked)"/> ★
             </label>
+            <span class="fc-badge" id="fc_bottomText" title="Chars used">0</span>
           </div>
         </div>
       </div>
@@ -379,13 +379,13 @@
           </div>
           <div class="row" style="margin-top:.4rem">
             <input type="text" id="kaomoji" value="(❀◡❀)" placeholder="kaomoji…" data-i18n-ph="ph_kao"/>
-            <div class="cbtn" id="btn_kaomoji" style="background:var(--gold)" onclick="openModal('kaomoji')"></div>
             <button type="button" class="row-without" onclick="setFieldEmpty('kaomoji')" data-i18n="without" data-i18n-title="without_tt" title="Render this line without decoration">Without</button>
           </div>
           <div class="meta">
             <select class="size-select" id="sizeKaomoji" onchange="generate()" title="Font size">
               <option>10</option><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option>
             </select>
+            <div class="cbtn" id="btn_kaomoji" style="background:var(--gold)" onclick="openModal('kaomoji')"></div>
             <span class="fc-badge" id="fc_kaomoji" title="Chars used">0</span>
           </div>
         </div>
@@ -429,7 +429,6 @@
           </div>
           <div class="row">
             <input type="text" id="dekoBottom" value=".. ･ ✦ ･ .." placeholder="deco bottom…" data-i18n-ph="ph_deco_bottom"/>
-            <div class="cbtn" id="btn_dekoBottom" style="background:#5c5c7a" onclick="openModal('dekoBottom')"></div>
             <button type="button" class="row-without" onclick="setFieldEmpty('dekoBottom')" data-i18n="without" data-i18n-title="without_tt" title="Render this line without decoration">Without</button>
           </div>
           <div class="meta">
@@ -443,6 +442,7 @@
             <select class="size-select" id="sizeDekoBottom" onchange="generate()" title="Font size">
               <option>8</option><option>10</option><option selected>12</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
             </select>
+            <div class="cbtn" id="btn_dekoBottom" style="background:#5c5c7a" onclick="openModal('dekoBottom')"></div>
             <span class="fc-badge" id="fc_dekoBottom" title="Chars used">0</span>
           </div>
         </div>
