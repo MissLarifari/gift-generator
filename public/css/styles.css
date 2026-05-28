@@ -367,9 +367,32 @@ a{color:inherit;text-decoration:none;}
 .col-right > .col-toolbar,
 .col-right > .fav-panel{flex-shrink:0;}
 .col-toolbar{
-  display:flex;justify-content:flex-end;align-items:center;
+  display:flex;justify-content:space-between;align-items:center;
   padding:6px 12px;border-bottom:1px solid var(--b1);background:var(--s2);
 }
+/* Undo / Redo icon group — moved here (top-left) from the bottom code-
+   actions row per maximilian's feedback: standard editor placement,
+   icon-only with hover tooltip, frees vertical space at the bottom. */
+.undo-redo-group{display:flex;gap:4px;}
+.ur-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:30px;height:28px;padding:0;
+  border-radius:8px;cursor:pointer;font-size:13px;
+  color:#c4b5fd;
+  border:1px solid rgba(179,136,255,.4);
+  background:linear-gradient(180deg, rgba(179,136,255,.12), rgba(179,136,255,.05));
+  transition:all .15s;
+}
+.ur-btn:hover{
+  color:#fff;border-color:var(--purple);
+  background:linear-gradient(180deg, rgba(179,136,255,.28), rgba(179,136,255,.13));
+  box-shadow:0 2px 8px rgba(179,136,255,.3);
+}
+.ur-btn:active{transform:scale(.92);}
+.ur-btn.disabled{opacity:.3;pointer-events:none;}
+/* When the left column has no undo group (right column toolbar), keep
+   the expand-all button right-aligned. */
+.col-right .col-toolbar{justify-content:flex-end;}
 .col-toolbar-btn{
   font-size:11.5px;font-weight:600;letter-spacing:.3px;
   padding:5px 14px;border-radius:14px;cursor:pointer;

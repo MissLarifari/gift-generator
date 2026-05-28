@@ -31,6 +31,7 @@
           <span>Fabi</span>
           <span>Hater</span>
           <span>iVix</span>
+          <span>Maximilian</span>
           <span>OliverCream</span>
           <span>Redji</span>
           <span>ReneL</span>
@@ -78,6 +79,10 @@
 <div class="col col-left">
 
   <div class="col-toolbar">
+    <div class="undo-redo-group">
+      <button type="button" class="ur-btn disabled" id="undoBtn" onclick="undo()" data-i18n-title="undo_title" title="Undo (Ctrl+Z)" aria-label="Undo"><i class="fa-icon" data-icon="arrow-rotate-left"></i></button>
+      <button type="button" class="ur-btn disabled" id="redoBtn" onclick="redo()" data-i18n-title="redo_title" title="Redo (Ctrl+Y)" aria-label="Redo"><i class="fa-icon" data-icon="arrow-rotate-right"></i></button>
+    </div>
     <button type="button" class="col-toolbar-btn" onclick="toggleAllSections('.col-left')" data-i18n="expand_all" title="Expand or collapse all sections">▾ Expand all</button>
   </div>
 
@@ -218,17 +223,6 @@
             <textarea id="topText" rows="1" placeholder="top line…" data-i18n-ph="ph_top">.. stop being ..</textarea>
             <div class="cbtn" id="btn_topText" style="background:#8f8f8f" onclick="openModal('topText')"></div>
           </div>
-          <div class="meta" style="margin-bottom:.4rem">
-            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="topBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
-            </label>
-            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="topItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
-            </label>
-            <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="topStars" onchange="setPyramidStars('topText',this.checked)"/> ★
-            </label>
-          </div>
           <div class="meta">
             <select class="font-select" id="font_topText" onchange="setFontStyle('topText', this.value)" title="Font style">
               <option value="normal">Aa Normal</option>
@@ -241,6 +235,17 @@
               <option>8</option><option>10</option><option>12</option><option selected>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
             </select>
             <span class="fc-badge" id="fc_topText" title="Chars used">0</span>
+          </div>
+          <div class="meta" style="margin-top:.4rem">
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="topBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="topItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
+            </label>
+            <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="topStars" onchange="setPyramidStars('topText',this.checked)"/> ★
+            </label>
           </div>
         </div>
       </div>
@@ -260,14 +265,6 @@
             <input type="text" id="mainText" value="so cute" placeholder="main text…" data-i18n-ph="ph_main"/>
             <div class="cbtn" id="btn_mainText" style="background:var(--pink)" onclick="openModal('mainText')"></div>
           </div>
-          <div class="meta" style="margin-bottom:.4rem">
-            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="mainBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
-            </label>
-            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="mainItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
-            </label>
-          </div>
           <div class="meta">
             <select class="font-select" id="font_mainText" onchange="setFontStyle('mainText', this.value)" title="Font style">
               <option value="normal">Aa Normal</option>
@@ -280,6 +277,14 @@
               <option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option selected>60</option><option>70</option><option>80</option><option>90</option><option>100</option><option>120</option>
             </select>
             <span class="fc-badge" id="fc_mainText" title="Chars used">0</span>
+          </div>
+          <div class="meta" style="margin-top:.4rem">
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="mainBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="mainItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
+            </label>
           </div>
         </div>
       </div>
@@ -299,17 +304,6 @@
             <input type="text" id="bottomText" value=".. i cant handle it .." placeholder="bottom line…" data-i18n-ph="ph_bottom"/>
             <div class="cbtn" id="btn_bottomText" style="background:#8f8f8f" onclick="openModal('bottomText')"></div>
           </div>
-          <div class="meta" style="margin-bottom:.4rem">
-            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="bottomBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
-            </label>
-            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="bottomItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
-            </label>
-            <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
-              <input type="checkbox" id="bottomStars" onchange="setPyramidStars('bottomText',this.checked)"/> ★
-            </label>
-          </div>
           <div class="meta">
             <select class="font-select" id="font_bottomText" onchange="setFontStyle('bottomText', this.value)" title="Font style">
               <option value="normal">Aa Normal</option>
@@ -322,6 +316,17 @@
               <option>8</option><option>10</option><option>12</option><option selected>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>30</option><option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>
             </select>
             <span class="fc-badge" id="fc_bottomText" title="Chars used">0</span>
+          </div>
+          <div class="meta" style="margin-top:.4rem">
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="bottomBold" onchange="generate()"/> <b data-i18n="bold">Bold</b>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="bottomItalic" onchange="generate()"/> <i data-i18n="italic">Italic</i>
+            </label>
+            <label title="Wrap this line in * stars * — works in every layout" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--subtle)">
+              <input type="checkbox" id="bottomStars" onchange="setPyramidStars('bottomText',this.checked)"/> ★
+            </label>
           </div>
         </div>
       </div>
@@ -633,8 +638,6 @@
     <div class="code-actions">
       <button class="btn btn-copy" onclick="copyCode()"><i class="fa-icon" data-icon="clipboard"></i> <span data-i18n="copy_code">Copy Code</span></button>
       <button class="btn btn-share" id="shareBtn" onclick="shareGift()"><i class="fa-icon" data-icon="share-nodes"></i> Share</button>
-      <button class="btn btn-undo disabled" id="undoBtn" onclick="undo()" data-i18n-title="undo_title" title="Undo (Ctrl+Z)"><i class="fa-icon" data-icon="arrow-rotate-left"></i> <span data-i18n="undo_btn">Undo</span></button>
-      <button class="btn btn-redo disabled" id="redoBtn" onclick="redo()" data-i18n-title="redo_title" title="Redo (Ctrl+Y)"><i class="fa-icon" data-icon="arrow-rotate-right"></i> <span data-i18n="redo_btn">Redo</span></button>
       <button class="btn btn-reset" onclick="resetAll()"><i class="fa-icon" data-icon="rotate-left"></i> <span data-i18n="reset_all">Reset All</span></button>
     </div>
   </div>
