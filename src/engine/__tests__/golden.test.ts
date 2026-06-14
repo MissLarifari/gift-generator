@@ -173,37 +173,19 @@ describe('gift engine — byte-identical to the legacy generator', () => {
   }
 });
 
-// New (non-legacy) behaviour: the pyramid layout expands mainText into
-// cumulative word lines so it forms a real triangle when 3dxchat centers it.
-// Solid colour → ONE tag wraps the whole multi-line block (byte-cheap).
-describe('pyramid — auto word-pyramid', () => {
-  it('wraps the growing lines in a single solid-colour tag', () => {
-    const r = generate(S({ text: { ...D.text, mainText: 'you are my star' }, sizes: { mainText: 26 }, colors: { mainText: '#ff71b8' }, layout: 'pyramid' }));
-    expect(r.code).toBe(`<size=26><color=#ff71b8>you
-you are
-you are my
-you are my star</color></size>`);
-  });
-
-  it('keeps deco / top around the pyramid (single-tag main block)', () => {
-    const r = generate(S({ text: { dekoTop: '✦', topText: 'happy birthday', mainText: 'i love you', bottomText: '', kaomoji: '', dekoBottom: '' }, sizes: { mainText: 26 }, colors: { dekoTop: '#ffd84d', topText: '#8f8f8f', mainText: '#ff71b8' }, layout: 'pyramid' }));
-    expect(r.code).toBe(`<color=#ffd84d>✦</color>
-<color=#8f8f8f>happy birthday</color>
-<size=26><color=#ff71b8>i
-i love
-i love you</color></size>`);
-  });
-
-  it('single word → single line (degenerate pyramid)', () => {
-    const r = generate(S({ text: { ...D.text, mainText: 'hi' }, layout: 'pyramid' }));
-    expect(r.code).toBe(`<size=60><color=#ff71b8>hi</color></size>`);
-  });
-
-  it('gradient main falls back to per-line styling', () => {
-    const r = generate(S({ text: { ...D.text, mainText: 'a b c' }, sizes: { mainText: 26 }, grads: { mainText: { on: true, c1: '#ff71b8', c2: '#b388ff' } }, layout: 'pyramid' }));
-    // each cumulative line styled on its own (gradients can't span newlines)
-    expect(r.code.split('\n').length).toBe(3);
-    expect(r.code).toContain('<size=26>');
-    expect(r.code.startsWith('<size=26>')).toBe(true);
+// Pyramid = star pyramid: gold deco lines (✦ / ✦·✦ / ✦·✦·✦) grow in width and
+// form the triangle (3dxchat centers each line); the text stacks normally below.
+describe('pyramid — star pyramid', () => {
+  it('stacks the multi-line star deco above the normal text', () => {
+    const r = generate(S({
+      text: { dekoTop: '✦\n✦ · ✦\n✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', bottomText: '', kaomoji: '', dekoBottom: '' },
+      colors: { dekoTop: '#ffd84d' },
+      layout: 'pyramid',
+    }));
+    expect(r.code).toBe(`<color=#ffd84d>✦
+✦ · ✦
+✦ · ✦ · ✦</color>
+<color=#8f8f8f>youre my</color>
+<size=60><color=#ff71b8>shining star</color></size>`);
   });
 });

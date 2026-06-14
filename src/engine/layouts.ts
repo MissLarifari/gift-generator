@@ -25,9 +25,9 @@ export function applyLayout(
   };
 
   // 'flipped' shares the center vertical stack — its identity is font/colour.
-  // 'pyramid' also stacks centered, but generate() has already replaced its
-  // mainText with a multi-line word-pyramid block (cumulative growing lines);
-  // here it just stacks like center (3dxchat centers each line → real triangle).
+  // 'pyramid' also stacks centered — its triangle comes from gold deco lines
+  // that grow in width (3dxchat centers every line, so leading-space indent
+  // can't work); the text sits normally below.
   if (layout === 'center' || layout === 'flipped' || layout === 'pyramid') return ord.map((f) => w[f]).filter(Boolean).join('\n');
   if (layout === 'inline') {
     return [[w.dekoTop, w.topText, w.mainText, w.dekoTop].filter(Boolean).join(' '), w.bottomText, w.kaomoji, w.dekoBottom].filter(Boolean).join('\n');

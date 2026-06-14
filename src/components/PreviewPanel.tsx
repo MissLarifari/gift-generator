@@ -170,26 +170,8 @@ export default function PreviewPanel({
         if (has('dekoTop') && !has('dekoBottom')) nodes.push(row(field('dekoTop', 'f-frame'), 'f-frame'));
         return nodes;
       }
-      case 'pyramid': {
-        // Auto word-pyramid: render mainText as cumulative growing lines
-        // (you / you are / you are my …); other fields stack around it.
-        const words = state.text.mainText.trim() ? state.text.mainText.trim().split(/\s+/).filter(Boolean) : [];
-        const nodes: ReactNode[] = [];
-        for (const f of order) {
-          if (f !== 'mainText') { if (has(f)) nodes.push(row(field(f), f)); continue; }
-          if (editing === 'mainText') { nodes.push(row(field('mainText'), 'pyr-edit')); continue; }
-          words.forEach((_, i) => {
-            const phrase = applyFont(words.slice(0, i + 1).join(' '), state.fonts.mainText);
-            nodes.push(
-              <div key={'pyr-' + i} style={{ minHeight: 4 }}>
-                <span onClick={() => startEdit('mainText')} title={t('click_edit')} style={displayStyle('mainText')}>{phrase}</span>
-              </div>,
-            );
-          });
-        }
-        return nodes;
-      }
-      default: // center, flipped (all stack centered)
+      default: // center, flipped, pyramid (all stack centered; pyramid's star
+        // deco is multi-line and renders its line breaks via pre-wrap)
         return order.map((f) => row(field(f), f));
     }
   };

@@ -23,33 +23,6 @@ const wrapBI = (s: string, b: boolean, i: boolean) => {
   return s;
 };
 
-// Auto word-pyramid: split mainText into words and emit cumulative lines
-// (word 1 / word 1-2 / word 1-2-3 …). 3dxchat centers every line, so each
-// longer line is the next, wider tier — a real pyramid for ANY phrase.
-//
-// For a solid colour the WHOLE block is wrapped in ONE <size><color> tag
-// (a single colour tag spans multiple lines in 3dxchat — verified in-game by
-// the gold star deco). That keeps it byte-cheap so long phrases still fit.
-// Gradient/rainbow split per word and can't span newlines, so they fall back
-// to per-line styling. Returns null when empty.
-function pyramidMain(state: GiftState): string | null {
-  const words = state.text.mainText.trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return null;
-  const size = state.sizes.mainText;
-  const grad = state.grads.mainText;
-  const phrases = words.map((_, i) => words.slice(0, i + 1).join(' '));
-  const wrap = (m: string) => {
-    if (state.bold.main) m = `<b>${m}</b>`;
-    if (state.italic.main) m = `<i>${m}</i>`;
-    return `<size=${size}>${m}</size>`;
-  };
-  if (!grad.on && !grad.rainbow) {
-    // one tag for the whole multi-line block
-    return wrap(colorTag(applyFont(phrases.join('\n'), state.fonts.mainText), grad, state.colors.mainText, state.noColor.mainText));
-  }
-  return phrases.map((p) => wrap(colorTag(applyFont(p, state.fonts.mainText), grad, state.colors.mainText, state.noColor.mainText))).join('\n');
-}
-
 // Pure port of the original generate() code-building path: per-field
 // applyFont → colorTag → (bold/italic) → size wrap, then applyLayout.
 export function generate(state: GiftState): GenerateResult {
@@ -79,9 +52,6 @@ export function generate(state: GiftState): GenerateResult {
       ? sz(colorTag(applyFont(t.dekoBottom, state.fonts.dekoBottom), state.grads.dekoBottom, state.colors.dekoBottom, state.noColor.dekoBottom), state.sizes.dekoBottom, DEFAULT_SIZES.dekoBottom)
       : null,
   };
-
-  // Pyramid replaces the single main line with a centered word-pyramid block.
-  if (state.layout === 'pyramid') lm.mainText = pyramidMain(state);
 
   const code = state.layout === 'custom' ? (state.customText || '') : applyLayout(lm, state.layout, state.lineOrder, state.stars);
   const chars = giftChars(code);

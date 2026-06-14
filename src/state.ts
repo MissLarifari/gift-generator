@@ -83,15 +83,12 @@ export const LAYOUT_DEFAULTS: Record<Layout, LayoutDefault> = {
   compact: { text: { dekoTop: '· · ·', topText: 'wollt nur sagen', mainText: 'danke dir', bottomText: 'für alles', kaomoji: '(˘³˘)♥', dekoBottom: '· · ·' } },
   framed: { text: { dekoTop: '❀ · ❀ · ❀', topText: 'du bist mein', mainText: 'liebling', bottomText: '· kein scherz ·', kaomoji: '', dekoBottom: '' } },
   minimal: { text: { dekoTop: '', topText: '', mainText: 'nur wir', bottomText: '', kaomoji: '(❀◡❀)', dekoBottom: '' } },
-  // Auto word-pyramid — the main phrase is expanded into cumulative lines
-  // (you / you are / you are my …). 3dxchat centers every line and strips
-  // leading spaces, so each longer line forms a wider tier = a real pyramid.
-  // A gold ✦ crown sits on top (narrower than the first word → clean apex);
-  // smaller main size keeps the whole thing under the byte limit.
+  // Star pyramid — gold deco lines that grow in width (✦ / ✦·✦ / ✦·✦·✦) form
+  // the triangle, since 3dxchat centers every line and strips leading spaces
+  // (no indent possible). The text sits normally below, fully editable.
   pyramid: {
-    text: { dekoTop: '✦', topText: '', mainText: 'you are my star', bottomText: '', kaomoji: '', dekoBottom: '' },
-    sizes: { mainText: 26 },
-    colors: { dekoTop: '#ffd84d', mainText: '#ff71b8' },
+    text: { dekoTop: '✦\n✦ · ✦\n✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', bottomText: '', kaomoji: '', dekoBottom: '' },
+    colors: { dekoTop: '#ffd84d' },
   },
   flipped: {
     text: { dekoTop: '.. ↓ ..', topText: 'ɢʀᴀᴠɪᴛʏ ɢᴀᴠᴇ ᴜᴘ\nᴀɴᴅ sᴏ ᴅɪᴅ ɪ\n', mainText: 'ꜰᴀʟʟɪɴɢ', bottomText: 'pɹɐɥ ꜰᴏʀ ʏᴏᴜ ♡', kaomoji: '(◡‿◡)', dekoBottom: 'ɴᴏᴡ ɪᴍ ᴊᴜsᴛ' },
