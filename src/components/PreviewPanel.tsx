@@ -223,7 +223,7 @@ export default function PreviewPanel({
           </div>
           <div style={{ width: '90%', height: 1, background: 'var(--border)', margin: '5px auto 4px' }} />
           <div className="flex items-center justify-center" style={{ width: '100%', minHeight: 170, marginBottom: 2 }}>
-            <img src={import.meta.env.BASE_URL + 'gift.png'} alt="gift" style={{ maxWidth: 200, maxHeight: 200, width: 'auto', height: 'auto', objectFit: 'contain' }} />
+            <img src={import.meta.env.BASE_URL + 'gift-sticker.png'} alt="gift" style={{ maxWidth: 200, maxHeight: 200, width: 'auto', height: 'auto', objectFit: 'contain' }} />
           </div>
           {state.layout === 'custom' ? (
             <div className="mono" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: '100%', fontSize: 13, lineHeight: 1.45, color: '#eaf2ff' }} dangerouslySetInnerHTML={{ __html: customPreviewHtml(state.customText) }} />
