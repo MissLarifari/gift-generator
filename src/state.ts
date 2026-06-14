@@ -86,11 +86,12 @@ export const LAYOUT_DEFAULTS: Record<Layout, LayoutDefault> = {
   // Auto word-pyramid — the main phrase is expanded into cumulative lines
   // (you / you are / you are my …). 3dxchat centers every line and strips
   // leading spaces, so each longer line forms a wider tier = a real pyramid.
-  // Smaller main size + a short default phrase keep it under the byte limit.
+  // A gold ✦ crown sits on top (narrower than the first word → clean apex);
+  // smaller main size keeps the whole thing under the byte limit.
   pyramid: {
-    text: { dekoTop: '', topText: '', mainText: 'you are my star', bottomText: '', kaomoji: '', dekoBottom: '' },
+    text: { dekoTop: '✦', topText: '', mainText: 'you are my star', bottomText: '', kaomoji: '', dekoBottom: '' },
     sizes: { mainText: 26 },
-    colors: { mainText: '#ff71b8' },
+    colors: { dekoTop: '#ffd84d', mainText: '#ff71b8' },
   },
   flipped: {
     text: { dekoTop: '.. ↓ ..', topText: 'ɢʀᴀᴠɪᴛʏ ɢᴀᴠᴇ ᴜᴘ\nᴀɴᴅ sᴏ ᴅɪᴅ ɪ\n', mainText: 'ꜰᴀʟʟɪɴɢ', bottomText: 'pɹɐɥ ꜰᴏʀ ʏᴏᴜ ♡', kaomoji: '(◡‿◡)', dekoBottom: 'ɴᴏᴡ ɪᴍ ᴊᴜsᴛ' },
