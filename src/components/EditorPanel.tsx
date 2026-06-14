@@ -14,6 +14,7 @@ export default function EditorPanel({
   open,
   setOpen,
   onSetLayout,
+  focusReq,
 }: {
   state: GiftState;
   commit: Commit;
@@ -21,11 +22,22 @@ export default function EditorPanel({
   open: FieldId[];
   setOpen: (f: FieldId[]) => void;
   onSetLayout: (l: Layout) => void;
+  focusReq?: { f: FieldId; n: number } | null;
 }) {
   const { t } = useI18n();
   const layoutLabel = (l: Layout) => t('layout_' + l);
   const fieldLabel = (f: FieldId) => t('fl_' + f);
   const cardRefs = useRef<Partial<Record<FieldId, HTMLDivElement | null>>>({});
+  const inputRefs = useRef<Partial<Record<FieldId, HTMLInputElement | null>>>({});
+
+  // Focus a field's text input when the app requests it (e.g. tapping a line in
+  // the mobile preview). The field is already opened via `open`, so its input is
+  // mounted by the time this effect runs.
+  useEffect(() => {
+    if (!focusReq) return;
+    const el = inputRefs.current[focusReq.f];
+    if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }, [focusReq]);
 
   // Scroll a newly-opened line into view (single opens — header click or middle
   // preview focus), but stay put on Expand-all (bulk) and on collapses.
@@ -147,6 +159,7 @@ export default function EditorPanel({
               <div style={{ padding: '0 11px 11px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {/* text */}
                 <input
+                  ref={(el) => { inputRefs.current[f] = el; }}
                   value={val}
                   onChange={(e) => typeText(f, e.target.value)}
                   placeholder={t('g_text_ph')}

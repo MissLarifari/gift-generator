@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { LayoutGrid, Gift, SlidersHorizontal } from 'lucide-react';
 import { generate } from './engine';
 import type { FieldId, Layout } from './engine';
@@ -23,9 +23,19 @@ export default function App() {
   // Which lines are "open" in the editor (multi-open accordion) — shared so editing
   // the middle opens that line on the left, and Expand/Collapse all toggles every card.
   const [openFields, setOpenFields] = useState<FieldId[]>(['mainText']);
+  // A focus request the editor consumes to focus a field's input (nonce retriggers
+  // even for the same field). On mobile, focusing a field also jumps to the Edit tab
+  // so tapping a preview line lands on a real, keyboard-ready input.
+  const focusNonce = useRef(0);
+  const [focusReq, setFocusReq] = useState<{ f: FieldId; n: number } | null>(null);
   const focusField = useCallback((f: FieldId) => {
     setOpenFields((prev) => (prev.includes(f) ? prev : [...prev, f]));
-  }, []);
+    if (isMobile) {
+      setMobileTab('edit');
+      focusNonce.current += 1;
+      setFocusReq({ f, n: focusNonce.current });
+    }
+  }, [isMobile]);
 
   // A shared gift is loaded once into history; clear the hash so editing isn't pinned to it.
   useEffect(() => { clearShareHash(); }, []);
@@ -117,8 +127,8 @@ export default function App() {
       <div className="relative z-10 h-full flex flex-col">
         <Topbar result={result} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} compact={isMobile} />
         {(() => {
-          const editorPanel = <EditorPanel state={state} commit={commit} onOpenColor={setColorField} open={openFields} setOpen={setOpenFields} onSetLayout={setLayout} />;
-          const previewPanel = <PreviewPanel state={state} result={result} commit={commit} onReset={() => reset(createDefaultState())} onFocusField={focusField} />;
+          const editorPanel = <EditorPanel state={state} commit={commit} onOpenColor={setColorField} open={openFields} setOpen={setOpenFields} onSetLayout={setLayout} focusReq={focusReq} />;
+          const previewPanel = <PreviewPanel state={state} result={result} commit={commit} onReset={() => reset(createDefaultState())} onFocusField={focusField} isMobile={isMobile} />;
           const templatesPanel = <TemplatesPanel onApply={(c, i) => { applyTemplate(c, i); if (isMobile) setMobileTab('preview'); }} favorites={favorites} onToggleFav={toggleFav} />;
 
           if (isMobile) {

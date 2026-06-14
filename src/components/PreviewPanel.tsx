@@ -27,12 +27,14 @@ export default function PreviewPanel({
   commit,
   onReset,
   onFocusField,
+  isMobile,
 }: {
   state: GiftState;
   result: GenerateResult;
   commit: Commit;
   onReset: () => void;
   onFocusField: (f: FieldId) => void;
+  isMobile?: boolean;
 }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
@@ -41,6 +43,13 @@ export default function PreviewPanel({
   const [reorder, setReorder] = useState(false);
   const opt = useMemo(() => (state.layout === 'custom' ? { show: false, state: 'info' as const, headerMsg: '', tips: [] } : buildOptimizeTips(state, result.chars, result.bytes, result.lines, t)), [state, result, t]);
   const overLimit = result.over;
+
+  // Desktop: edit inline in the preview. Mobile: hand off to the editor (App jumps
+  // to the Edit tab and focuses the field) — the inline input is too fiddly on touch.
+  const startEdit = (f: FieldId) => {
+    if (!isMobile) setEditing(f);
+    onFocusField(f);
+  };
 
   const setText = (f: FieldId, v: string) => commit((s) => ({ ...s, text: { ...s.text, [f]: v } }), 'text:' + f);
   const removeField = (f: FieldId) => commit((s) => ({ ...s, text: { ...s.text, [f]: '' } }));
@@ -101,7 +110,7 @@ export default function PreviewPanel({
     }
     if (!raw) return null;
     const shown = f === 'kaomoji' ? raw : applyFont(raw, state.fonts[f]);
-    const click = () => { setEditing(f); onFocusField(f); };
+    const click = () => startEdit(f);
     const canStar = f === 'dekoTop' || f === 'topText' || f === 'bottomText';
     const starred = canStar && state.stars[f as 'dekoTop' | 'topText' | 'bottomText'];
     if (!starred) {
@@ -173,7 +182,7 @@ export default function PreviewPanel({
             const phrase = applyFont(words.slice(0, i + 1).join(' '), state.fonts.mainText);
             nodes.push(
               <div key={'pyr-' + i} style={{ minHeight: 4 }}>
-                <span onClick={() => { setEditing('mainText'); onFocusField('mainText'); }} title={t('click_edit')} style={displayStyle('mainText')}>{phrase}</span>
+                <span onClick={() => startEdit('mainText')} title={t('click_edit')} style={displayStyle('mainText')}>{phrase}</span>
               </div>,
             );
           });
