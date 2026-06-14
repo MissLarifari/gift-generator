@@ -156,20 +156,12 @@ export default function PreviewPanel({
           row(field('kaomoji'), 'c-k'),
           row(field('dekoBottom'), 'c-db'),
         ];
-      case 'pyramid':
-        return [
-          row(field('dekoTop'), 'p-dt'),
-          <div key="p-tt" style={{ marginLeft: '2ch' }}>{field('topText')}</div>,
-          row(field('mainText'), 'p-mt'),
-          <div key="p-bt" style={{ marginLeft: '8ch' }}>{field('bottomText')}</div>,
-          row(field('kaomoji'), 'p-k'),
-        ];
       case 'framed': {
         const nodes = order.filter((f) => has(f)).map((f) => row(field(f), 'f-' + f));
         if (has('dekoTop') && !has('dekoBottom')) nodes.push(row(field('dekoTop', 'f-frame'), 'f-frame'));
         return nodes;
       }
-      default: // center, flipped
+      default: // center, flipped, pyramid (all stack centered)
         return order.map((f) => row(field(f), f));
     }
   };

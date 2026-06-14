@@ -25,7 +25,9 @@ export function applyLayout(
   };
 
   // 'flipped' shares the center vertical stack — its identity is font/colour.
-  if (layout === 'center' || layout === 'flipped') return ord.map((f) => w[f]).filter(Boolean).join('\n');
+  // 'pyramid' also stacks centered — its pyramid shape comes from deco lines that
+  // grow in width (3dxchat centers every line, so leading-space indent can't work).
+  if (layout === 'center' || layout === 'flipped' || layout === 'pyramid') return ord.map((f) => w[f]).filter(Boolean).join('\n');
   if (layout === 'inline') {
     return [[w.dekoTop, w.topText, w.mainText, w.dekoTop].filter(Boolean).join(' '), w.bottomText, w.kaomoji, w.dekoBottom].filter(Boolean).join('\n');
   }
@@ -39,21 +41,6 @@ export function applyLayout(
   }
   if (layout === 'minimal') {
     return ord.filter((f) => f === 'mainText' || f === 'kaomoji').map((f) => w[f]).filter(Boolean).join('\n');
-  }
-  if (layout === 'pyramid') {
-    const pyrFmt: Partial<Record<FieldId, (t: string) => string>> = {
-      dekoTop: (t) => t,
-      topText: (t) => '　　' + t,
-      bottomText: (t) => '　　　　　　　　　　' + t,
-      mainText: (t) => t,
-      kaomoji: (t) => t,
-    };
-    const lines: string[] = [];
-    ord.forEach((f) => {
-      const fmt = pyrFmt[f];
-      if (fmt && w[f]) lines.push(fmt(w[f] as string));
-    });
-    return lines.join('\n');
   }
   return Object.values(w).filter(Boolean).join('\n');
 }

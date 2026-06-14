@@ -82,9 +82,11 @@ export const LAYOUT_DEFAULTS: Record<Layout, LayoutDefault> = {
   compact: { text: { dekoTop: '· · ·', topText: 'wollt nur sagen', mainText: 'danke dir', bottomText: 'für alles', kaomoji: '(˘³˘)♥', dekoBottom: '· · ·' } },
   framed: { text: { dekoTop: '❀ · ❀ · ❀', topText: 'du bist mein', mainText: 'liebling', bottomText: '· kein scherz ·', kaomoji: '', dekoBottom: '' } },
   minimal: { text: { dekoTop: '', topText: '', mainText: 'nur wir', bottomText: '', kaomoji: '(❀◡❀)', dekoBottom: '' } },
+  // Star pyramid — deco lines grow in width (centered in-game → real triangle),
+  // since 3dxchat centers every line and strips leading spaces (no indent possible).
   pyramid: {
-    text: { dekoTop: '✦ · ✦', topText: '.. stop being ..', mainText: 'so cute', bottomText: '.. i cant handle it ..', kaomoji: '(❀◡❀)', dekoBottom: '' },
-    lineOrder: ['dekoTop', 'topText', 'mainText', 'kaomoji', 'bottomText', 'dekoBottom'],
+    text: { dekoTop: '✦\n✦ · ✦\n✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', bottomText: '', kaomoji: '', dekoBottom: '' },
+    colors: { dekoTop: '#ffd84d' },
   },
   flipped: {
     text: { dekoTop: '.. ↓ ..', topText: 'ɢʀᴀᴠɪᴛʏ ɢᴀᴠᴇ ᴜᴘ\nᴀɴᴅ sᴏ ᴅɪᴅ ɪ\n', mainText: 'ꜰᴀʟʟɪɴɢ', bottomText: 'pɹɐɥ ꜰᴏʀ ʏᴏᴜ ♡', kaomoji: '(◡‿◡)', dekoBottom: 'ɴᴏᴡ ɪᴍ ᴊᴜsᴛ' },

@@ -140,12 +140,6 @@ const CASES: Case[] = [
   { name: 'layout-minimal', state: S({ text: B, layout: 'minimal' }), chars: 76, bytes: 82, code: `<size=60><color=#ff71b8>so cute</color></size>
 <color=#ffd84d>(❀◡❀)</color>` },
 
-  { name: 'layout-pyramid-stars', state: S({ text: B, layout: 'pyramid', stars: { topText: true } }), chars: 213, bytes: 247, code: `<color=#555555>· ily ·←</color>
-　　* <color=#8f8f8f>.. stop being ..</color> *
-<size=60><color=#ff71b8>so cute</color></size>
-　　　　　　　　　　<color=#8f8f8f>.. i cant handle it ..</color>
-<color=#ffd84d>(❀◡❀)</color>` },
-
   { name: 'layout-flipped', state: S({ text: B, layout: 'flipped' }), chars: 233, bytes: 249, code: `<color=#555555>· ily ·←</color>
 <color=#8f8f8f>.. stop being ..</color>
 <size=60><color=#ff71b8>so cute</color></size>
