@@ -83,12 +83,16 @@ export const LAYOUT_DEFAULTS: Record<Layout, LayoutDefault> = {
   compact: { text: { dekoTop: '· · ·', topText: 'wollt nur sagen', mainText: 'danke dir', bottomText: 'für alles', kaomoji: '(˘³˘)♥', dekoBottom: '· · ·' } },
   framed: { text: { dekoTop: '❀ · ❀ · ❀', topText: 'du bist mein', mainText: 'liebling', bottomText: '· kein scherz ·', kaomoji: '', dekoBottom: '' } },
   minimal: { text: { dekoTop: '', topText: '', mainText: 'nur wir', bottomText: '', kaomoji: '(❀◡❀)', dekoBottom: '' } },
-  // Star pyramid — gold deco lines that grow in width (✦ / ✦·✦ / ✦·✦·✦) form
-  // the triangle, since 3dxchat centers every line and strips leading spaces
-  // (no indent possible). The text sits normally below, fully editable.
+  // Star pyramid — each star row is its OWN line (so every line is separately
+  // clickable & editable): 3 gold star rows that grow in width (✦ / ✦·✦ / ✦·✦·✦)
+  // form the triangle (3dxchat centers every line; leading-space indent can't
+  // work), then 2 text lines below. lineOrder stacks them top→bottom; the stars
+  // live in dekoTop/dekoBottom/bottomText, the text in topText/mainText.
   pyramid: {
-    text: { dekoTop: '✦\n✦ · ✦\n✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', bottomText: '', kaomoji: '', dekoBottom: '' },
-    colors: { dekoTop: '#ffd84d' },
+    text: { dekoTop: '✦', dekoBottom: '✦ · ✦', bottomText: '✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', kaomoji: '' },
+    sizes: { dekoTop: 16, dekoBottom: 16, bottomText: 16 },
+    colors: { dekoTop: '#ffd84d', dekoBottom: '#ffd84d', bottomText: '#ffd84d' },
+    lineOrder: ['dekoTop', 'dekoBottom', 'bottomText', 'topText', 'mainText', 'kaomoji'],
   },
   flipped: {
     text: { dekoTop: '.. ↓ ..', topText: 'ɢʀᴀᴠɪᴛʏ ɢᴀᴠᴇ ᴜᴘ\nᴀɴᴅ sᴏ ᴅɪᴅ ɪ\n', mainText: 'ꜰᴀʟʟɪɴɢ', bottomText: 'pɹɐɥ ꜰᴏʀ ʏᴏᴜ ♡', kaomoji: '(◡‿◡)', dekoBottom: 'ɴᴏᴡ ɪᴍ ᴊᴜsᴛ' },

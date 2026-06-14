@@ -170,7 +170,7 @@ export default function App() {
 
       <ColorPickerOverlay
         open={!!colorField}
-        fieldLabel={colorField ? t('fl_' + colorField) : ''}
+        fieldLabel={colorField ? t((state.layout === 'pyramid' ? 'pyr_' : 'fl_') + colorField) : ''}
         initial={colorInitial}
         onClose={() => setColorField(null)}
         onApply={(cs) => {

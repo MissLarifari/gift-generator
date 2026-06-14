@@ -173,18 +173,21 @@ describe('gift engine — byte-identical to the legacy generator', () => {
   }
 });
 
-// Pyramid = star pyramid: gold deco lines (✦ / ✦·✦ / ✦·✦·✦) grow in width and
-// form the triangle (3dxchat centers each line); the text stacks normally below.
+// Pyramid = star pyramid: each gold star row is its OWN line (separately
+// editable) and they grow in width (✦ / ✦·✦ / ✦·✦·✦) to form the triangle
+// (3dxchat centers each line); the two text lines stack below.
 describe('pyramid — star pyramid', () => {
-  it('stacks the multi-line star deco above the normal text', () => {
+  it('each star row is its own line; text stacks below', () => {
     const r = generate(S({
-      text: { dekoTop: '✦\n✦ · ✦\n✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', bottomText: '', kaomoji: '', dekoBottom: '' },
-      colors: { dekoTop: '#ffd84d' },
+      text: { dekoTop: '✦', dekoBottom: '✦ · ✦', bottomText: '✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', kaomoji: '' },
+      sizes: { dekoTop: 16, dekoBottom: 16, bottomText: 16 },
+      colors: { dekoTop: '#ffd84d', dekoBottom: '#ffd84d', bottomText: '#ffd84d' },
+      lineOrder: ['dekoTop', 'dekoBottom', 'bottomText', 'topText', 'mainText', 'kaomoji'],
       layout: 'pyramid',
     }));
-    expect(r.code).toBe(`<color=#ffd84d>✦
-✦ · ✦
-✦ · ✦ · ✦</color>
+    expect(r.code).toBe(`<size=16><color=#ffd84d>✦</color></size>
+<size=16><color=#ffd84d>✦ · ✦</color></size>
+<size=16><color=#ffd84d>✦ · ✦ · ✦</color></size>
 <color=#8f8f8f>youre my</color>
 <size=60><color=#ff71b8>shining star</color></size>`);
   });

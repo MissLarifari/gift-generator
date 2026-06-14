@@ -26,7 +26,9 @@ export default function EditorPanel({
 }) {
   const { t } = useI18n();
   const layoutLabel = (l: Layout) => t('layout_' + l);
-  const fieldLabel = (f: FieldId) => t('fl_' + f);
+  // The pyramid repurposes the generic fields as star/text rows, so give them
+  // pyramid-specific labels (Star 1/2/3, Top/Bottom text) instead of fl_*.
+  const fieldLabel = (f: FieldId) => (state.layout === 'pyramid' ? t('pyr_' + f) : t('fl_' + f));
   const cardRefs = useRef<Partial<Record<FieldId, HTMLDivElement | null>>>({});
   const inputRefs = useRef<Partial<Record<FieldId, HTMLInputElement | null>>>({});
 
