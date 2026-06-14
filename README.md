@@ -1,111 +1,73 @@
-# Gift Generator
+# React + TypeScript + Vite
 
-A 3dxchat gift-message generator with live preview, code output, multi-language UI (EN/DE/FR/RU), and customizable templates.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-By MissLarifari.
-Live: https://sophey.vodka/gift-generator/
+Currently, two official plugins are available:
 
-## Features
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-- **Live preview** with click-to-edit lines and reorder/remove controls
-- **7 layouts** (Center, Inline, Compact, Framed, Minimal, Pyramid, Custom)
-- **Per-line ★ star toggle** for Pyramid layout (Deco Top / Top Line / Bottom Line)
-- **Themed template sections** — Sweet, Funny, Friends, Flirty, Dominant, Submissive, Flirty bold, Spicy, Voyeur, Aftercare, Funny / Chaotic, Friends / Roast, plus grouped **Vibes** (Goth / Dark, Drunk vibes, Soft / Cottagecore, Pride), **Holidays** (Christmas, Halloween, Easter, St Patricks, Valentine, Womens Day, 4th of July, Thanksgiving, Hanukkah, New Year), **Celebrations** (Wedding, Anniversary, Birthday)
-- **Auto-theming** — clicking a holiday/celebration template applies matching colors and clears deco/kaomoji so the byte budget stays under the 240 chars / 255 bytes limit
-- **Pride pastel rainbow** — main text gets a multi-color pastel gradient (capped at 3 segments to stay within the byte limit)
-- **Favorites** — star any template to pin it to the top
-- **Character + byte counter** with live warnings before you hit the 3dxchat limit
-- **Light & dark theme**
-- **Multi-language UI** — EN / DE / FR / RU
+## React Compiler
 
-## Tech
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-Vanilla HTML/CSS/JS bundled by [Vite](https://vitejs.dev/). No framework, no backend, no tracking.
+## Expanding the ESLint configuration
 
-## Project structure
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-```
-.
-├── index.html              # Vite entry — the actual app
-├── vite.config.js          # Vite config (base: '/gift-generator/')
-├── package.json
-├── package-lock.json
-├── .gitignore
-├── .env                    # DEPLOY_TOKEN (gitignored — never commit!)
-├── .env.example            # Template for .env
-├── README.md
-│
-├── public/                 # Static assets served as-is by Vite
-│   ├── js/
-│   │   ├── app.js          # Main app logic, i18n, theme functions
-│   │   ├── templates.js    # Template sections + render
-│   │   └── icons.js        # FontAwesome icon map + hydration
-│   ├── css/
-│   │   └── styles.css      # All styling (dark theme)
-│   ├── img/
-│   │   ├── gift.png        # Gift preview image
-│   │   └── flags/          # UI language flags
-│   ├── fontawesome/        # FA assets (self-hosted)
-│   ├── favicon.svg
-│   ├── _headers            # Netlify security headers
-│   └── _redirects          # Netlify redirect to sophey.vodka
-│
-├── scripts/                # Local helper scripts
-│   └── deploy.js           # Pushes to git + pings deploy webhook
-│
-├── alt-deploy/             # Alternative deployment options
-│   └── netlify-redirect-only/   # Standalone Netlify "redirect-only" site
-│       ├── index.html      # HTML fallback redirect
-│       └── _redirects      # Netlify 301 redirect rule
-│
-└── dist/                   # Build output (gitignored, auto-generated)
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## Local development
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```bash
-npm install
-npm run dev
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-Opens http://localhost:5173 with hot-reload.
-
-## Build for production
-
-```bash
-npm run build
-```
-
-Outputs to `dist/` ready for static hosting under `/gift-generator/`.
-
-Test the production build locally:
-
-```bash
-npm run preview
-```
-
-## Deploy to sophey.vodka
-
-1. Make sure `.env` contains a valid `DEPLOY_TOKEN` (ask your friend if you don't have one)
-2. Commit your changes
-3. Run:
-
-```bash
-npm run deploy
-```
-
-The script pushes to GitHub and pings the deploy webhook. The server then pulls, builds, and serves the new version.
-
-## Alternative deploy (Netlify redirect-only)
-
-Folder `alt-deploy/netlify-redirect-only/` contains a tiny standalone Netlify site that just redirects every request to `sophey.vodka/gift-generator/`. Useful as a backup if you want a barebones Netlify deploy that just hands traffic off to the main site.
-
-Drag-drop that folder into a Netlify site to use it.
-
-## Languages
-
-UI is translated into English, Deutsch, Français and Русский. Templates stay in English. Add or edit translations in `public/app.js` (the `I18N` object).
-
-<!-- git setup test -->
-<!-- gcm-fix verified -->
-<!-- final test commit -->
