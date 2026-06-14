@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { applyFont } from '../engine';
 import type { FontStyle } from '../engine';
-import { FONT_STYLES, type Commit } from '../state';
+import { FONT_STYLES, SYMBOLS, KAOMOJI, DECO_PRESETS, type Commit } from '../state';
 import { useI18n } from '../i18n';
 
 // Free-form gift-code editor for the 'custom' layout. The textarea content IS
@@ -42,6 +42,18 @@ export default function CustomEditor({ value, commit }: { value: string; commit:
     pendingSel.current = [s, s + out.length];
     setText(next, false);
   };
+
+  // Insert a snippet (deco / symbol / kaomoji) at the cursor, replacing any
+  // selection; the caret lands right after the inserted text.
+  const insert = (str: string) => {
+    const ta = taRef.current; if (!ta) return;
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    const next = value.slice(0, s) + str + value.slice(e);
+    pendingSel.current = [s + str.length, s + str.length];
+    setText(next, false);
+  };
+
+  const DECOS = [...(DECO_PRESETS.dekoTop ?? []), ...(DECO_PRESETS.dekoBottom ?? [])];
 
   const chip = (label: ReactNode, onClick: () => void, title: string): ReactNode => (
     <button
@@ -90,6 +102,22 @@ export default function CustomEditor({ value, commit }: { value: string; commit:
         className="mono"
         style={{ width: '100%', minHeight: 150, resize: 'vertical', background: 'rgba(6,9,18,.5)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 11px', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.5, outline: 'none', whiteSpace: 'pre-wrap' }}
       />
+      {/* insert deco / symbols / kaomoji at the cursor */}
+      <div className="flex flex-col" style={{ gap: 7 }}>
+        <div>
+          <div style={{ fontSize: 10, color: '#7e8fb5', margin: '0 0 5px' }}>{t('g_pick_deco')}</div>
+          <div className="flex flex-wrap" style={{ gap: 5 }}>{DECOS.map((p) => chip(p, () => insert(p), p))}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: '#7e8fb5', margin: '0 0 5px' }}>{t('plus_symbol')}</div>
+          <div className="flex flex-wrap" style={{ gap: 5 }}>{SYMBOLS.map((sym) => chip(sym, () => insert(sym), sym))}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: '#7e8fb5', margin: '0 0 5px' }}>{t('kaomoji')}</div>
+          <div className="flex flex-wrap" style={{ gap: 5 }}>{KAOMOJI.map((k) => chip(k, () => insert(k), k))}</div>
+        </div>
+      </div>
+
       <div style={{ fontSize: 11, color: 'var(--muted)' }}>{t('g_custom_hint')}</div>
     </div>
   );
