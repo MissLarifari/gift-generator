@@ -76,6 +76,7 @@ export default function App() {
           ...base,
           text: { ...d.text },
           fonts: { ...base.fonts, ...(d.fonts ?? {}) },
+          sizes: { ...base.sizes, ...(d.sizes ?? {}) },
           colors: { ...base.colors, ...(d.colors ?? {}) },
           noColor: { ...base.noColor, ...(d.noColor ?? {}) },
           layout: l,

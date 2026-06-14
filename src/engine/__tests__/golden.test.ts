@@ -172,3 +172,29 @@ describe('gift engine — byte-identical to the legacy generator', () => {
     });
   }
 });
+
+// New (non-legacy) behaviour: the pyramid layout expands mainText into
+// cumulative word lines so it forms a real triangle when 3dxchat centers it.
+describe('pyramid — auto word-pyramid', () => {
+  it('expands the main phrase into growing lines', () => {
+    const r = generate(S({ text: { ...D.text, mainText: 'you are my star' }, sizes: { mainText: 26 }, colors: { mainText: '#ff71b8' }, layout: 'pyramid' }));
+    expect(r.code).toBe(`<size=26><color=#ff71b8>you</color></size>
+<size=26><color=#ff71b8>you are</color></size>
+<size=26><color=#ff71b8>you are my</color></size>
+<size=26><color=#ff71b8>you are my star</color></size>`);
+  });
+
+  it('keeps deco / top / bottom around the pyramid', () => {
+    const r = generate(S({ text: { dekoTop: '✦', topText: 'happy birthday', mainText: 'i love you', bottomText: '', kaomoji: '', dekoBottom: '' }, sizes: { mainText: 26 }, colors: { dekoTop: '#ffd84d', topText: '#8f8f8f', mainText: '#ff71b8' }, layout: 'pyramid' }));
+    expect(r.code).toBe(`<color=#ffd84d>✦</color>
+<color=#8f8f8f>happy birthday</color>
+<size=26><color=#ff71b8>i</color></size>
+<size=26><color=#ff71b8>i love</color></size>
+<size=26><color=#ff71b8>i love you</color></size>`);
+  });
+
+  it('single word → single line (degenerate pyramid)', () => {
+    const r = generate(S({ text: { ...D.text, mainText: 'hi' }, layout: 'pyramid' }));
+    expect(r.code).toBe(`<size=60><color=#ff71b8>hi</color></size>`);
+  });
+});

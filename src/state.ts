@@ -71,6 +71,7 @@ export function createDefaultState(): GiftState {
 export interface LayoutDefault {
   text: Record<FieldId, string>;
   fonts?: Partial<Record<FieldId, FontStyle>>;
+  sizes?: Partial<Record<FieldId, number>>;
   colors?: Partial<Record<FieldId, string>>;
   noColor?: Partial<Record<FieldId, boolean>>;
   lineOrder?: FieldId[];
@@ -82,11 +83,14 @@ export const LAYOUT_DEFAULTS: Record<Layout, LayoutDefault> = {
   compact: { text: { dekoTop: '· · ·', topText: 'wollt nur sagen', mainText: 'danke dir', bottomText: 'für alles', kaomoji: '(˘³˘)♥', dekoBottom: '· · ·' } },
   framed: { text: { dekoTop: '❀ · ❀ · ❀', topText: 'du bist mein', mainText: 'liebling', bottomText: '· kein scherz ·', kaomoji: '', dekoBottom: '' } },
   minimal: { text: { dekoTop: '', topText: '', mainText: 'nur wir', bottomText: '', kaomoji: '(❀◡❀)', dekoBottom: '' } },
-  // Star pyramid — deco lines grow in width (centered in-game → real triangle),
-  // since 3dxchat centers every line and strips leading spaces (no indent possible).
+  // Auto word-pyramid — the main phrase is expanded into cumulative lines
+  // (you / you are / you are my …). 3dxchat centers every line and strips
+  // leading spaces, so each longer line forms a wider tier = a real pyramid.
+  // Smaller main size + a short default phrase keep it under the byte limit.
   pyramid: {
-    text: { dekoTop: '✦\n✦ · ✦\n✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', bottomText: '', kaomoji: '', dekoBottom: '' },
-    colors: { dekoTop: '#ffd84d' },
+    text: { dekoTop: '', topText: '', mainText: 'you are my star', bottomText: '', kaomoji: '', dekoBottom: '' },
+    sizes: { mainText: 26 },
+    colors: { mainText: '#ff71b8' },
   },
   flipped: {
     text: { dekoTop: '.. ↓ ..', topText: 'ɢʀᴀᴠɪᴛʏ ɢᴀᴠᴇ ᴜᴘ\nᴀɴᴅ sᴏ ᴅɪᴅ ɪ\n', mainText: 'ꜰᴀʟʟɪɴɢ', bottomText: 'pɹɐɥ ꜰᴏʀ ʏᴏᴜ ♡', kaomoji: '(◡‿◡)', dekoBottom: 'ɴᴏᴡ ɪᴍ ᴊᴜsᴛ' },

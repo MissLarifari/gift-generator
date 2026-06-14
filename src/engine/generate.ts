@@ -23,6 +23,24 @@ const wrapBI = (s: string, b: boolean, i: boolean) => {
   return s;
 };
 
+// Auto word-pyramid: split mainText into words and emit cumulative lines
+// (word 1 / word 1-2 / word 1-2-3 …), each fully styled like the main line.
+// 3dxchat centers every line, so each longer line is the next, wider tier —
+// a real pyramid for ANY phrase the user types. Returns null when empty.
+function pyramidMain(state: GiftState): string | null {
+  const words = state.text.mainText.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return null;
+  const size = state.sizes.mainText;
+  return words
+    .map((_, i) => {
+      let m = colorTag(applyFont(words.slice(0, i + 1).join(' '), state.fonts.mainText), state.grads.mainText, state.colors.mainText, state.noColor.mainText);
+      if (state.bold.main) m = `<b>${m}</b>`;
+      if (state.italic.main) m = `<i>${m}</i>`;
+      return `<size=${size}>${m}</size>`;
+    })
+    .join('\n');
+}
+
 // Pure port of the original generate() code-building path: per-field
 // applyFont → colorTag → (bold/italic) → size wrap, then applyLayout.
 export function generate(state: GiftState): GenerateResult {
@@ -52,6 +70,9 @@ export function generate(state: GiftState): GenerateResult {
       ? sz(colorTag(applyFont(t.dekoBottom, state.fonts.dekoBottom), state.grads.dekoBottom, state.colors.dekoBottom, state.noColor.dekoBottom), state.sizes.dekoBottom, DEFAULT_SIZES.dekoBottom)
       : null,
   };
+
+  // Pyramid replaces the single main line with a centered word-pyramid block.
+  if (state.layout === 'pyramid') lm.mainText = pyramidMain(state);
 
   const code = state.layout === 'custom' ? (state.customText || '') : applyLayout(lm, state.layout, state.lineOrder, state.stars);
   const chars = giftChars(code);
