@@ -51,9 +51,10 @@ export default function Topbar({
               <span key={n} style={{ fontWeight: 600, color: '#d8e2f5', lineHeight: 1.35 }}>{n}</span>
             ))}
             <span style={{ color: '#7e8fb5' }}>… and many more</span>
-            <span style={{ marginTop: 6, color: '#9fb3d6', fontSize: 10.5 }}>made with <span style={{ color: 'var(--pink)' }}>♥</span> by MissLarifari</span>
+            <span style={{ marginTop: 6, color: '#9fb3d6', fontSize: 10.5 }}>made with <span style={{ color: 'var(--pink)' }}>♥</span> by Lari</span>
           </span>
         </span>
+        <a href="https://sophey.vodka/lari" target="_blank" rel="noopener noreferrer" title="Gifty by Lari" style={{ fontSize: compact ? 9.5 : 11, color: '#8ea3c8', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' }}>by&nbsp;Lari</a>
         {!compact && (
           <span className="flex items-center gap-1" style={{ fontSize: 11, color: '#bfeefa', border: '1px solid rgba(87,224,240,.4)', borderRadius: 20, padding: '3px 10px', boxShadow: '0 0 10px rgba(87,224,240,.22)' }}>
             <Sparkles size={13} /> No Tracking
