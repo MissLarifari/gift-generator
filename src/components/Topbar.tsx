@@ -23,12 +23,14 @@ export default function Topbar({
   redo,
   canUndo,
   canRedo,
+  compact = false,
 }: {
   result: GenerateResult;
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  compact?: boolean;
 }) {
   const { lang, setLang, t } = useI18n();
   const histBtn = (enabled: boolean): React.CSSProperties => ({
@@ -38,11 +40,11 @@ export default function Topbar({
   });
 
   return (
-    <div className="flex items-center justify-between px-[18px] shrink-0" style={{ height: 56, borderBottom: '1px solid var(--border)', background: 'rgba(13,20,48,.5)', backdropFilter: 'blur(8px)' }}>
+    <div className={`flex items-center justify-between shrink-0 ${compact ? 'flex-wrap gap-y-2 px-[12px] py-[8px]' : 'px-[18px]'}`} style={{ ...(compact ? { minHeight: 54 } : { height: 56 }), borderBottom: '1px solid var(--border)', background: 'rgba(13,20,48,.5)', backdropFilter: 'blur(8px)' }}>
       <div className="flex items-center gap-3">
         <span className="brand-wrap flex items-center gap-[7px]" style={{ position: 'relative' }}>
-          <Gift size={22} className="brand-gift" style={{ color: 'var(--ind)', filter: 'drop-shadow(0 0 8px rgba(87,224,240,.5))' }} />
-          <span className="word" style={{ fontSize: 24 }}>GIFTY</span>
+          <Gift size={compact ? 19 : 22} className="brand-gift" style={{ color: 'var(--ind)', filter: 'drop-shadow(0 0 8px rgba(87,224,240,.5))' }} />
+          <span className="word" style={{ fontSize: compact ? 20 : 24 }}>GIFTY</span>
           <span className="brand-thanks">
             <span className="word" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: 5 }}>♥ Thank you for the support</span>
             {THANKS_NAMES.map((n) => (
@@ -52,22 +54,24 @@ export default function Topbar({
             <span style={{ marginTop: 6, color: '#9fb3d6', fontSize: 10.5 }}>made with <span style={{ color: 'var(--pink)' }}>♥</span> by MissLarifari</span>
           </span>
         </span>
-        <span className="flex items-center gap-1" style={{ fontSize: 11, color: '#bfeefa', border: '1px solid rgba(87,224,240,.4)', borderRadius: 20, padding: '3px 10px', boxShadow: '0 0 10px rgba(87,224,240,.22)' }}>
-          <Sparkles size={13} /> No Tracking
-        </span>
+        {!compact && (
+          <span className="flex items-center gap-1" style={{ fontSize: 11, color: '#bfeefa', border: '1px solid rgba(87,224,240,.4)', borderRadius: 20, padding: '3px 10px', boxShadow: '0 0 10px rgba(87,224,240,.22)' }}>
+            <Sparkles size={13} /> No Tracking
+          </span>
+        )}
         <div className="flex gap-[5px]" style={{ marginLeft: 4 }}>
           <button title={t('undo_title')} onClick={undo} disabled={!canUndo} style={histBtn(canUndo)}><Undo2 size={15} /></button>
           <button title={t('redo_title')} onClick={redo} disabled={!canRedo} style={histBtn(canRedo)}><Redo2 size={15} /></button>
         </div>
       </div>
 
-      <div className="flex items-center gap-[11px]" style={{ background: 'rgba(6,9,18,.5)', border: '1px solid var(--border-2)', borderRadius: 20, padding: '6px 15px' }}>
-        <span style={{ fontSize: 10, color: 'var(--muted)' }}>{t('chars')}</span>
-        <span className="mono" style={{ fontSize: 15, fontWeight: 700, color: statusColor(result.charStatus) }}>{result.chars}</span>
+      <div className="flex items-center" style={{ gap: compact ? 6 : 11, background: 'rgba(6,9,18,.5)', border: '1px solid var(--border-2)', borderRadius: 20, padding: compact ? '4px 11px' : '6px 15px' }}>
+        {!compact && <span style={{ fontSize: 10, color: 'var(--muted)' }}>{t('chars')}</span>}
+        <span className="mono" style={{ fontSize: compact ? 13 : 15, fontWeight: 700, color: statusColor(result.charStatus) }}>{result.chars}</span>
         <span className="mono" style={{ fontSize: 12, color: 'var(--dim)' }}>/240</span>
         <span style={{ width: 1, height: 15, background: 'var(--border-2)' }} />
-        <span style={{ fontSize: 10, color: 'var(--muted)' }}>{t('bytes')}</span>
-        <span className="mono" style={{ fontSize: 15, fontWeight: 700, color: statusColor(result.byteStatus) }}>{result.bytes}</span>
+        {!compact && <span style={{ fontSize: 10, color: 'var(--muted)' }}>{t('bytes')}</span>}
+        <span className="mono" style={{ fontSize: compact ? 13 : 15, fontWeight: 700, color: statusColor(result.byteStatus) }}>{result.bytes}</span>
         <span className="mono" style={{ fontSize: 12, color: 'var(--dim)' }}>/255</span>
       </div>
 
@@ -78,9 +82,9 @@ export default function Topbar({
           rel="noopener noreferrer"
           title="The Cloud · Discord"
           className="flex items-center gap-[6px]"
-          style={{ fontSize: 11, fontWeight: 600, color: '#e6e9ff', background: 'rgba(88,101,242,.16)', border: '1px solid rgba(124,131,255,.5)', borderRadius: 20, padding: '5px 11px', textDecoration: 'none', boxShadow: '0 0 12px rgba(88,101,242,.25)' }}
+          style={{ fontSize: 11, fontWeight: 600, color: '#e6e9ff', background: 'rgba(88,101,242,.16)', border: '1px solid rgba(124,131,255,.5)', borderRadius: 20, padding: compact ? '6px' : '5px 11px', textDecoration: 'none', boxShadow: '0 0 12px rgba(88,101,242,.25)' }}
         >
-          <DiscordGlyph size={14} /> The Cloud
+          <DiscordGlyph size={compact ? 16 : 14} /> {!compact && 'The Cloud'}
         </a>
         <div className="flex gap-[5px]">
         {LANGS.map((l: Lang) => (

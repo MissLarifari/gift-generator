@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { LayoutGrid, Gift, SlidersHorizontal } from 'lucide-react';
 import { generate } from './engine';
 import type { FieldId, Layout } from './engine';
 import { createDefaultState, favKey, FIELDS, LAYOUT_DEFAULTS } from './state';
 import { readShareFromUrl, clearShareHash } from './share';
 import { useHistory } from './useHistory';
+import { useIsMobile } from './useIsMobile';
 import { useI18n } from './i18n';
 import Topbar from './components/Topbar';
 import EditorPanel from './components/EditorPanel';
@@ -16,6 +18,8 @@ export default function App() {
   const { state, commit, undo, redo, reset, canUndo, canRedo } = useHistory(readShareFromUrl() ?? createDefaultState());
   const result = useMemo(() => generate(state), [state]);
   const [colorField, setColorField] = useState<FieldId | null>(null);
+  const isMobile = useIsMobile();
+  const [mobileTab, setMobileTab] = useState<'templates' | 'preview' | 'edit'>('preview');
   // Which lines are "open" in the editor (multi-open accordion) — shared so editing
   // the middle opens that line on the left, and Expand/Collapse all toggles every card.
   const [openFields, setOpenFields] = useState<FieldId[]>(['mainText']);
@@ -110,15 +114,47 @@ export default function App() {
       <div className="cloud" style={{ width: 160, height: 80, background: 'rgba(120,220,255,.09)', bottom: 60, left: '46%' }} />
 
       <div className="relative z-10 h-full flex flex-col">
-        <Topbar result={result} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} />
-        <div className="grid" style={{ gridTemplateColumns: '296px 1fr 322px', gap: 13, padding: 14, height: 'calc(100% - 56px - 30px)' }}>
-          <EditorPanel state={state} commit={commit} onOpenColor={setColorField} open={openFields} setOpen={setOpenFields} onSetLayout={setLayout} />
-          <PreviewPanel state={state} result={result} commit={commit} onReset={() => reset(createDefaultState())} onFocusField={focusField} />
-          <TemplatesPanel onApply={applyTemplate} favorites={favorites} onToggleFav={toggleFav} />
-        </div>
-        <footer className="shrink-0 flex items-center justify-center text-center" style={{ height: 30, padding: '0 14px', borderTop: '1px solid var(--border)', background: 'rgba(6,9,18,.4)', fontSize: 10.5, color: 'var(--dim)', letterSpacing: '.2px' }}>
-          {t('g_disclaimer')}
-        </footer>
+        <Topbar result={result} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} compact={isMobile} />
+        {(() => {
+          const editorPanel = <EditorPanel state={state} commit={commit} onOpenColor={setColorField} open={openFields} setOpen={setOpenFields} onSetLayout={setLayout} />;
+          const previewPanel = <PreviewPanel state={state} result={result} commit={commit} onReset={() => reset(createDefaultState())} onFocusField={focusField} />;
+          const templatesPanel = <TemplatesPanel onApply={(c, i) => { applyTemplate(c, i); if (isMobile) setMobileTab('preview'); }} favorites={favorites} onToggleFav={toggleFav} />;
+
+          if (isMobile) {
+            const tab = (id: 'templates' | 'preview' | 'edit', icon: ReactNode, label: string) => (
+              <button onClick={() => setMobileTab(id)} className="flex flex-col items-center justify-center gap-[2px]" style={{ padding: '8px 0', fontSize: 10.5, fontWeight: 600, cursor: 'pointer', background: mobileTab === id ? 'rgba(87,224,240,.08)' : 'transparent', border: 'none', borderTop: `2px solid ${mobileTab === id ? 'var(--ind)' : 'transparent'}`, color: mobileTab === id ? 'var(--ind)' : 'var(--muted)' }}>
+                {icon}{label}
+              </button>
+            );
+            return (
+              <>
+                <div className="flex-1 min-h-0 overflow-y-auto" style={{ padding: 10 }}>
+                  <div style={{ display: mobileTab === 'templates' ? 'block' : 'none' }}>{templatesPanel}</div>
+                  <div style={{ display: mobileTab === 'preview' ? 'block' : 'none' }}>{previewPanel}</div>
+                  <div style={{ display: mobileTab === 'edit' ? 'block' : 'none' }}>{editorPanel}</div>
+                </div>
+                <nav className="shrink-0 grid grid-cols-3" style={{ borderTop: '1px solid var(--border)', background: 'rgba(13,20,48,.85)', backdropFilter: 'blur(8px)' }}>
+                  {tab('templates', <LayoutGrid size={18} />, t('g_tab_templates'))}
+                  {tab('preview', <Gift size={18} />, t('preview'))}
+                  {tab('edit', <SlidersHorizontal size={18} />, t('g_tab_edit'))}
+                </nav>
+              </>
+            );
+          }
+
+          return (
+            <>
+              <div className="grid" style={{ gridTemplateColumns: '296px 1fr 322px', gap: 13, padding: 14, height: 'calc(100% - 56px - 30px)' }}>
+                {editorPanel}
+                {previewPanel}
+                {templatesPanel}
+              </div>
+              <footer className="shrink-0 flex items-center justify-center text-center" style={{ height: 30, padding: '0 14px', borderTop: '1px solid var(--border)', background: 'rgba(6,9,18,.4)', fontSize: 10.5, color: 'var(--dim)', letterSpacing: '.2px' }}>
+                {t('g_disclaimer')}
+              </footer>
+            </>
+          );
+        })()}
       </div>
 
       <ColorPickerOverlay
