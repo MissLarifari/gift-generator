@@ -7,8 +7,8 @@ const statusColor = (s: CounterStatus) => (s === 'over' ? '#ff6b6b' : s === 'war
 // The Cloud's Discord server invite.
 const THE_CLOUD_DISCORD = 'https://discord.gg/h3uAk96r68';
 
-// Sister tool — Lari's 3dx profile-text editor.
-const PROFILLY_URL = 'https://misslarifari.github.io/profilly/';
+// Sister tool — Lari's 3dx profile-text editor (same host as Gifty; it links back to us).
+const PROFILLY_URL = 'https://sophey.vodka/profile-editor/';
 
 // Supporters shown in the brand hover popover (from the legacy topbar).
 const THANKS_NAMES = ['Alert', 'BiigG', 'Crizzo', 'Denji', 'Endorfin', 'Esphio', 'Fabi', 'Hater', 'iVix', 'Maxr', 'OliverCream', 'Redji', 'ReneL', 'Sophey'];
