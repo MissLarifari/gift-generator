@@ -122,7 +122,7 @@ export default function App() {
       <div className="sky" />
       <div className="cloud" style={{ width: 230, height: 120, background: 'rgba(255,255,255,.08)', bottom: -40, left: -50 }} />
       <div className="cloud" style={{ width: 200, height: 100, background: 'rgba(255,122,217,.10)', top: 120, right: -50 }} />
-      <div className="cloud" style={{ width: 160, height: 80, background: 'rgba(120,220,255,.09)', bottom: 60, left: '46%' }} />
+      <div className="cloud" style={{ width: 160, height: 80, background: 'rgba(154,120,240,.10)', bottom: 60, left: '46%' }} />
 
       <div className="relative z-10 h-full flex flex-col">
         <Topbar result={result} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} compact={isMobile} />
@@ -133,7 +133,7 @@ export default function App() {
 
           if (isMobile) {
             const tab = (id: 'templates' | 'preview' | 'edit', icon: ReactNode, label: string) => (
-              <button onClick={() => setMobileTab(id)} className="flex flex-col items-center justify-center gap-[2px]" style={{ padding: '8px 0', fontSize: 10.5, fontWeight: 600, cursor: 'pointer', background: mobileTab === id ? 'rgba(87,224,240,.08)' : 'transparent', border: 'none', borderTop: `2px solid ${mobileTab === id ? 'var(--ind)' : 'transparent'}`, color: mobileTab === id ? 'var(--ind)' : 'var(--muted)' }}>
+              <button onClick={() => setMobileTab(id)} className="flex flex-col items-center justify-center gap-[2px]" style={{ padding: '8px 0', fontSize: 10.5, fontWeight: 600, cursor: 'pointer', background: mobileTab === id ? 'rgba(225,92,158,.08)' : 'transparent', border: 'none', borderTop: `2px solid ${mobileTab === id ? 'var(--ind)' : 'transparent'}`, color: mobileTab === id ? 'var(--ind)' : 'var(--muted)' }}>
                 {icon}{label}
               </button>
             );

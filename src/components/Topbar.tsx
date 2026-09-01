@@ -1,4 +1,4 @@
-import { Sparkles, Undo2, Redo2, Gift } from 'lucide-react';
+import { Sparkles, Undo2, Redo2, Gift, UserPen } from 'lucide-react';
 import type { GenerateResult, CounterStatus } from '../engine';
 import { useI18n, LANGS, type Lang } from '../i18n';
 
@@ -6,6 +6,9 @@ const statusColor = (s: CounterStatus) => (s === 'over' ? '#ff6b6b' : s === 'war
 
 // The Cloud's Discord server invite.
 const THE_CLOUD_DISCORD = 'https://discord.gg/h3uAk96r68';
+
+// Sister tool — Lari's 3dx profile-text editor.
+const PROFILLY_URL = 'https://misslarifari.github.io/profilly/';
 
 // Supporters shown in the brand hover popover (from the legacy topbar).
 const THANKS_NAMES = ['Alert', 'BiigG', 'Crizzo', 'Denji', 'Endorfin', 'Esphio', 'Fabi', 'Hater', 'iVix', 'Maxr', 'OliverCream', 'Redji', 'ReneL', 'Sophey'];
@@ -40,10 +43,10 @@ export default function Topbar({
   });
 
   return (
-    <div className={`flex items-center justify-between shrink-0 ${compact ? 'flex-wrap gap-y-2 px-[12px] py-[8px]' : 'px-[18px]'}`} style={{ ...(compact ? { minHeight: 54 } : { height: 56 }), borderBottom: '1px solid var(--border)', background: 'rgba(13,20,48,.5)', backdropFilter: 'blur(8px)' }}>
+    <div className={`flex items-center justify-between shrink-0 ${compact ? 'flex-wrap gap-y-2 px-[12px] py-[8px]' : 'px-[18px]'}`} style={{ ...(compact ? { minHeight: 54 } : { height: 56 }), borderBottom: '1px solid var(--border)', background: 'rgba(20,16,30,.5)', backdropFilter: 'blur(8px)' }}>
       <div className="flex items-center gap-3">
         <span className="brand-wrap flex items-center gap-[7px]" style={{ position: 'relative' }}>
-          <Gift size={compact ? 19 : 22} className="brand-gift" style={{ color: 'var(--ind)', filter: 'drop-shadow(0 0 8px rgba(87,224,240,.5))' }} />
+          <Gift size={compact ? 19 : 22} className="brand-gift" style={{ color: 'var(--ind)', filter: 'drop-shadow(0 0 8px rgba(225,92,158,.5))' }} />
           <span className="word" style={{ fontSize: compact ? 20 : 24 }}>GIFTY</span>
           <span className="brand-thanks">
             <span className="word" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: 5 }}>♥ Thank you for the support</span>
@@ -56,7 +59,7 @@ export default function Topbar({
         </span>
         <a href="https://sophey.vodka/lari" target="_blank" rel="noopener noreferrer" title="Gifty by Lari" style={{ fontSize: compact ? 9.5 : 11, color: '#8ea3c8', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' }}>by&nbsp;Lari</a>
         {!compact && (
-          <span className="flex items-center gap-1" style={{ fontSize: 11, color: '#bfeefa', border: '1px solid rgba(87,224,240,.4)', borderRadius: 20, padding: '3px 10px', boxShadow: '0 0 10px rgba(87,224,240,.22)' }}>
+          <span className="flex items-center gap-1" style={{ fontSize: 11, color: '#f3cfe2', border: '1px solid rgba(225,92,158,.4)', borderRadius: 20, padding: '3px 10px', boxShadow: '0 0 10px rgba(225,92,158,.22)' }}>
             <Sparkles size={13} /> No Tracking
           </span>
         )}
@@ -77,6 +80,16 @@ export default function Topbar({
       </div>
 
       <div className="flex items-center gap-[10px]">
+        <a
+          href={PROFILLY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Profilly · 3DX Profile Editor"
+          className="flex items-center gap-[6px]"
+          style={{ fontSize: 11, fontWeight: 600, color: 'color-mix(in srgb, var(--ind) 30%, #ffffff)', background: 'color-mix(in srgb, var(--ind) 14%, transparent)', border: '1px solid color-mix(in srgb, var(--ind) 50%, transparent)', borderRadius: 20, padding: compact ? '6px' : '5px 11px', textDecoration: 'none', boxShadow: '0 0 12px color-mix(in srgb, var(--ind) 22%, transparent)' }}
+        >
+          <UserPen size={compact ? 16 : 14} /> {!compact && 'Profilly'}
+        </a>
         <a
           href={THE_CLOUD_DISCORD}
           target="_blank"

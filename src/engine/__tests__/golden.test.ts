@@ -125,28 +125,6 @@ const CASES: Case[] = [
 <color=#ffd84d>(❀◡❀)</color>
 <color=#5c5c7a>.. ･ ✦ ･ ..</color>` },
 
-  { name: 'layout-compact', state: S({ text: B, layout: 'compact' }), chars: 235, bytes: 253, code: `<color=#555555>· ily ·←</color>
-<color=#8f8f8f>.. stop being ..</color> · <size=60><color=#ff71b8>so cute</color></size> · <color=#8f8f8f>.. i cant handle it ..</color>
-<color=#ffd84d>(❀◡❀)</color>
-<color=#5c5c7a>.. ･ ✦ ･ ..</color>` },
-
-  { name: 'layout-framed', state: S({ text: B, layout: 'framed' }), chars: 233, bytes: 249, code: `<color=#555555>· ily ·←</color>
-<color=#8f8f8f>.. stop being ..</color>
-<size=60><color=#ff71b8>so cute</color></size>
-<color=#8f8f8f>.. i cant handle it ..</color>
-<color=#ffd84d>(❀◡❀)</color>
-<color=#5c5c7a>.. ･ ✦ ･ ..</color>` },
-
-  { name: 'layout-minimal', state: S({ text: B, layout: 'minimal' }), chars: 76, bytes: 82, code: `<size=60><color=#ff71b8>so cute</color></size>
-<color=#ffd84d>(❀◡❀)</color>` },
-
-  { name: 'layout-flipped', state: S({ text: B, layout: 'flipped' }), chars: 233, bytes: 249, code: `<color=#555555>· ily ·←</color>
-<color=#8f8f8f>.. stop being ..</color>
-<size=60><color=#ff71b8>so cute</color></size>
-<color=#8f8f8f>.. i cant handle it ..</color>
-<color=#ffd84d>(❀◡❀)</color>
-<color=#5c5c7a>.. ･ ✦ ･ ..</color>` },
-
   { name: 'reorder', state: S({ text: B, lineOrder: ['mainText', 'topText', 'dekoTop', 'kaomoji', 'bottomText', 'dekoBottom'] }), chars: 233, bytes: 249, code: `<size=60><color=#ff71b8>so cute</color></size>
 <color=#8f8f8f>.. stop being ..</color>
 <color=#555555>· ily ·←</color>
@@ -173,11 +151,13 @@ describe('gift engine — byte-identical to the legacy generator', () => {
   }
 });
 
-// Pyramid = star pyramid: each gold star row is its OWN line (separately
-// editable) and they grow in width (✦ / ✦·✦ / ✦·✦·✦) to form the triangle
-// (3dxchat centers each line); the two text lines stack below.
-describe('pyramid — star pyramid', () => {
-  it('each star row is its own line; text stacks below', () => {
+// Pyramid = star pyramid: each gold star row is its OWN editable field, but
+// because the three rows share an identical wrapper (size 16 + gold) they are
+// collapsed into ONE <size=16><color=#ffd84d>…</color></size> block with the
+// rows separated by '\n' — fewer bytes, same in-game render (3dxchat centers
+// each line). The two text lines have distinct wrappers and stay separate.
+describe('pyramid — star pyramid (adjacent same-wrapper rows merged)', () => {
+  it('merges the three gold star rows into one tag block; text stacks below', () => {
     const r = generate(S({
       text: { dekoTop: '✦', dekoBottom: '✦ · ✦', bottomText: '✦ · ✦ · ✦', topText: 'youre my', mainText: 'shining star', kaomoji: '' },
       sizes: { dekoTop: 16, dekoBottom: 16, bottomText: 16 },
@@ -185,10 +165,40 @@ describe('pyramid — star pyramid', () => {
       lineOrder: ['dekoTop', 'dekoBottom', 'bottomText', 'topText', 'mainText', 'kaomoji'],
       layout: 'pyramid',
     }));
-    expect(r.code).toBe(`<size=16><color=#ffd84d>✦</color></size>
-<size=16><color=#ffd84d>✦ · ✦</color></size>
-<size=16><color=#ffd84d>✦ · ✦ · ✦</color></size>
+    expect(r.code).toBe(`<size=16><color=#ffd84d>✦
+✦ · ✦
+✦ · ✦ · ✦</color></size>
 <color=#8f8f8f>youre my</color>
 <size=60><color=#ff71b8>shining star</color></size>`);
+  });
+});
+
+// The general merge rule must NOT fire across DISTINCT wrappers and must leave
+// runs of length 1 byte-identical (guards the legacy-parity center cases).
+describe('adjacent-wrapper merge — edge cases', () => {
+  it('merges three same-size same-colour rows but not the differently-coloured one', () => {
+    const r = generate(S({
+      text: { dekoTop: 'aaa', topText: 'bbb', mainText: '', bottomText: 'ccc', kaomoji: 'ddd', dekoBottom: '' },
+      sizes: { dekoTop: 16, topText: 16, bottomText: 16, kaomoji: 16 },
+      colors: { dekoTop: '#ffd84d', topText: '#ffd84d', bottomText: '#ffd84d', kaomoji: '#111111' },
+      lineOrder: ['dekoTop', 'topText', 'bottomText', 'kaomoji', 'mainText', 'dekoBottom'],
+      layout: 'center',
+    }));
+    expect(r.code).toBe(`<size=16><color=#ffd84d>aaa
+bbb
+ccc</color></size>
+<color=#111111>ddd</color>`);
+  });
+
+  it('does not merge gradient lines (inner tags) even with matching size', () => {
+    const r = generate(S({
+      text: { dekoTop: 'one two', topText: 'three four', mainText: '', bottomText: '', kaomoji: '', dekoBottom: '' },
+      sizes: { dekoTop: 16, topText: 16 },
+      grads: { dekoTop: { on: true, c1: '#ff71b8', c2: '#b388ff' }, topText: { on: true, c1: '#ff71b8', c2: '#b388ff' } },
+      lineOrder: ['dekoTop', 'topText', 'mainText', 'bottomText', 'kaomoji', 'dekoBottom'],
+      layout: 'center',
+    }));
+    expect(r.code).toBe(`<size=16><color=#ff71b8>one</color> <color=#b388ff>two</color></size>
+<size=16><color=#ff71b8>three</color> <color=#b388ff>four</color></size>`);
   });
 });

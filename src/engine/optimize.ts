@@ -65,10 +65,6 @@ export function buildOptimizeTips(s: GiftState, chars: number, bytes: number, lm
   if (raw.kaomoji && gradCount >= 1) tips.push({ level: 'warn', msg: t('opt_kao_grad', gradCount) });
   if (raw.dekoTop && raw.dekoTop.length > 8 && /(.)\1{2,}/.test(raw.dekoTop)) tips.push({ level: 'tip', msg: t('opt_dup_deko') });
 
-  if ((chars > 220 || bytes > 240) && s.layout !== 'minimal' && s.layout !== 'compact') {
-    tips.push({ level: 'tip', msg: t('opt_layout') });
-  }
-
   // one-click removal actions
   if (chars > 210 || bytes > 230) {
     if (raw.kaomoji) { const save = lm.kaomoji ? (lm.kaomoji as string).length + 1 : raw.kaomoji.length; tips.push({ level: 'action', field: 'kaomoji', action: 'remove', msg: t('opt_rm_kao', save) }); }

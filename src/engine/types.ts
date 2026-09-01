@@ -2,7 +2,7 @@ import type { FontStyle } from './fonts';
 import type { Grad } from './colorTags';
 
 export type FieldId = 'dekoTop' | 'topText' | 'mainText' | 'bottomText' | 'kaomoji' | 'dekoBottom';
-export type Layout = 'center' | 'inline' | 'compact' | 'framed' | 'minimal' | 'pyramid' | 'flipped' | 'custom';
+export type Layout = 'center' | 'inline' | 'pyramid' | 'sparkle' | 'heart' | 'custom';
 
 export interface GiftState {
   text: Record<FieldId, string>;

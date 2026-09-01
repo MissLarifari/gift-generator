@@ -5,7 +5,7 @@ export type Commit = (producer: (s: GiftState) => GiftState, coalesceKey?: strin
 export const favKey = (catLabel: string, itemL: string) => `${catLabel}::${itemL}`;
 
 export const FIELDS: FieldId[] = ['dekoTop', 'topText', 'mainText', 'bottomText', 'kaomoji', 'dekoBottom'];
-export const LAYOUTS: Layout[] = ['center', 'inline', 'compact', 'framed', 'minimal', 'pyramid', 'flipped', 'custom'];
+export const LAYOUTS: Layout[] = ['center', 'inline', 'pyramid', 'sparkle', 'heart', 'custom'];
 
 export const FIELD_LABELS: Record<FieldId, string> = {
   dekoTop: 'Deco Top',
@@ -30,8 +30,8 @@ export const HAS_STAR: FieldId[] = ['dekoTop', 'topText', 'bottomText'];
 export const HAS_FONT: FieldId[] = ['dekoTop', 'topText', 'mainText', 'bottomText', 'dekoBottom'];
 
 export const DECO_PRESETS: Partial<Record<FieldId, string[]>> = {
-  dekoTop: ['· ily ·←', '❀ · ❀ · ❀', '✦ · · · ✦', '♥ · ♥ · ♥', '★.° ★.°', '· · ·'],
-  dekoBottom: ['.. ･ ✦ ･ ..', '· · · · ·', '♡ ·° ☆ ·° ♡', '❀ ♡ ✦ ♡ ❀', '~ · ~ · ~'],
+  dekoTop: ['˚ ⋆ ✦ ⋆ ˚', '· ˚ ⋆ ✦ ⋆ ˚ ·', '♡ · ♥ · ♡', '· ily ·←', '❀ · ❀ · ❀', '✦ · · · ✦', '♥ · ♥ · ♥', '★.° ★.°', '· · ·'],
+  dekoBottom: ['˚ ⋆ ✦ ⋆ ˚', '· ˚ ⋆ ✦ ⋆ ˚ ·', '♡ · ♥ · ♡', '.. ･ ✦ ･ ..', '· · · · ·', '♡ ·° ☆ ·° ♡', '❀ ♡ ✦ ♡ ❀', '~ · ~ · ~'],
 };
 
 export const SYMBOLS = ['♡', '♥', '❀', '✿', '✦', '★', '·', '°', '˚', '⋆', '←', '→', '∞', '~', '｡ﾟ'];
@@ -80,9 +80,6 @@ export interface LayoutDefault {
 export const LAYOUT_DEFAULTS: Record<Layout, LayoutDefault> = {
   center: { text: { dekoTop: '· ily ·←', topText: '.. stop being ..', mainText: 'so cute', bottomText: '.. i cant handle it ..', kaomoji: '(❀◡❀)', dekoBottom: '.. ･ ✦ ･ ..' } },
   inline: { text: { dekoTop: '❀', topText: 'you are', mainText: 'so cute', bottomText: '.. i cant handle it ..', kaomoji: '(❀◡❀)', dekoBottom: '.. ✦ ..' } },
-  compact: { text: { dekoTop: '· · ·', topText: 'wollt nur sagen', mainText: 'danke dir', bottomText: 'für alles', kaomoji: '(˘³˘)♥', dekoBottom: '· · ·' } },
-  framed: { text: { dekoTop: '❀ · ❀ · ❀', topText: 'du bist mein', mainText: 'liebling', bottomText: '· kein scherz ·', kaomoji: '', dekoBottom: '' } },
-  minimal: { text: { dekoTop: '', topText: '', mainText: 'nur wir', bottomText: '', kaomoji: '(❀◡❀)', dekoBottom: '' } },
   // Star pyramid — each star row is its OWN line (so every line is separately
   // clickable & editable): 3 gold star rows that grow in width (✦ / ✦·✦ / ✦·✦·✦)
   // form the triangle (3dxchat centers every line; leading-space indent can't
@@ -94,11 +91,16 @@ export const LAYOUT_DEFAULTS: Record<Layout, LayoutDefault> = {
     colors: { dekoTop: '#ffd84d', dekoBottom: '#ffd84d', bottomText: '#ffd84d' },
     lineOrder: ['dekoTop', 'dekoBottom', 'bottomText', 'topText', 'mainText', 'kaomoji'],
   },
-  flipped: {
-    text: { dekoTop: '.. ↓ ..', topText: 'ɢʀᴀᴠɪᴛʏ ɢᴀᴠᴇ ᴜᴘ\nᴀɴᴅ sᴏ ᴅɪᴅ ɪ\n', mainText: 'ꜰᴀʟʟɪɴɢ', bottomText: 'pɹɐɥ ꜰᴏʀ ʏᴏᴜ ♡', kaomoji: '(◡‿◡)', dekoBottom: 'ɴᴏᴡ ɪᴍ ᴊᴜsᴛ' },
-    colors: { mainText: '#ff4d8c', topText: '#c4b5fd', bottomText: '#a78bfa' },
-    noColor: { dekoTop: true, dekoBottom: true, kaomoji: true },
-    lineOrder: ['dekoTop', 'topText', 'dekoBottom', 'mainText', 'bottomText', 'kaomoji'],
+  // Sparkle — centered stack with pink ✦ deco top & bottom (and pink kaomoji).
+  sparkle: {
+    text: { dekoTop: '˚ ⋆ ✦ ⋆ ˚', topText: '.. stop being ..', mainText: 'so cute', bottomText: '.. i cant handle it ..', kaomoji: '(ʀ>ω<ʀ)', dekoBottom: '˚ ⋆ ✦ ⋆ ˚' },
+    colors: { dekoTop: '#ff7ad9', dekoBottom: '#ff7ad9', kaomoji: '#ff7ad9' },
+  },
+  // Heart — centered text framed by pink hearts on ALL sides: heart deco top/bottom
+  // PLUS each text line wrapped with hearts (♡ … ♡) so it's surrounded left/right too.
+  heart: {
+    text: { dekoTop: '♡ · ♥ · ♡', topText: '♡ you + me ♡', mainText: '♥ = forever ♥', bottomText: '', kaomoji: '(♡˘▽˘♡)', dekoBottom: '♡ · ♥ · ♡' },
+    colors: { dekoTop: '#ff4d8c', dekoBottom: '#ff4d8c', topText: '#ff7ad9', kaomoji: '#ff7ad9' },
   },
   custom: { text: { dekoTop: '', topText: '', mainText: '', bottomText: '', kaomoji: '', dekoBottom: '' } },
 };

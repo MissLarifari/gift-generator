@@ -101,8 +101,8 @@ export default function PreviewPanel({
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
           style={{
             color: solidColor(f), fontSize: fontSizeRem(f), fontFamily: f === 'mainText' ? 'Space Grotesk, sans-serif' : 'inherit',
-            fontWeight: f === 'mainText' ? 700 : 400, textAlign: 'center', background: 'rgba(87,224,240,.1)',
-            border: '1px solid rgba(87,224,240,.55)', borderRadius: 6, padding: '0 6px', outline: 'none',
+            fontWeight: f === 'mainText' ? 700 : 400, textAlign: 'center', background: 'rgba(225,92,158,.1)',
+            border: '1px solid rgba(225,92,158,.55)', borderRadius: 6, padding: '0 6px', outline: 'none',
             width: Math.max(4, raw.length + 2) + 'ch', maxWidth: '100%',
           }}
         />
@@ -127,14 +127,12 @@ export default function PreviewPanel({
     );
   };
 
-  const sep = (k: string) => <span key={k} style={{ color: 'var(--dim)' }}> · </span>;
   const row = (children: ReactNode, k: string) => <div key={k} style={{ minHeight: 4 }}>{children}</div>;
   const inlineRow = (children: ReactNode, k: string) => <div key={k} className="flex flex-wrap justify-center items-baseline" style={{ columnGap: 8, rowGap: 2 }}>{children}</div>;
 
   // Arrange preview lines to match the chosen layout (mirrors applyLayout).
   const body = (): ReactNode => {
     const order = state.lineOrder;
-    const has = (f: FieldId) => !!state.text[f] || editing === f;
     if (reorder) {
       const visible = order.filter((f) => state.text[f]);
       return visible.map((f, idx) => (
@@ -149,8 +147,6 @@ export default function PreviewPanel({
       ));
     }
     switch (state.layout) {
-      case 'minimal':
-        return order.filter((f) => f === 'mainText' || f === 'kaomoji').map((f) => row(field(f), f));
       case 'inline':
         return [
           inlineRow([field('dekoTop', 'i-dt1'), field('topText', 'i-tt'), field('mainText', 'i-mt'), field('dekoTop', 'i-dt2')], 'i-row'),
@@ -158,19 +154,7 @@ export default function PreviewPanel({
           row(field('kaomoji'), 'i-k'),
           row(field('dekoBottom'), 'i-db'),
         ];
-      case 'compact':
-        return [
-          row(field('dekoTop'), 'c-dt'),
-          inlineRow([field('topText', 'c-tt'), has('topText') && has('mainText') ? sep('c-s1') : null, field('mainText', 'c-mt'), has('mainText') && has('bottomText') ? sep('c-s2') : null, field('bottomText', 'c-bt')], 'c-row'),
-          row(field('kaomoji'), 'c-k'),
-          row(field('dekoBottom'), 'c-db'),
-        ];
-      case 'framed': {
-        const nodes = order.filter((f) => has(f)).map((f) => row(field(f), 'f-' + f));
-        if (has('dekoTop') && !has('dekoBottom')) nodes.push(row(field('dekoTop', 'f-frame'), 'f-frame'));
-        return nodes;
-      }
-      default: // center, flipped, pyramid (all stack centered; pyramid's star
+      default: // center, pyramid, sparkle, heart (stack centered; pyramid's star
         // deco is multi-line and renders its line breaks via pre-wrap)
         return order.map((f) => row(field(f), f));
     }
@@ -194,7 +178,7 @@ export default function PreviewPanel({
     <div className="flex flex-col items-center overflow-y-auto" style={{ gap: 8 }}>
       <div className="flex items-center justify-between w-full" style={{ maxWidth: 460, fontSize: 11, textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--muted)' }}>
         <span>{t('preview')}</span>
-        <button onClick={() => { setReorder((r) => !r); setEditing(null); }} className="flex items-center gap-[5px]" style={{ fontSize: 11, textTransform: 'none', letterSpacing: 0, borderRadius: 7, padding: '4px 9px', cursor: 'pointer', border: '1px solid rgba(87,224,240,.35)', ...(reorder ? { background: 'linear-gradient(90deg,var(--ind),var(--cyan))', color: '#08131f', fontWeight: 600 } : { background: 'transparent', color: 'var(--ind)' }) }}>
+        <button onClick={() => { setReorder((r) => !r); setEditing(null); }} className="flex items-center gap-[5px]" style={{ fontSize: 11, textTransform: 'none', letterSpacing: 0, borderRadius: 7, padding: '4px 9px', cursor: 'pointer', border: '1px solid rgba(225,92,158,.35)', ...(reorder ? { background: 'linear-gradient(90deg,var(--ind),var(--cyan))', color: '#08131f', fontWeight: 600 } : { background: 'transparent', color: 'var(--ind)' }) }}>
           {reorder ? <><Check size={12} /> {t('reorder_done')}</> : <><ArrowUpDown size={12} /> {t('reorder_btn')}</>}
         </button>
       </div>
@@ -213,7 +197,7 @@ export default function PreviewPanel({
           {['Message', 'Gallery ( )', 'Gifts ( )', 'Send Gift', 'Unfriend', 'Report'].map((tb) => {
             const on = tb === 'Gifts ( )';
             return (
-              <span key={tb} style={{ flex: 1, textAlign: 'center', padding: '5px 1px', fontSize: 9.5, whiteSpace: 'nowrap', color: on ? 'var(--ind)' : '#7e8fb5', background: on ? 'rgba(87,224,240,.08)' : 'transparent', borderBottom: on ? '2px solid var(--ind)' : '2px solid transparent' }}>{tb}</span>
+              <span key={tb} style={{ flex: 1, textAlign: 'center', padding: '5px 1px', fontSize: 9.5, whiteSpace: 'nowrap', color: on ? 'var(--ind)' : '#7e8fb5', background: on ? 'rgba(225,92,158,.08)' : 'transparent', borderBottom: on ? '2px solid var(--ind)' : '2px solid transparent' }}>{tb}</span>
             );
           })}
         </div>
@@ -274,10 +258,10 @@ export default function PreviewPanel({
       )}
 
       <div className="flex w-full" style={{ maxWidth: 460, gap: 8 }}>
-        <button onClick={copy} disabled={overLimit} className="flex-1 flex items-center justify-center gap-[7px]" style={{ fontSize: 13, fontWeight: 600, padding: '11px 0', borderRadius: 9, cursor: overLimit ? 'not-allowed' : 'pointer', ...(overLimit ? { background: 'rgba(255,107,107,.12)', color: '#ff9b9b', border: '1px solid rgba(255,107,107,.4)' } : { background: 'linear-gradient(90deg,var(--ind),var(--cyan))', color: '#08131f', border: 'none', boxShadow: '0 0 18px rgba(87,224,240,.3)' }) }}>
+        <button onClick={copy} disabled={overLimit} className="flex-1 flex items-center justify-center gap-[7px]" style={{ fontSize: 13, fontWeight: 600, padding: '11px 0', borderRadius: 9, cursor: overLimit ? 'not-allowed' : 'pointer', ...(overLimit ? { background: 'rgba(255,107,107,.12)', color: '#ff9b9b', border: '1px solid rgba(255,107,107,.4)' } : { background: 'linear-gradient(90deg,var(--ind),var(--cyan))', color: '#08131f', border: 'none', boxShadow: '0 0 18px rgba(225,92,158,.3)' }) }}>
           {overLimit ? <><Ban size={15} /> {t('g_too_long')}</> : copied ? <><Check size={15} /> {t('copied')}</> : <><Copy size={15} /> {t('copy_code')}</>}
         </button>
-        <button onClick={share} className="flex-1 flex items-center justify-center gap-[7px]" style={{ fontSize: 13, fontWeight: 600, padding: '11px 0', borderRadius: 9, cursor: 'pointer', color: 'var(--ind)', background: 'transparent', border: '1px solid rgba(87,224,240,.4)' }}>
+        <button onClick={share} className="flex-1 flex items-center justify-center gap-[7px]" style={{ fontSize: 13, fontWeight: 600, padding: '11px 0', borderRadius: 9, cursor: 'pointer', color: 'var(--ind)', background: 'transparent', border: '1px solid rgba(225,92,158,.4)' }}>
           {shared ? <><Check size={15} /> {t('g_link_copied')}</> : <><Share2 size={15} /> {t('g_share')}</>}
         </button>
         <button onClick={onReset} className="flex items-center justify-center gap-[6px]" style={{ fontSize: 13, fontWeight: 600, padding: '11px 14px', borderRadius: 9, cursor: 'pointer', color: '#cdd9f0', background: 'transparent', border: '1px solid var(--border)' }}>

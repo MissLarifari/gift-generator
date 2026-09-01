@@ -1,22 +1,28 @@
 import { useMemo, useState } from 'react';
 import {
-  Search, ChevronDown, ChevronUp, ChevronsDownUp, ChevronsUpDown, Star,
+  Search, Star, Sparkles,
   Heart, CandyCane, Users, Smile, Laugh, Skull, HandHeart, WandSparkles, Flame, Lock, FlameKindling,
   Eye, Coffee, VenetianMask, Wine, Leaf, Rainbow, TreePine, Ghost, Egg, Clover, HeartPulse, Venus,
   Flag, Drumstick, PartyPopper, Diamond, Gem, Cake, type LucideIcon,
 } from 'lucide-react';
-import { TEMPLATE_CATEGORIES, TEMPLATE_GROUPS, type TplCategory, type TplItem } from '../data/templates';
+import { TEMPLATE_CATEGORIES, type TplCategory, type TplItem } from '../data/templates';
 import { favKey } from '../state';
 import { useI18n } from '../i18n';
 
 export type { TplCategory, TplItem };
 
-const GROUP_KEY: Record<string, string> = { Themen: 'g_grp_themes', Vibes: 'g_grp_vibes', Holidays: 'g_grp_holidays', Celebrations: 'g_grp_celebrations' };
+// New templates panel (pink/violet): search + category filter chips, favorite
+// cards, and an icon grid of all themes. Click a theme → its phrases; click a
+// phrase/favorite → apply. Same data + props as before, only the UI changed.
+const PINK = '#e15c9e';
+const PANEL = '#0f0d18';
+const CARD = '#16121f';
+const FIELDBG = '#0e0c16';
+const BORDER = 'rgba(255,255,255,.08)';
+const MUTED = '#8b84a6';
 
-// Per-category icons — closest lucide matches to the legacy FontAwesome set
-// (heart, candy-cane, user-group, skull, fire, eye, cake, …). Keyed by label.
 const CATEGORY_ICON: Record<string, LucideIcon> = {
-  Romance: Heart, Cute: CandyCane, Friendship: Users, Funny: Smile, 'Funny / Chaotic': Laugh,
+  New: Sparkles, Romance: Heart, Cute: CandyCane, Friendship: Users, Funny: Smile, 'Funny / Chaotic': Laugh,
   'Friends / Roast': Skull, 'Flirty bold': HandHeart, Wicked: WandSparkles, Dominant: Flame,
   Submissive: Lock, Spicy: FlameKindling, Voyeur: Eye, Aftercare: Coffee, 'Goth / Dark': VenetianMask,
   'Drunk vibes': Wine, 'Soft / Cottagecore': Leaf, Pride: Rainbow, Christmas: TreePine, Halloween: Ghost,
@@ -34,95 +40,114 @@ export default function TemplatesPanel({
   onToggleFav: (cat: TplCategory, item: TplItem) => void;
 }) {
   const { t } = useI18n();
-  const groupLabel = (g: string) => (GROUP_KEY[g] ? t(GROUP_KEY[g]) : g);
   const [q, setQ] = useState('');
-  const [group, setGroup] = useState<string>('Themen');
-  const [openCats, setOpenCats] = useState<string[]>(['Romance']);
-
+  const [cat, setCat] = useState<string | null>(null);
   const query = q.trim().toLowerCase();
-  const searchResults = query
-    ? TEMPLATE_CATEGORIES.flatMap((c) => c.items.filter((i) => `${i.l} ${i.main} ${i.top} ${i.bottom}`.toLowerCase().includes(query)).map((i) => ({ c, i })))
-    : [];
-  const cats = TEMPLATE_CATEGORIES.filter((c) => c.group === group);
 
+  const isFav = (c: TplCategory, i: TplItem) => favorites.includes(favKey(c.label, i.l));
   const favItems = useMemo(() => {
     const out: { c: TplCategory; i: TplItem }[] = [];
     for (const c of TEMPLATE_CATEGORIES) for (const i of c.items) if (favorites.includes(favKey(c.label, i.l))) out.push({ c, i });
     return out;
   }, [favorites]);
 
-  const isFav = (c: TplCategory, i: TplItem) => favorites.includes(favKey(c.label, i.l));
+  const searchResults = query
+    ? TEMPLATE_CATEGORIES.flatMap((c) => c.items.filter((i) => `${i.l} ${i.main} ${i.top} ${i.bottom}`.toLowerCase().includes(query)).map((i) => ({ c, i })))
+    : [];
 
-  const phraseChip = (c: TplCategory, i: TplItem) => (
-    <span key={c.label + i.l} className="inline-flex items-center" style={{ gap: 4, padding: '4px 5px 4px 10px', borderRadius: 7, background: 'rgba(87,224,240,.08)', border: '1px solid rgba(87,224,240,.22)' }}>
-      <button onClick={() => onApply(c, i)} style={{ background: 'none', border: 'none', padding: 0, color: '#bfeefa', cursor: 'pointer', fontSize: 12 }}>{i.l}</button>
-      <button onClick={() => onToggleFav(c, i)} title="Favorit" className="grid place-items-center" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: isFav(c, i) ? '#ffce8a' : '#5f7099' }}>
-        <Star size={12} fill={isFav(c, i) ? '#ffce8a' : 'transparent'} />
+  const activeCat = cat ? TEMPLATE_CATEGORIES.find((c) => c.label === cat) ?? null : null;
+
+  const icon = (label: string, size: number, color: string) => {
+    const Ic = CATEGORY_ICON[label];
+    return Ic ? <Ic size={size} style={{ color, flex: '0 0 auto' }} /> : <span style={{ width: Math.round(size * 0.55), height: Math.round(size * 0.55), borderRadius: '50%', background: color, display: 'inline-block', flex: '0 0 auto' }} />;
+  };
+
+  const secLabel = (text: string) => <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.12em', color: MUTED, margin: '2px 0 8px' }}>{text}</div>;
+
+  const chip = (text: string, active: boolean, onClick: () => void) => (
+    <button key={text} onClick={onClick} style={{ flex: '0 0 auto', fontSize: 11.5, padding: '5px 11px', borderRadius: 8, cursor: 'pointer', whiteSpace: 'nowrap', ...(active ? { background: PINK, color: '#fff', border: 'none' } : { background: CARD, border: `1px solid ${BORDER}`, color: '#c9c3da' }) }}>{text}</button>
+  );
+
+  const phraseRow = (c: TplCategory, i: TplItem) => (
+    <div key={c.label + i.l} className="flex items-center" style={{ gap: 6, background: FIELDBG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '7px 9px' }}>
+      <button onClick={() => onApply(c, i)} className="flex-1 flex items-center" style={{ gap: 8, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: '#dbe6fb', fontSize: 12.5, minWidth: 0 }}>
+        {icon(c.label, 14, c.theme.mainColor)}
+        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{i.main || i.l}</span>
       </button>
-    </span>
+      <button onClick={() => onToggleFav(c, i)} aria-label="Favorit" style={{ background: 'none', border: 'none', cursor: 'pointer', color: isFav(c, i) ? '#f3c24f' : MUTED, display: 'grid', placeItems: 'center', flex: '0 0 auto' }}>
+        <Star size={13} fill={isFav(c, i) ? '#f3c24f' : 'transparent'} />
+      </button>
+    </div>
+  );
+
+  const favCard = ({ c, i }: { c: TplCategory; i: TplItem }) => (
+    <div key={c.label + i.l} onClick={() => onApply(c, i)} style={{ position: 'relative', flex: '0 0 auto', width: 150, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '12px 10px', cursor: 'pointer' }}>
+      <button onClick={(e) => { e.stopPropagation(); onToggleFav(c, i); }} aria-label="Favorit" style={{ position: 'absolute', top: 6, right: 6, background: 'none', border: 'none', cursor: 'pointer', color: '#f3c24f', display: 'grid', placeItems: 'center' }}>
+        <Star size={13} fill="#f3c24f" />
+      </button>
+      <div className="flex flex-col items-center text-center" style={{ gap: 2, minHeight: 54, justifyContent: 'center' }}>
+        {i.top && <div style={{ fontSize: 10.5, color: MUTED, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{i.top}</div>}
+        <div style={{ fontSize: 14, fontWeight: 500, color: c.theme.mainColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{i.main}</div>
+        {i.bottom && <div style={{ fontSize: 10.5, color: MUTED, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{i.bottom}</div>}
+      </div>
+      <div className="flex items-center" style={{ gap: 5, marginTop: 8, fontSize: 10, color: MUTED }}>
+        {icon(c.label, 11, c.theme.mainColor)}<span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.label}</span>
+      </div>
+    </div>
   );
 
   return (
-    <div className="flex flex-col overflow-y-auto" style={{ gap: 9, paddingRight: 4 }}>
-      <div className="flex items-center gap-[7px]" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 11px' }}>
-        <Search size={15} style={{ color: 'var(--muted)' }} />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('g_search_ph')} style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: 13 }} />
-      </div>
+    <div className="flex flex-col overflow-y-auto" style={{ paddingRight: 4, scrollbarGutter: 'stable' }}>
+      <div style={{ background: PANEL, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-      <div className="flex gap-[5px] flex-wrap">
-        {TEMPLATE_GROUPS.map((g) => (
-          <button key={g} onClick={() => setGroup(g)} style={{ fontSize: 11, padding: '5px 9px', borderRadius: 8, cursor: 'pointer', ...(group === g && !query ? { background: 'linear-gradient(90deg,var(--ind),var(--cyan))', color: '#08131f', fontWeight: 600, border: 'none' } : { background: 'var(--surface)', border: '1px solid var(--border)', color: '#cdd9f0' }) }}>{groupLabel(g)}</button>
-        ))}
-      </div>
+        <div style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase', color: '#cdb8d8' }}>{t('g_tab_templates')}</div>
 
-      {!query && favItems.length > 0 && (
-        <div style={{ background: 'rgba(255,206,138,.07)', border: '1px solid rgba(255,206,138,.28)', borderRadius: 10, padding: '9px 11px' }}>
-          <div className="flex items-center gap-[6px]" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.1em', color: '#ffce8a', fontWeight: 600, marginBottom: 7 }}>
-            <Star size={13} fill="#ffce8a" /> {t('g_favorites')}
+        {/* search */}
+        <div className="flex items-center" style={{ gap: 8, background: FIELDBG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '8px 11px' }}>
+          <Search size={15} style={{ color: MUTED, flex: '0 0 auto' }} />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('g_search_ph')} style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', outline: 'none', color: '#ece9f6', fontSize: 13 }} />
+        </div>
+
+        {/* filter chips */}
+        <div className="flex" style={{ gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+          {chip('All', cat === null && !query, () => { setCat(null); setQ(''); })}
+          {TEMPLATE_CATEGORIES.map((c) => chip(c.label, cat === c.label && !query, () => { setCat(c.label); setQ(''); }))}
+        </div>
+
+        {query ? (
+          <div className="flex flex-col" style={{ gap: 5 }}>
+            <div style={{ fontSize: 10, color: MUTED }}>{searchResults.length} {t('g_hits')}</div>
+            {searchResults.slice(0, 60).map(({ c, i }) => phraseRow(c, i))}
           </div>
-          <div className="flex flex-wrap gap-[5px]">{favItems.map(({ c, i }) => phraseChip(c, i))}</div>
-        </div>
-      )}
-
-      {query ? (
-        <div className="flex flex-col gap-[5px]">
-          <div style={{ fontSize: 10, color: 'var(--dim)' }}>{searchResults.length} {t('g_hits')}</div>
-          {searchResults.slice(0, 50).map(({ c, i }) => (
-            <button key={c.label + i.l} onClick={() => onApply(c, i)} className="flex items-center justify-between" style={{ textAlign: 'left', fontSize: 12, padding: '7px 9px', borderRadius: 8, background: 'var(--surface)', border: '1px solid var(--border)', color: '#dbe6fb', cursor: 'pointer' }}>
-              <span className="flex items-center gap-[7px]">{(() => { const Ic = CATEGORY_ICON[c.label]; return Ic ? <Ic size={13} style={{ color: c.theme.mainColor, flex: '0 0 auto' }} /> : <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: c.theme.mainColor }} />; })()}{i.main}</span>
-              <span style={{ fontSize: 9, color: '#7e8fb5' }}>{c.label}</span>
+        ) : activeCat ? (
+          <div className="flex flex-col" style={{ gap: 5 }}>
+            <button onClick={() => setCat(null)} className="flex items-center" style={{ gap: 7, background: 'none', border: 'none', cursor: 'pointer', color: '#c9c3da', fontSize: 12.5, padding: '0 0 4px' }}>
+              <span style={{ color: PINK }}>←</span> {icon(activeCat.label, 15, activeCat.theme.mainColor)} <span style={{ fontWeight: 500 }}>{activeCat.label}</span>
             </button>
-          ))}
-        </div>
-      ) : (
-        <>
-        <div className="flex items-center justify-between" style={{ padding: '0 2px', marginTop: 1 }}>
-          <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.12em', color: '#7e8fb5' }}>{groupLabel(group)}</span>
-          <button
-            onClick={() => { const vis = cats.map((c) => c.label); const allOpen = vis.every((l) => openCats.includes(l)); setOpenCats(allOpen ? openCats.filter((l) => !vis.includes(l)) : [...new Set([...openCats, ...vis])]); }}
-            className="flex items-center gap-[5px]"
-            style={{ fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', padding: '4px 9px', ...(cats.every((c) => openCats.includes(c.label)) ? { color: '#08131f', background: 'linear-gradient(90deg,var(--ind),var(--cyan))', border: 'none' } : { color: '#bfeefa', background: 'rgba(87,224,240,.1)', border: '1px solid rgba(87,224,240,.3)' }) }}
-          >
-            {cats.every((c) => openCats.includes(c.label)) ? <><ChevronsDownUp size={12} /> {t('g_collapse_all')}</> : <><ChevronsUpDown size={12} /> {t('g_expand_all')}</>}
-          </button>
-        </div>
-        {cats.map((c) => {
-          const isOpen = openCats.includes(c.label);
-          return (
-            <div key={c.label} className="flex flex-col gap-[5px]">
-              <button onClick={() => setOpenCats(isOpen ? openCats.filter((x) => x !== c.label) : [...openCats, c.label])} className="flex items-center justify-between" style={{ padding: '9px 11px', fontSize: 13, borderRadius: 10, cursor: 'pointer', background: isOpen ? 'rgba(255,255,255,.07)' : 'var(--surface)', border: `1px solid ${isOpen ? 'var(--border-2)' : 'var(--border)'}`, color: '#dbe6fb' }}>
-                <span className="flex items-center gap-[9px]">{(() => { const Ic = CATEGORY_ICON[c.label]; return Ic ? <Ic size={15} style={{ color: c.theme.mainColor, flex: '0 0 auto' }} /> : <span style={{ width: 9, height: 9, borderRadius: '50%', background: c.theme.mainColor }} />; })()} {c.label}</span>
-                <span className="flex items-center gap-[6px]">
-                  <span style={{ fontSize: 11, color: '#5f7099' }}>{c.items.length}</span>
-                  {isOpen ? <ChevronUp size={14} style={{ color: 'var(--muted)' }} /> : <ChevronDown size={14} style={{ color: 'var(--muted)' }} />}
-                </span>
-              </button>
-              {isOpen && <div className="flex flex-wrap gap-[5px]" style={{ padding: '0 2px 4px' }}>{c.items.map((i) => phraseChip(c, i))}</div>}
+            {activeCat.items.map((i) => phraseRow(activeCat, i))}
+          </div>
+        ) : (
+          <>
+            {favItems.length > 0 && (
+              <div>
+                {secLabel(t('g_favorites'))}
+                <div className="flex" style={{ gap: 8, overflowX: 'auto', paddingBottom: 4 }}>{favItems.map((f) => favCard(f))}</div>
+              </div>
+            )}
+            <div>
+              {secLabel(t('g_grp_themes'))}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {TEMPLATE_CATEGORIES.map((c) => (
+                  <button key={c.label} onClick={() => setCat(c.label)} className="flex flex-col items-center justify-center" style={{ gap: 7, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '12px 5px', cursor: 'pointer', minHeight: 74 }}>
+                    {icon(c.label, 22, c.theme.mainColor)}
+                    <span style={{ fontSize: 10.5, color: '#c9c3da', textAlign: 'center', lineHeight: 1.2 }}>{c.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          );
-        })}
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

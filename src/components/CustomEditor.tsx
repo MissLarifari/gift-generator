@@ -60,7 +60,7 @@ export default function CustomEditor({ value, commit }: { value: string; commit:
       key={title}
       onClick={onClick}
       title={title}
-      style={{ fontSize: 11.5, minWidth: 26, padding: '4px 8px', borderRadius: 7, cursor: 'pointer', background: 'rgba(87,224,240,.08)', border: '1px solid rgba(87,224,240,.22)', color: '#bfeefa' }}
+      style={{ fontSize: 11.5, minWidth: 26, padding: '4px 8px', borderRadius: 7, cursor: 'pointer', background: 'rgba(225,92,158,.08)', border: '1px solid rgba(225,92,158,.22)', color: '#f3cfe2' }}
     >
       {label}
     </button>
@@ -69,7 +69,7 @@ export default function CustomEditor({ value, commit }: { value: string; commit:
 
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 11px', display: 'flex', flexDirection: 'column', gap: 9 }}>
-      <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.12em', color: '#bfeefa' }}>{t('g_custom_code')}</div>
+      <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.12em', color: '#f3cfe2' }}>{t('g_custom_code')}</div>
 
       {/* bold / italic / fonts */}
       <div className="flex flex-wrap items-center" style={{ gap: 6 }}>
