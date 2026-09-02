@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Undo2, Redo2, Gift, ChevronDown, HelpCircle, Check } from 'lucide-react';
+import { Undo2, Redo2, Gift, ChevronDown, HelpCircle, Check, UserPen } from 'lucide-react';
 import { useI18n, LANGS, type Lang } from '../i18n';
-import { THE_CLOUD_DISCORD } from './links';
+import { THE_CLOUD_DISCORD, PROFILLY_URL } from './links';
 
 // Minimal header: THE CLOUD / Gifty  ·  undo/redo  ·  EN ▾  ·  ?
 // Credits, supporters and external links live in the About dialog now.
@@ -61,6 +61,18 @@ export default function Topbar({
 
       {/* actions */}
       <div className="flex items-center" style={{ gap: 4 }}>
+        {/* sister tool — Lari's 3dx profile-text editor */}
+        <a
+          className="btn btn-sm"
+          href={PROFILLY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Profilly · 3DX Profile Editor"
+          style={{ gap: 6, color: 'var(--muted)', textDecoration: 'none', marginRight: 4, ...(compact ? { padding: '6px 8px' } : null) }}
+        >
+          <UserPen size={14} /> {!compact && 'Profilly'}
+        </a>
+
         <button className="icon-btn" title={t('undo_title')} onClick={undo} disabled={!canUndo}><Undo2 size={15} /></button>
         <button className="icon-btn" title={t('redo_title')} onClick={redo} disabled={!canRedo}><Redo2 size={15} /></button>
 
