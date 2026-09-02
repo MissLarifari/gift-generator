@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Undo2, Redo2, Gift, ChevronDown, HelpCircle, Check, UserPen } from 'lucide-react';
 import { useI18n, LANGS, type Lang } from '../i18n';
-import { THE_CLOUD_DISCORD, PROFILLY_URL } from './links';
+import { THE_CLOUD_DISCORD, PROFILLY_URL, LARI_URL } from './links';
 
 // Minimal header: THE CLOUD / Gifty  ·  undo/redo  ·  EN ▾  ·  ?
 // Credits, supporters and external links live in the About dialog now.
@@ -56,7 +56,18 @@ export default function Topbar({
             <span style={{ color: '#39414d', fontSize: 13 }}>/</span>
           </>
         )}
-        <span className="display" style={{ fontSize: 15, fontWeight: 600, letterSpacing: '.02em' }}>Gifty</span>
+        <span className="flex items-baseline" style={{ gap: 6, minWidth: 0 }}>
+          <span className="display" style={{ fontSize: 15, fontWeight: 600, letterSpacing: '.02em' }}>Gifty</span>
+          <a
+            href={LARI_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Gifty by Lari"
+            style={{ fontSize: 11, color: 'var(--muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}
+          >
+            by&nbsp;Lari
+          </a>
+        </span>
       </div>
 
       {/* actions */}
