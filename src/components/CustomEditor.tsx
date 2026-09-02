@@ -60,16 +60,17 @@ export default function CustomEditor({ value, commit }: { value: string; commit:
       key={title}
       onClick={onClick}
       title={title}
-      style={{ fontSize: 11.5, minWidth: 26, padding: '4px 8px', borderRadius: 7, cursor: 'pointer', background: 'rgba(225,92,158,.08)', border: '1px solid rgba(225,92,158,.22)', color: '#f3cfe2' }}
+      className="tog"
+      style={{ fontSize: 11.5, minWidth: 26, height: 26, padding: '0 8px' }}
     >
       {label}
     </button>
   );
-  const divider = <span style={{ width: 1, height: 18, background: 'var(--border)', flex: '0 0 auto' }} />;
+  const divider = <span style={{ width: 1, height: 18, background: 'var(--border)', flex: '0 0 auto', margin: '0 2px' }} />;
 
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 11px', display: 'flex', flexDirection: 'column', gap: 9 }}>
-      <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.12em', color: '#f3cfe2' }}>{t('g_custom_code')}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="sec-label" style={{ fontSize: 10 }}>{t('g_custom_code')}</div>
 
       {/* bold / italic / fonts */}
       <div className="flex flex-wrap items-center" style={{ gap: 6 }}>
@@ -81,15 +82,15 @@ export default function CustomEditor({ value, commit }: { value: string; commit:
 
       {/* size + color */}
       <div className="flex flex-wrap items-center" style={{ gap: 6 }}>
-        <span style={{ fontSize: 10, color: 'var(--muted)' }}>{t('size')}</span>
+        <span className="sec-label" style={{ fontSize: 10 }}>{t('size')}</span>
         {chip('S', () => wrap('<size=12>', '</size>'), '12')}
         {chip('M', () => wrap('<size=20>', '</size>'), '20')}
         {chip('L', () => wrap('<size=40>', '</size>'), '40')}
-        <input type="number" value={size} min={1} max={200} onChange={(e) => setSize(parseInt(e.target.value) || 1)} style={{ width: 50, background: 'rgba(6,9,18,.4)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 6px', color: 'var(--text)', fontSize: 12, outline: 'none' }} />
+        <input type="number" value={size} min={1} max={200} onChange={(e) => setSize(parseInt(e.target.value) || 1)} className="num" style={{ width: 50 }} />
         {chip('✓', () => wrap(`<size=${size}>`, '</size>'), 'Apply size')}
         {divider}
-        <span style={{ fontSize: 10, color: 'var(--muted)' }}>{t('g_color')}</span>
-        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} style={{ width: 26, height: 26, padding: 0, border: '1px solid var(--border)', borderRadius: 6, background: 'transparent', cursor: 'pointer' }} />
+        <span className="sec-label" style={{ fontSize: 10 }}>{t('g_color')}</span>
+        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} style={{ width: 26, height: 26, padding: 0, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--card)', cursor: 'pointer' }} />
         {chip('✓', () => wrap(`<color=${color}>`, '</color>'), 'Apply color')}
       </div>
 
@@ -100,20 +101,20 @@ export default function CustomEditor({ value, commit }: { value: string; commit:
         placeholder={t('g_custom_ph')}
         spellCheck={false}
         className="mono"
-        style={{ width: '100%', minHeight: 150, resize: 'vertical', background: 'rgba(6,9,18,.5)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 11px', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.5, outline: 'none', whiteSpace: 'pre-wrap' }}
+        style={{ width: '100%', minHeight: 150, resize: 'vertical', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '9px 11px', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.5, outline: 'none', whiteSpace: 'pre-wrap' }}
       />
       {/* insert deco / symbols / kaomoji at the cursor */}
       <div className="flex flex-col" style={{ gap: 7 }}>
         <div>
-          <div style={{ fontSize: 10, color: '#7e8fb5', margin: '0 0 5px' }}>{t('g_pick_deco')}</div>
+          <div className="sec-label" style={{ fontSize: 10, marginBottom: 5 }}>{t('g_pick_deco')}</div>
           <div className="flex flex-wrap" style={{ gap: 5 }}>{DECOS.map((p) => chip(p, () => insert(p), p))}</div>
         </div>
         <div>
-          <div style={{ fontSize: 10, color: '#7e8fb5', margin: '0 0 5px' }}>{t('plus_symbol')}</div>
+          <div className="sec-label" style={{ fontSize: 10, marginBottom: 5 }}>{t('plus_symbol')}</div>
           <div className="flex flex-wrap" style={{ gap: 5 }}>{SYMBOLS.map((sym) => chip(sym, () => insert(sym), sym))}</div>
         </div>
         <div>
-          <div style={{ fontSize: 10, color: '#7e8fb5', margin: '0 0 5px' }}>{t('kaomoji')}</div>
+          <div className="sec-label" style={{ fontSize: 10, marginBottom: 5 }}>{t('kaomoji')}</div>
           <div className="flex flex-wrap" style={{ gap: 5 }}>{KAOMOJI.map((k) => chip(k, () => insert(k), k))}</div>
         </div>
       </div>

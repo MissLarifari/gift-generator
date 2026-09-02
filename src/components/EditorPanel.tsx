@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { Sparkles, Type, Palette, LayoutGrid, Wand2, Trash2, Download, Upload, Lightbulb, Heart } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Type, Palette, LayoutGrid, Wand2, Trash2, Download, Upload, ChevronRight, Sparkles } from 'lucide-react';
 import type { GiftState, FieldId, Layout, FontStyle } from '../engine';
 import { FIELDS, LAYOUTS, FONT_STYLES, HAS_BOLD_ITALIC, HAS_STAR, HAS_FONT, DECO_PRESETS, SYMBOLS, KAOMOJI, type Commit } from '../state';
 import { buildShareUrl, decodeState } from '../share';
@@ -7,51 +7,57 @@ import { TEMPLATE_CATEGORIES } from '../data/templates';
 import { useI18n } from '../i18n';
 import CustomEditor from './CustomEditor';
 
-// New tabbed "Customize" editor (Text / Deco / Layout / Colors) in the pink/violet
-// look. Self-contained: drives the same GiftState via `commit`; no engine/App changes.
+// Customization sidebar — the same controls as before, regrouped into four
+// collapsible sections (Text / Style / Decoration / Layout) so the important
+// ones sit on top. Every handler drives the existing GiftState via `commit`;
+// no engine or state-shape change.
 const BIKEY: Record<string, 'top' | 'main' | 'bottom'> = { topText: 'top', mainText: 'main', bottomText: 'bottom' };
 const LINE_LIMIT = 46;
 
-// Local palette — kept inline so the rest of the app (still cyan) is untouched.
-const PINK = '#e15c9e';
-const PANEL = '#0f0d18';
-const CARD = '#16121f';
-const FIELDBG = '#0e0c16';
-const BORDER = 'rgba(255,255,255,.08)';
-const BORDER_ON = 'rgba(225,92,158,.5)';
-const TXT = '#ece9f6';
-const MUTED = '#8b84a6';
-const CAP = '#6f6a85';
+type Section = 'text' | 'style' | 'deco' | 'layout';
 
-type Tab = 'text' | 'deco' | 'layout' | 'colors';
+// Style targets, most-used first (FIELDS is in render order, which buries the main text).
+const STYLE_TARGETS: FieldId[] = ['mainText', 'topText', 'bottomText', 'dekoTop', 'kaomoji', 'dekoBottom'];
 
-const labelStyle: CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.12em', color: MUTED };
+// Module scope on purpose: picking at random is impure, so it must not sit in the
+// component body where the react-hooks lint treats it as render-time work.
+function pickRandomTemplate() {
+  const cat = TEMPLATE_CATEGORIES[Math.floor(Math.random() * TEMPLATE_CATEGORIES.length)];
+  const item = cat.items[Math.floor(Math.random() * cat.items.length)];
+  return { cat, item };
+}
 
 export default function EditorPanel(props: {
   state: GiftState;
   commit: Commit;
   onOpenColor: (f: FieldId) => void;
-  open: FieldId[];
-  setOpen: (f: FieldId[]) => void;
   onSetLayout: (l: Layout) => void;
   focusReq?: { f: FieldId; n: number } | null;
 }) {
   const { state, commit, onOpenColor, onSetLayout, focusReq } = props;
   const { t } = useI18n();
-  const [tab, setTab] = useState<Tab>('text');
+  const [open, setOpen] = useState<Record<Section, boolean>>({ text: true, style: false, deco: false, layout: true });
+  const [styleTarget, setStyleTarget] = useState<FieldId>('mainText');
   const [flash, setFlash] = useState('');
-  const inputRefs = useRef<Partial<Record<FieldId, HTMLInputElement | null>>>({});
+  const fieldRefs = useRef<Partial<Record<FieldId, HTMLElement | null>>>({});
 
   const fieldLabel = (f: FieldId) => (state.layout === 'pyramid' ? t('pyr_' + f) : t('fl_' + f));
+  const toggleSection = (s: Section) => setOpen((o) => ({ ...o, [s]: !o[s] }));
 
-  // Tapping a preview line (mobile) asks the editor to focus that field's input.
+  // Which section a field's control lives in (used by the mobile hand-off).
+  const sectionOf = (f: FieldId): Section =>
+    state.layout === 'pyramid' || f === 'mainText' || f === 'topText' || f === 'bottomText' ? 'text' : 'deco';
+
+  // Tapping a preview line (mobile) asks the editor to reveal + focus that field.
   useEffect(() => {
     if (!focusReq) return;
-    setTab('text');
+    const sec = sectionOf(focusReq.f);
+    setOpen((o) => ({ ...o, [sec]: true }));
     requestAnimationFrame(() => {
-      const el = inputRefs.current[focusReq.f];
+      const el = fieldRefs.current[focusReq.f];
       if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusReq]);
 
   const typeText = (f: FieldId, v: string) => commit((s) => ({ ...s, text: { ...s.text, [f]: v } }), 'text:' + f);
@@ -69,8 +75,7 @@ export default function EditorPanel(props: {
 
   // Randomize = apply a random template (mirrors App.applyTemplate's core).
   const randomize = () => {
-    const cat = TEMPLATE_CATEGORIES[Math.floor(Math.random() * TEMPLATE_CATEGORIES.length)];
-    const item = cat.items[Math.floor(Math.random() * cat.items.length)];
+    const { cat, item } = pickRandomTemplate();
     commit((s) => {
       const th = cat.theme;
       const text = { ...s.text, mainText: item.main, topText: item.top, bottomText: item.bottom };
@@ -97,217 +102,234 @@ export default function EditorPanel(props: {
 
   const dotBg = (f: FieldId) => {
     const g = state.grads[f];
-    if (state.noColor[f]) return 'repeating-conic-gradient(#3a2a3e 0% 25%, transparent 0% 50%) 50% / 8px 8px';
+    if (state.noColor[f]) return 'repeating-conic-gradient(#3a4049 0% 25%, transparent 0% 50%) 50% / 8px 8px';
     if (g.on || g.rainbow) return `linear-gradient(90deg, ${g.rainbow ? '#ffadad' : g.c1}, ${g.rainbow ? '#bdb2ff' : g.c2})`;
     return state.colors[f];
   };
 
-  const pill = (label: string, onClick: () => void, active = false, extra: CSSProperties = {}) => (
-    <button
-      key={label}
-      onClick={onClick}
-      style={{ fontSize: 12, padding: '5px 9px', borderRadius: 7, cursor: 'pointer', whiteSpace: 'nowrap', ...(active ? { background: PINK, color: '#fff', border: 'none' } : { background: CARD, border: `1px solid ${BORDER}`, color: '#c9c3da' }), ...extra }}
-    >
-      {label}
-    </button>
-  );
+  /* ---------- section shell ---------- */
 
-  const tabBtn = (id: Tab, icon: React.ReactNode, label: string) => (
-    <button
-      key={id}
-      onClick={() => setTab(id)}
-      className="flex items-center justify-center"
-      style={{ flex: 1, gap: 5, fontSize: 12, borderRadius: 8, padding: '7px 4px', cursor: 'pointer', border: 'none', ...(tab === id ? { background: PINK, color: '#fff' } : { background: 'transparent', color: MUTED }) }}
-    >
-      {icon}{label}
-    </button>
-  );
-
-  const mainControls = (f: FieldId) => (
-    <div style={{ marginTop: 8 }}>
-      <div className="flex items-center flex-wrap" style={{ gap: 6 }}>
-        {HAS_FONT.includes(f) && FONT_STYLES.map((fs) => pill(fs.label, () => setFont(f, fs.id as FontStyle), state.fonts[f] === fs.id))}
-        <span className="flex items-center" style={{ gap: 4, marginLeft: HAS_FONT.includes(f) ? 'auto' : 0 }}>
-          <span style={{ fontSize: 11, color: MUTED }}>{t('size')}</span>
-          <input type="number" value={state.sizes[f]} onChange={(e) => setSize(f, parseInt(e.target.value) || 0)} style={{ width: 46, background: FIELDBG, border: `1px solid ${BORDER}`, borderRadius: 6, padding: '4px 6px', color: TXT, fontSize: 12, outline: 'none' }} />
-        </span>
-      </div>
-      {(HAS_BOLD_ITALIC.includes(f) || HAS_STAR.includes(f)) && (
-        <div className="flex" style={{ gap: 6, marginTop: 6 }}>
-          {HAS_BOLD_ITALIC.includes(f) && pill('B', () => toggleBI(f, 'bold'), state.bold[BIKEY[f]], { fontWeight: 700 })}
-          {HAS_BOLD_ITALIC.includes(f) && pill('I', () => toggleBI(f, 'italic'), state.italic[BIKEY[f]], { fontStyle: 'italic' })}
-          {HAS_STAR.includes(f) && pill('★', () => toggleStar(f as 'dekoTop' | 'topText' | 'bottomText'), state.stars[f as 'dekoTop' | 'topText' | 'bottomText'])}
-        </div>
-      )}
+  const section = (id: Section, icon: ReactNode, label: string, children: ReactNode) => (
+    <div className="sec">
+      <button className="sec-head" data-open={open[id]} onClick={() => toggleSection(id)} aria-expanded={open[id]}>
+        <ChevronRight size={14} style={{ flex: '0 0 auto', transform: open[id] ? 'rotate(90deg)' : 'none', transition: 'transform .14s ease' }} />
+        {icon}
+        <span className="sec-label" style={{ color: 'inherit' }}>{label}</span>
+      </button>
+      {open[id] && <div className="sec-body">{children}</div>}
     </div>
   );
 
-  const lineRow = (f: FieldId, withControls: boolean) => {
+  /* ---------- TEXT ---------- */
+
+  const lineRow = (f: FieldId) => {
     const val = state.text[f];
     const len = [...val].length;
     return (
-      <div key={f} style={{ marginBottom: 12 }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 6 }}>
-          <span style={labelStyle}>{fieldLabel(f)}</span>
-          <span style={{ fontSize: 11, color: len > LINE_LIMIT ? '#ff6b6b' : CAP }}>{len}/{LINE_LIMIT}</span>
+      <div key={f} style={{ marginBottom: 11 }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 5 }}>
+          <span className="sec-label" style={{ fontSize: 10 }}>{fieldLabel(f)}</span>
+          <span className="mono" style={{ fontSize: 10, color: len > LINE_LIMIT ? 'var(--danger)' : 'var(--dim)' }}>{len}/{LINE_LIMIT}</span>
         </div>
-        <div className="flex items-center" style={{ gap: 8, background: FIELDBG, border: `1px solid ${BORDER}`, borderRadius: 9, padding: '8px 10px' }}>
-          <button aria-label={t('g_color')} onClick={() => onOpenColor(f)} style={{ width: 15, height: 15, borderRadius: '50%', flex: '0 0 auto', cursor: 'pointer', border: '1px solid rgba(255,255,255,.2)', background: dotBg(f) }} />
-          <input ref={(el) => { inputRefs.current[f] = el; }} value={val} onChange={(e) => typeText(f, e.target.value)} placeholder={t('g_text_ph')} style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', outline: 'none', color: TXT, fontSize: 13 }} />
-        </div>
-        {f === 'kaomoji' && (
-          <select value={KAOMOJI.includes(val) ? val : ''} onChange={(e) => { if (e.target.value) setFieldValue('kaomoji', e.target.value); }} style={{ width: '100%', marginTop: 6, background: FIELDBG, border: `1px solid ${BORDER}`, borderRadius: 9, padding: '8px 10px', color: TXT, fontSize: 13, outline: 'none', cursor: 'pointer' }}>
-            <option value="">{t('kaomoji')} …</option>
-            {KAOMOJI.map((k) => <option key={k} value={k}>{k}</option>)}
-          </select>
-        )}
-        {withControls && mainControls(f)}
-      </div>
-    );
-  };
-
-  const decoDropdown = (f: 'dekoTop' | 'dekoBottom') => {
-    const val = state.text[f];
-    const presets = DECO_PRESETS[f] || [];
-    return (
-      <div style={{ marginBottom: 11 }}>
-        <div style={{ ...labelStyle, marginBottom: 6 }}>{fieldLabel(f)}</div>
-        <div className="flex items-center" style={{ gap: 6 }}>
-          <select value={val} onChange={(e) => setFieldValue(f, e.target.value)} style={{ flex: 1, minWidth: 0, background: FIELDBG, border: `1px solid ${BORDER}`, borderRadius: 9, padding: '9px 10px', color: TXT, fontSize: 13, outline: 'none', cursor: 'pointer' }}>
-            <option value="">{t('g_none')}</option>
-            {val !== '' && !presets.includes(val) && <option value={val}>{val}</option>}
-            {presets.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-          {HAS_STAR.includes(f) && pill('★', () => toggleStar(f as 'dekoTop'), state.stars[f as 'dekoTop'])}
+        <div className="field">
+          <button className="swatch" aria-label={t('g_color')} title={t('g_color')} onClick={() => onOpenColor(f)} style={{ background: dotBg(f) }} />
+          <input
+            ref={(el) => { fieldRefs.current[f] = el; }}
+            value={val}
+            onChange={(e) => typeText(f, e.target.value)}
+            placeholder={t('g_text_ph')}
+            aria-label={fieldLabel(f)}
+          />
         </div>
       </div>
     );
   };
 
-  const qa = (icon: React.ReactNode, label: string, onClick: () => void) => (
-    <button onClick={onClick} className="flex items-center" style={{ gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 9, padding: '10px 11px', fontSize: 12.5, color: TXT, cursor: 'pointer' }}>
-      {icon}{label}
-    </button>
-  );
+  const textFields: FieldId[] = state.layout === 'pyramid' ? FIELDS : ['mainText', 'topText', 'bottomText'];
+  const textSection = state.layout === 'custom'
+    ? <CustomEditor value={state.customText} commit={commit} />
+    : <div style={{ marginBottom: -11 }}>{textFields.map((f) => lineRow(f))}</div>;
 
-  const layoutPreview = (l: Layout) => {
-    const bar = (w: string, c = '#5a5570') => <span style={{ display: 'block', height: 4, width: w, borderRadius: 2, background: c }} />;
-    let bars: React.ReactNode;
-    if (l === 'pyramid') bars = <>{bar('22%', '#f3c24f')}{bar('45%', '#f3c24f')}{bar('70%', '#f3c24f')}</>;
-    else if (l === 'sparkle') bars = <>{bar('40%', '#ff7ad9')}{bar('70%', PINK)}{bar('40%', '#ff7ad9')}</>;
-    else if (l === 'heart') bars = <>{bar('45%', '#ff4d8c')}{bar('65%', PINK)}{bar('45%', '#ff4d8c')}</>;
-    else if (l === 'inline') bars = <>{bar('46%')}{bar('80%', PINK)}</>;
-    else if (l === 'custom') bars = <span className="mono" style={{ fontSize: 12, color: MUTED }}>{'</>'}</span>;
-    else bars = <>{bar('50%')}{bar('70%', PINK)}{bar('40%')}</>;
-    return bars;
-  };
+  /* ---------- STYLE ---------- */
 
-  const header = (
-    <div className="flex items-center" style={{ gap: 8 }}>
-      <Sparkles size={16} style={{ color: PINK }} />
-      <span style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase', color: '#cdb8d8' }}>{t('g_customize')}</span>
-      <button onClick={randomize} aria-label={t('g_randomize')} title={t('g_randomize')} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: MUTED, cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
-        <Wand2 size={15} />
+  const f = styleTarget;
+  const styleSection = (
+    <>
+      <div className="sec-label" style={{ fontSize: 10, marginBottom: 7 }}>{t('g_style_target')}</div>
+      <div className="flex flex-wrap" style={{ gap: 5, marginBottom: 14 }}>
+        {STYLE_TARGETS.map((id) => (
+          <button key={id} className="chip" data-on={styleTarget === id} onClick={() => setStyleTarget(id)} style={{ fontSize: 11, padding: '4px 9px' }}>
+            {fieldLabel(id)}
+          </button>
+        ))}
+      </div>
+
+      {HAS_FONT.includes(f) && (
+        <>
+          <div className="sec-label" style={{ fontSize: 10, marginBottom: 7 }}>{t('g_font')}</div>
+          <div className="flex flex-wrap" style={{ gap: 5, marginBottom: 14 }}>
+            {FONT_STYLES.map((fs) => (
+              <button key={fs.id} className="tog" data-on={state.fonts[f] === fs.id} onClick={() => setFont(f, fs.id as FontStyle)} title={fs.id}>
+                {fs.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className="flex items-center justify-between" style={{ gap: 10, marginBottom: 14 }}>
+        <span className="sec-label" style={{ fontSize: 10 }}>{t('g_font_size')}</span>
+        <input className="num" type="number" value={state.sizes[f]} onChange={(e) => setSize(f, parseInt(e.target.value) || 0)} aria-label={t('g_font_size')} />
+      </div>
+
+      {(HAS_BOLD_ITALIC.includes(f) || HAS_STAR.includes(f)) && (
+        <div className="flex" style={{ gap: 5, marginBottom: 14 }}>
+          {HAS_BOLD_ITALIC.includes(f) && (
+            <>
+              <button className="tog" data-on={state.bold[BIKEY[f]]} onClick={() => toggleBI(f, 'bold')} style={{ fontWeight: 700 }} title="Bold">B</button>
+              <button className="tog" data-on={state.italic[BIKEY[f]]} onClick={() => toggleBI(f, 'italic')} style={{ fontStyle: 'italic' }} title="Italic">I</button>
+            </>
+          )}
+          {HAS_STAR.includes(f) && (
+            <button className="tog" data-on={state.stars[f as 'dekoTop']} onClick={() => toggleStar(f as 'dekoTop')} title="* … *">★</button>
+          )}
+        </div>
+      )}
+
+      <button className="btn btn-sm" onClick={() => onOpenColor(f)} style={{ width: '100%', justifyContent: 'flex-start' }}>
+        <span className="swatch" style={{ background: dotBg(f) }} /> {t('g_color')}
       </button>
-    </div>
-  );
-
-  const tabBar = (
-    <div className="flex" style={{ gap: 4, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: 4 }}>
-      {tabBtn('text', <Type size={15} />, t('g_tab_text'))}
-      {tabBtn('deco', <Sparkles size={15} />, t('g_tab_deco'))}
-      {tabBtn('layout', <LayoutGrid size={15} />, t('layout'))}
-      {tabBtn('colors', <Palette size={15} />, t('g_tab_colors'))}
-    </div>
-  );
-
-  const textFields: FieldId[] = state.layout === 'pyramid' ? FIELDS : ['topText', 'mainText', 'bottomText', 'kaomoji'];
-
-  const textTab = state.layout === 'custom' ? (
-    <CustomEditor value={state.customText} commit={commit} />
-  ) : (
-    <>
-      {textFields.map((f) => lineRow(f, true))}
-      {state.layout !== 'pyramid' && (<>{decoDropdown('dekoTop')}{decoDropdown('dekoBottom')}</>)}
-
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ ...labelStyle, marginBottom: 8 }}>{t('g_quick_actions')}</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {qa(<Wand2 size={16} style={{ color: PINK }} />, t('g_randomize'), randomize)}
-          {qa(<Trash2 size={16} style={{ color: '#ff6b6b' }} />, t('g_clear_all'), clearAll)}
-          {qa(<Download size={16} style={{ color: '#57c7e0' }} />, t('g_import'), importGift)}
-          {qa(<Upload size={16} style={{ color: '#57c7e0' }} />, t('g_export'), exportGift)}
-        </div>
-        {flash && <div style={{ fontSize: 11, color: PINK, marginTop: 6 }}>{flash}</div>}
-      </div>
-
-      <div className="flex items-center" style={{ gap: 10, background: '#120f1c', border: `1px solid ${BORDER}`, borderRadius: 11, padding: '11px 12px' }}>
-        <Lightbulb size={16} style={{ color: '#f3c24f', flex: '0 0 auto' }} />
-        <span style={{ fontSize: 12, color: '#b8b2c8' }}>{t('g_tip')}</span>
-        <Heart size={16} style={{ marginLeft: 'auto', color: PINK, flex: '0 0 auto' }} />
-      </div>
     </>
   );
 
-  const decoTab = (
-    <>
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ ...labelStyle, marginBottom: 8 }}>{t('fl_dekoTop')}</div>
-        <div className="flex flex-wrap" style={{ gap: 6 }}>{(DECO_PRESETS.dekoTop || []).map((p) => pill(p, () => setFieldValue('dekoTop', p)))}</div>
-      </div>
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ ...labelStyle, marginBottom: 8 }}>{t('fl_dekoBottom')}</div>
-        <div className="flex flex-wrap" style={{ gap: 6 }}>{(DECO_PRESETS.dekoBottom || []).map((p) => pill(p, () => setFieldValue('dekoBottom', p)))}</div>
-      </div>
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ ...labelStyle, marginBottom: 8 }}>{t('plus_symbol')}</div>
-        <div className="flex flex-wrap" style={{ gap: 6 }}>{SYMBOLS.map((s) => pill(s, () => appendSym('dekoTop', s)))}</div>
-      </div>
-      <div>
-        <div style={{ ...labelStyle, marginBottom: 8 }}>{t('kaomoji')}</div>
-        <div className="flex flex-wrap" style={{ gap: 6 }}>{KAOMOJI.map((k) => pill(k, () => setFieldValue('kaomoji', k)))}</div>
-      </div>
-    </>
-  );
+  /* ---------- DECORATION ---------- */
 
-  const layoutTab = (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-      {LAYOUTS.map((l) => {
-        const active = state.layout === l;
-        return (
-          <button key={l} onClick={() => onSetLayout(l)} style={{ textAlign: 'left', border: `1px solid ${active ? BORDER_ON : BORDER}`, background: active ? 'rgba(225,92,158,.08)' : CARD, borderRadius: 10, padding: 10, cursor: 'pointer', boxShadow: active ? '0 0 14px rgba(225,92,158,.16)' : 'none' }}>
-            <div style={{ fontSize: 12, color: active ? '#fff' : '#c9c3da', marginBottom: 8 }}>{t('layout_' + l)}</div>
-            <div className="flex flex-col items-center" style={{ gap: 3, minHeight: 22, justifyContent: 'center' }}>{layoutPreview(l)}</div>
-          </button>
-        );
-      })}
-    </div>
-  );
+  const decoSelect = (id: 'dekoTop' | 'dekoBottom') => {
+    const val = state.text[id];
+    const presets = DECO_PRESETS[id] || [];
+    return (
+      <div style={{ marginBottom: 12 }}>
+        <div className="sec-label" style={{ fontSize: 10, marginBottom: 6 }}>{t('fl_' + id)}</div>
+        <select
+          ref={(el) => { fieldRefs.current[id] = el; }}
+          className="select"
+          value={val}
+          onChange={(e) => setFieldValue(id, e.target.value)}
+          aria-label={t('fl_' + id)}
+        >
+          <option value="">{t('g_none')}</option>
+          {val !== '' && !presets.includes(val) && <option value={val}>{val}</option>}
+          {presets.map((p) => <option key={p} value={p}>{p}</option>)}
+        </select>
+      </div>
+    );
+  };
 
-  const colorsTab = (
+  const kaoVal = state.text.kaomoji;
+  const decoSection = (
     <>
-      <div style={{ ...labelStyle, marginBottom: 8 }}>{t('g_per_line')}</div>
-      <div className="flex flex-col" style={{ gap: 7 }}>
-        {FIELDS.map((f) => (
-          <button key={f} onClick={() => onOpenColor(f)} className="flex items-center justify-between" style={{ background: FIELDBG, border: `1px solid ${BORDER}`, borderRadius: 9, padding: '9px 11px', cursor: 'pointer' }}>
-            <span style={{ fontSize: 12.5, color: '#b8b2c8' }}>{fieldLabel(f)}</span>
-            <span style={{ width: 16, height: 16, borderRadius: '50%', border: '1px solid rgba(255,255,255,.2)', background: dotBg(f) }} />
-          </button>
+      {decoSelect('dekoTop')}
+
+      <div style={{ marginBottom: 12 }}>
+        <div className="sec-label" style={{ fontSize: 10, marginBottom: 6 }}>{t('fl_kaomoji')}</div>
+        <select
+          ref={(el) => { fieldRefs.current.kaomoji = el; }}
+          className="select"
+          value={KAOMOJI.includes(kaoVal) ? kaoVal : kaoVal === '' ? '' : '__own'}
+          onChange={(e) => { if (e.target.value !== '__own') setFieldValue('kaomoji', e.target.value); }}
+          aria-label={t('fl_kaomoji')}
+        >
+          <option value="">{t('g_none')}</option>
+          {kaoVal !== '' && !KAOMOJI.includes(kaoVal) && <option value="__own">{kaoVal}</option>}
+          {KAOMOJI.map((k) => <option key={k} value={k}>{k}</option>)}
+        </select>
+      </div>
+
+      {decoSelect('dekoBottom')}
+
+      <div className="sec-label" style={{ fontSize: 10, margin: '16px 0 7px' }}>{t('plus_symbol')}</div>
+      <div className="flex flex-wrap" style={{ gap: 5 }}>
+        {SYMBOLS.map((s) => (
+          <button key={s} className="tog" onClick={() => appendSym('dekoTop', s)} title={t('fl_dekoTop')} style={{ minWidth: 28, height: 26, padding: '0 7px' }}>{s}</button>
         ))}
       </div>
     </>
   );
 
-  return (
-    <div className="flex flex-col overflow-y-auto" style={{ paddingRight: 4, scrollbarGutter: 'stable' }}>
-      <div style={{ background: PANEL, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {header}
-        {tabBar}
-        {tab === 'text' && textTab}
-        {tab === 'deco' && decoTab}
-        {tab === 'layout' && layoutTab}
-        {tab === 'colors' && colorsTab}
-      </div>
+  /* ---------- LAYOUT ---------- */
+
+  // Rough thumbnail of where the text lands, per layout.
+  const layoutThumb = (l: Layout) => {
+    const bar = (k: string, w: string, main = false) => <span key={k} className={'lay-bar' + (main ? ' lay-bar-main' : '')} style={{ width: w }} />;
+    const dot = (k: string) => <span key={k} style={{ width: 3, height: 3, borderRadius: '50%', background: '#4a515c' }} />;
+    const dots = (k: string) => (
+      <span key={k} className="flex items-center" style={{ gap: 3 }}>
+        {[0, 1, 2].map((i) => dot(k + i))}
+      </span>
+    );
+    switch (l) {
+      case 'inline':
+        return <>{bar('a', '74%', true)}{bar('b', '44%')}</>;
+      case 'pyramid':
+        return <>{bar('a', '18%')}{bar('b', '38%')}{bar('c', '58%')}{bar('d', '72%', true)}</>;
+      case 'sparkle':
+        return <>{dots('a')}{bar('b', '64%', true)}{dots('c')}</>;
+      case 'heart':
+        return (
+          <>
+            {dots('a')}
+            <span key="mid" className="flex items-center" style={{ gap: 4 }}>
+              {dot('l')}
+              {bar('m', '46px', true)}
+              {dot('r')}
+            </span>
+            {dots('c')}
+          </>
+        );
+      case 'custom':
+        return <span className="mono" style={{ fontSize: 12, color: 'var(--dim)' }}>{'</>'}</span>;
+      default:
+        return <>{bar('a', '40%')}{bar('b', '66%', true)}{bar('c', '40%')}</>;
+    }
+  };
+
+  const layoutSection = (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
+      {LAYOUTS.map((l) => (
+        <button key={l} className="lay" data-on={state.layout === l} onClick={() => onSetLayout(l)}>
+          <span className="lay-canvas">{layoutThumb(l)}</span>
+          <span style={{ fontSize: 11.5, color: state.layout === l ? 'var(--text)' : 'var(--muted)' }}>{t('layout_' + l)}</span>
+        </button>
+      ))}
     </div>
+  );
+
+  /* ---------- panel ---------- */
+
+  const quick = (icon: ReactNode, label: string, onClick: () => void) => (
+    <button className="btn btn-sm btn-ghost" onClick={onClick} title={label} style={{ minWidth: 0, padding: '6px 8px', fontSize: 11.5, justifyContent: 'flex-start' }}>
+      {icon}<span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+    </button>
+  );
+
+  return (
+    <section className="panel flex flex-col" style={{ minHeight: 0, overflow: 'hidden' }}>
+      <div className="scroll-y" style={{ flex: 1, minHeight: 0 }}>
+        {section('text', <Type size={14} />, t('g_sec_text'), textSection)}
+        {state.layout !== 'custom' && section('style', <Palette size={14} />, t('g_sec_style'), styleSection)}
+        {state.layout !== 'custom' && section('deco', <Sparkles size={14} />, t('g_sec_deco'), decoSection)}
+        {section('layout', <LayoutGrid size={14} />, t('g_sec_layout'), layoutSection)}
+      </div>
+
+      <div className="shrink-0" style={{ borderTop: '1px solid var(--border)', padding: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+          {quick(<Wand2 size={13} />, t('g_randomize'), randomize)}
+          {quick(<Trash2 size={13} />, t('g_clear_all'), clearAll)}
+          {quick(<Download size={13} />, t('g_import'), importGift)}
+          {quick(<Upload size={13} />, t('g_export'), exportGift)}
+        </div>
+        {flash && <div style={{ fontSize: 11, color: 'var(--accent)', textAlign: 'center', marginTop: 6 }}>{flash}</div>}
+      </div>
+    </section>
   );
 }

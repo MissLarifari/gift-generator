@@ -1,5 +1,5 @@
-import { useState, useMemo, type CSSProperties, type ReactNode } from 'react';
-import { Copy, Share2, RotateCcw, X, Check, Ban, TriangleAlert, Lightbulb, ArrowRight, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { useEffect, useRef, useState, useMemo, type CSSProperties, type ReactNode } from 'react';
+import { Copy, Share2, RotateCcw, X, Check, Ban, TriangleAlert, Lightbulb, ArrowRight, ArrowUp, ArrowDown, ArrowUpDown, ChevronDown } from 'lucide-react';
 import { applyFont, buildOptimizeTips } from '../engine';
 import type { GiftState, GenerateResult, FieldId } from '../engine';
 import type { Commit } from '../state';
@@ -41,8 +41,19 @@ export default function PreviewPanel({
   const [shared, setShared] = useState(false);
   const [editing, setEditing] = useState<FieldId | null>(null);
   const [reorder, setReorder] = useState(false);
+  const [optOpen, setOptOpen] = useState(false);
+  const optRef = useRef<HTMLDivElement>(null);
   const opt = useMemo(() => (state.layout === 'custom' ? { show: false, state: 'info' as const, headerMsg: '', tips: [] } : buildOptimizeTips(state, result.chars, result.bytes, result.lines, t)), [state, result, t]);
   const overLimit = result.over;
+
+  useEffect(() => {
+    if (!optOpen) return;
+    const onDown = (e: MouseEvent) => { if (optRef.current && !optRef.current.contains(e.target as Node)) setOptOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOptOpen(false); };
+    window.addEventListener('mousedown', onDown);
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('mousedown', onDown); window.removeEventListener('keydown', onKey); };
+  }, [optOpen]);
 
   // Desktop: edit inline in the preview. Mobile: hand off to the editor (App jumps
   // to the Edit tab and focuses the field) — the inline input is too fiddly on touch.
@@ -67,8 +78,8 @@ export default function PreviewPanel({
     });
   const reorderBtn = (enabled: boolean, danger = false): CSSProperties => ({
     width: 24, height: 24, borderRadius: 6, display: 'grid', placeItems: 'center',
-    background: 'rgba(255,255,255,.06)', border: `1px solid ${danger ? 'rgba(255,122,217,.4)' : 'var(--border)'}`,
-    color: !enabled ? '#3a4861' : danger ? '#ff9be3' : '#cdd9f0', cursor: enabled ? 'pointer' : 'not-allowed',
+    background: 'var(--card)', border: '1px solid var(--border)',
+    color: !enabled ? '#454c58' : danger ? 'var(--danger)' : 'var(--muted)', cursor: enabled ? 'pointer' : 'not-allowed',
   });
 
   const solidColor = (f: FieldId) => (state.noColor[f] ? PV_NOCOLOR : state.grads[f].on || state.grads[f].rainbow ? '#eaf2ff' : state.colors[f]);
@@ -101,8 +112,8 @@ export default function PreviewPanel({
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
           style={{
             color: solidColor(f), fontSize: fontSizeRem(f), fontFamily: f === 'mainText' ? 'Space Grotesk, sans-serif' : 'inherit',
-            fontWeight: f === 'mainText' ? 700 : 400, textAlign: 'center', background: 'rgba(225,92,158,.1)',
-            border: '1px solid rgba(225,92,158,.55)', borderRadius: 6, padding: '0 6px', outline: 'none',
+            fontWeight: f === 'mainText' ? 700 : 400, textAlign: 'center', background: 'var(--accent-soft)',
+            border: '1px solid var(--accent-line)', borderRadius: 6, padding: '0 6px', outline: 'none',
             width: Math.max(4, raw.length + 2) + 'ch', maxWidth: '100%',
           }}
         />
@@ -170,104 +181,170 @@ export default function PreviewPanel({
     navigator.clipboard?.writeText(url).then(() => { setShared(true); setTimeout(() => setShared(false), 1600); }).catch(() => {});
   };
 
-  const budgetPct = Math.min(100, Math.round((result.bytes / 255) * 100));
-  // Cloud-palette status colours (was amber/red, which clashed with the site)
-  const headerColor = opt.state === 'over' ? 'var(--pink)' : opt.state === 'warn' ? 'var(--violet)' : 'var(--ind)';
+  // The bar tracks whichever budget is tighter — 3dxchat enforces both the
+  // 240-char and the 255-byte ceiling.
+  const usedPct = Math.min(100, Math.round(Math.max(result.chars / 240, result.bytes / 255) * 100));
+  const barColor = overLimit ? 'var(--danger)' : usedPct >= 88 ? 'var(--warn)' : 'var(--accent)';
+  const actionTips = opt.tips.filter((tp) => tp.action);
+  const optLoud = opt.show && (opt.state === 'over' || opt.state === 'warn');
+  const optColor = opt.state === 'over' ? 'var(--danger)' : 'var(--warn)';
+
+  const MAX = 468;
 
   return (
-    <div className="flex flex-col items-center overflow-y-auto" style={{ gap: 8 }}>
-      <div className="flex items-center justify-between w-full" style={{ maxWidth: 460, fontSize: 11, textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--muted)' }}>
-        <span>{t('preview')}</span>
-        <button onClick={() => { setReorder((r) => !r); setEditing(null); }} className="flex items-center gap-[5px]" style={{ fontSize: 11, textTransform: 'none', letterSpacing: 0, borderRadius: 7, padding: '4px 9px', cursor: 'pointer', border: '1px solid rgba(225,92,158,.35)', ...(reorder ? { background: 'linear-gradient(90deg,var(--ind),var(--cyan))', color: '#08131f', fontWeight: 600 } : { background: 'transparent', color: 'var(--ind)' }) }}>
-          {reorder ? <><Check size={12} /> {t('reorder_done')}</> : <><ArrowUpDown size={12} /> {t('reorder_btn')}</>}
+    <section className="flex flex-col" style={{ minHeight: 0 }}>
+      {/* workspace header */}
+      <div className="flex items-center justify-between shrink-0" style={{ maxWidth: MAX, width: '100%', margin: '0 auto', paddingBottom: 10 }}>
+        <span className="sec-label">{t('preview')}</span>
+        <button
+          className="btn btn-sm"
+          data-on={reorder}
+          onClick={() => { setReorder((r) => !r); setEditing(null); }}
+          style={reorder ? { background: 'var(--accent-soft)', borderColor: 'var(--accent-line)', color: '#c3c4ff' } : { background: 'transparent', color: 'var(--muted)' }}
+        >
+          {reorder ? <><Check size={13} /> {t('reorder_done')}</> : <><ArrowUpDown size={13} /> {t('reorder_btn')}</>}
         </button>
       </div>
 
-      {/* 3dxchat profile popup — restored, but tinted to the site palette (navy + cyan
-          lines) instead of the legacy near-black #141420 */}
-      <div className="w-full" style={{ maxWidth: 460, flexShrink: 0, background: 'rgba(10,15,34,.92)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 10px 34px rgba(0,0,0,.4)' }}>
-        {/* header */}
-        <div className="flex items-center" style={{ gap: 8, padding: '7px 11px', background: 'rgba(255,255,255,.03)', borderBottom: '1px solid var(--border)' }}>
-          <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: 'var(--pink)' }}>Sophey</span>
-          <span style={{ fontSize: 11, fontWeight: 500, color: '#fff', background: '#0a8f8a', padding: '3px 10px', borderRadius: 4 }}>Back To Profile</span>
-          <X size={14} style={{ color: '#7e8fb5' }} />
-        </div>
-        {/* tabs */}
-        <div className="flex" style={{ background: 'rgba(255,255,255,.02)', borderBottom: '1px solid var(--border)' }}>
-          {['Message', 'Gallery ( )', 'Gifts ( )', 'Send Gift', 'Unfriend', 'Report'].map((tb) => {
-            const on = tb === 'Gifts ( )';
-            return (
-              <span key={tb} style={{ flex: 1, textAlign: 'center', padding: '5px 1px', fontSize: 9.5, whiteSpace: 'nowrap', color: on ? 'var(--ind)' : '#7e8fb5', background: on ? 'rgba(225,92,158,.08)' : 'transparent', borderBottom: on ? '2px solid var(--ind)' : '2px solid transparent' }}>{tb}</span>
-            );
-          })}
-        </div>
-        {/* body */}
-        <div className="flex flex-col items-center text-center" style={{ padding: '10px 14px 16px', gap: 5 }}>
-          <div className="flex flex-col items-center" style={{ width: '100%' }}>
-            <span style={{ fontSize: 13, fontWeight: 600, fontStyle: 'italic', color: '#ffffff' }}>MissLarifari</span>
-            <span className="mono" style={{ fontSize: 11, color: '#7e8fb5', marginTop: 3 }}>Jun, 13 2026</span>
-          </div>
-          <div style={{ width: '90%', height: 1, background: 'var(--border)', margin: '5px auto 4px' }} />
-          <div className="flex items-center justify-center" style={{ width: '100%', minHeight: 170, marginBottom: 2 }}>
-            <img src={import.meta.env.BASE_URL + 'gift-sticker.png'} alt="gift" style={{ maxWidth: 200, maxHeight: 200, width: 'auto', height: 'auto', objectFit: 'contain' }} />
-          </div>
-          {state.layout === 'custom' ? (
-            <div className="mono" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: '100%', fontSize: 13, lineHeight: 1.45, color: '#eaf2ff' }} dangerouslySetInnerHTML={{ __html: customPreviewHtml(state.customText) }} />
-          ) : (
-            body()
-          )}
-        </div>
-      </div>
+      <div className="scroll-y flex-1" style={{ minHeight: 0 }}>
+        <div style={{ maxWidth: MAX, width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-      <div className="flex items-center w-full" style={{ maxWidth: 460, gap: 9 }}>
-        <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)' }}>{t('g_budget')}</span>
-        <div style={{ flex: 1, height: 6, borderRadius: 4, background: 'rgba(255,255,255,.06)', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: budgetPct + '%', background: result.byteStatus === 'over' ? '#ff6b6b' : result.byteStatus === 'warn' ? '#ffce8a' : 'linear-gradient(90deg,var(--ind),var(--cyan))' }} />
-        </div>
-        <span className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>{budgetPct}%</span>
-      </div>
-
-      <div onClick={copy} className="mono w-full" style={{ maxWidth: 460, fontSize: 11.5, lineHeight: 1.5, color: '#aab8d4', background: 'rgba(6,9,18,.55)', border: '1px solid var(--border)', borderRadius: 9, padding: '9px 11px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: overLimit ? 'default' : 'pointer' }}>
-        {result.code || '…'}
-      </div>
-
-      {opt.show && (
-        <div className="w-full" style={{ maxWidth: 460, border: `1px solid ${opt.state === 'over' ? 'rgba(255,122,217,.45)' : opt.state === 'warn' ? 'rgba(155,123,255,.45)' : 'var(--border)'}`, borderRadius: 9, padding: '5px 9px', background: 'var(--surface)' }}>
-          <div className="flex items-center gap-[5px]" style={{ fontSize: 10.5, fontWeight: 600, color: headerColor, marginBottom: 2 }}>
-            {opt.state === 'over' ? <Ban size={11} /> : opt.state === 'warn' ? <TriangleAlert size={11} /> : <Lightbulb size={11} />}
-            {opt.headerMsg}
-          </div>
-          <div className="flex flex-col gap-[1px]">
-            {opt.tips.map((tip, i) =>
-              tip.action ? (
-                <div key={i} className="flex items-center justify-between gap-[8px]" style={{ fontSize: 10, color: '#ff9be3' }}>
-                  <span className="flex items-center gap-[4px]"><X size={10} /> {tip.msg}</span>
-                  <button onClick={() => (tip.action === 'font' ? resetFont(tip.field!) : removeField(tip.field!))} style={{ fontSize: 9, padding: '0px 7px', borderRadius: 5, border: '1px solid rgba(255,122,217,.4)', color: '#ff9be3', background: 'rgba(255,122,217,.1)', cursor: 'pointer', flex: '0 0 auto' }}>
-                    {tip.action === 'font' ? 'reset' : 'remove'}
-                  </button>
+          {/* sticky stage: the 3dxchat gift popup stays put while the code scrolls */}
+          <div style={{ position: 'sticky', top: 0, zIndex: 2, background: 'var(--bg)', paddingBottom: 12 }}>
+            {/* 3dxchat profile popup mock — the gift itself renders exactly as before */}
+            <div style={{ background: '#0f1115', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+              <div className="flex items-center" style={{ gap: 8, padding: '7px 11px', background: 'rgba(255,255,255,.02)', borderBottom: '1px solid var(--border)' }}>
+                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: 'var(--text)' }}>Sophey</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: '#fff', background: '#0a8f8a', padding: '3px 10px', borderRadius: 4 }}>Back To Profile</span>
+                <X size={14} style={{ color: 'var(--dim)' }} />
+              </div>
+              <div className="flex" style={{ borderBottom: '1px solid var(--border)' }}>
+                {['Message', 'Gallery ( )', 'Gifts ( )', 'Send Gift', 'Unfriend', 'Report'].map((tb) => {
+                  const on = tb === 'Gifts ( )';
+                  return (
+                    <span key={tb} style={{ flex: 1, textAlign: 'center', padding: '5px 1px', fontSize: 9.5, whiteSpace: 'nowrap', color: on ? 'var(--text)' : 'var(--dim)', borderBottom: on ? '2px solid var(--accent)' : '2px solid transparent' }}>{tb}</span>
+                  );
+                })}
+              </div>
+              <div className="flex flex-col items-center text-center" style={{ padding: '10px 14px 16px', gap: 5 }}>
+                <div className="flex flex-col items-center" style={{ width: '100%' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, fontStyle: 'italic', color: '#ffffff' }}>MissLarifari</span>
+                  <span className="mono" style={{ fontSize: 11, color: 'var(--dim)', marginTop: 3 }}>Jun, 13 2026</span>
                 </div>
-              ) : (
-                <div key={i} className="flex items-center gap-[4px]" style={{ fontSize: 10, color: tip.level === 'warn' ? '#b9a8ff' : tip.level === 'info' ? '#9fc9ff' : 'var(--muted)' }}>
-                  {tip.level === 'warn' ? <TriangleAlert size={10} /> : tip.level === 'info' ? <ArrowRight size={10} /> : <span style={{ width: '.7em', textAlign: 'center', display: 'inline-block' }}>·</span>}
-                  {tip.msg}
+                <div style={{ width: '90%', height: 1, background: 'var(--border)', margin: '5px auto 4px' }} />
+                <div className="flex items-center justify-center" style={{ width: '100%', minHeight: 170, marginBottom: 2 }}>
+                  <img src={import.meta.env.BASE_URL + 'gift-sticker.png'} alt="gift" style={{ maxWidth: 200, maxHeight: 200, width: 'auto', height: 'auto', objectFit: 'contain' }} />
                 </div>
-              ),
+                {state.layout === 'custom' ? (
+                  <div className="mono" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: '100%', fontSize: 13, lineHeight: 1.45, color: '#eaf2ff' }} dangerouslySetInnerHTML={{ __html: customPreviewHtml(state.customText) }} />
+                ) : (
+                  body()
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          {/* generated code */}
+          <div
+            onClick={copy}
+            className="mono scroll-y"
+            title={overLimit ? t('g_too_long') : t('copy_code')}
+            style={{ fontSize: 11.5, lineHeight: 1.55, color: 'var(--muted)', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', maxHeight: 132, whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: overLimit ? 'default' : 'pointer' }}
+          >
+            {result.code || '…'}
+          </div>
+
+        </div>
+      </div>
+      {/* pinned footer: budget, primary actions, optimize — always visible */}
+      <div className="shrink-0" style={{ maxWidth: MAX, width: '100%', margin: '0 auto', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* budget: thin bar + plain counts */}
+          <div>
+            <div style={{ height: 3, borderRadius: 2, background: 'var(--card)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: usedPct + '%', background: barColor, transition: 'width .16s ease, background .16s ease' }} />
+            </div>
+            <div className="flex items-center justify-between" style={{ marginTop: 7 }}>
+              <span style={{ fontSize: 11.5, color: overLimit ? 'var(--danger)' : 'var(--muted)' }}>
+                <span className="mono" style={{ color: overLimit ? 'var(--danger)' : 'var(--text)' }}>{result.chars}</span>
+                <span className="mono"> / 240</span> {t('g_characters')}
+              </span>
+              <span className="mono" style={{ fontSize: 11, color: result.byteStatus === 'over' ? 'var(--danger)' : 'var(--dim)' }}>
+                {result.bytes} / 255 {t('g_bytes_short')}
+              </span>
+            </div>
+          </div>
+
+          {/* primary actions stay with the preview, always reachable */}
+          <div className="flex" style={{ gap: 8 }}>
+            <button className="btn btn-primary" onClick={copy} disabled={overLimit} style={{ flex: 1 }}>
+              {overLimit ? <><Ban size={15} /> {t('g_too_long')}</> : copied ? <><Check size={15} /> {t('copied')}</> : <><Copy size={15} /> {t('g_copy_gift')}</>}
+            </button>
+            <button className="btn" onClick={share} style={{ minWidth: 112 }}>
+              {shared ? <><Check size={15} /> {t('g_link_copied')}</> : <><Share2 size={15} /> {t('g_share')}</>}
+            </button>
+          </div>
+        {/* optimize + reset — quiet until the budget gets tight */}
+        <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
+          <div ref={optRef} style={{ position: 'relative' }}>
+            <button
+              className="btn btn-sm"
+              onClick={() => setOptOpen((o) => !o)}
+              aria-haspopup="true"
+              aria-expanded={optOpen}
+              style={optLoud
+                ? { background: 'transparent', borderColor: optColor, color: optColor }
+                : { background: 'transparent', borderColor: 'transparent', color: 'var(--muted)' }}
+            >
+              {opt.state === 'over' ? <Ban size={13} /> : optLoud ? <TriangleAlert size={13} /> : <Lightbulb size={13} />}
+              {t('g_optimize')}
+              {optLoud && actionTips.length > 0 && (
+                <span className="mono" style={{ fontSize: 10, padding: '0 5px', borderRadius: 999, background: optColor, color: '#10121a' }}>{actionTips.length}</span>
+              )}
+              <ChevronDown size={12} />
+            </button>
+            {optOpen && (
+              <div className="pop" style={{ bottom: 'calc(100% + 6px)', left: 0, width: 320, padding: 12 }}>
+                {opt.show ? (
+                  <>
+                    <div className="flex items-center" style={{ gap: 6, fontSize: 11.5, fontWeight: 600, color: opt.state === 'over' ? 'var(--danger)' : opt.state === 'warn' ? 'var(--warn)' : 'var(--muted)', marginBottom: 9 }}>
+                      {opt.state === 'over' ? <Ban size={12} /> : opt.state === 'warn' ? <TriangleAlert size={12} /> : <Lightbulb size={12} />}
+                      {opt.headerMsg}
+                    </div>
+                    <div className="flex flex-col" style={{ gap: 6 }}>
+                      {opt.tips.map((tip, i) =>
+                        tip.action ? (
+                          <div key={i} className="flex items-center justify-between" style={{ gap: 8, fontSize: 11.5, color: 'var(--text)' }}>
+                            <span>{tip.msg}</span>
+                            <button
+                              className="btn btn-sm"
+                              onClick={() => (tip.action === 'font' ? resetFont(tip.field!) : removeField(tip.field!))}
+                              style={{ flex: '0 0 auto', padding: '3px 9px', fontSize: 11 }}
+                            >
+                              {tip.action === 'font' ? t('opt_switch') : t('opt_remove')}
+                            </button>
+                          </div>
+                        ) : (
+                          <div key={i} className="flex items-start" style={{ gap: 6, fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.45 }}>
+                            {tip.level === 'warn' ? <TriangleAlert size={11} style={{ marginTop: 2, flex: '0 0 auto' }} /> : <ArrowRight size={11} style={{ marginTop: 2, flex: '0 0 auto' }} />}
+                            {tip.msg}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="hint">{t('g_opt_none')}</div>
+                )}
+              </div>
             )}
           </div>
-        </div>
-      )}
 
-      <div className="flex w-full" style={{ maxWidth: 460, gap: 8 }}>
-        <button onClick={copy} disabled={overLimit} className="flex-1 flex items-center justify-center gap-[7px]" style={{ fontSize: 13, fontWeight: 600, padding: '11px 0', borderRadius: 9, cursor: overLimit ? 'not-allowed' : 'pointer', ...(overLimit ? { background: 'rgba(255,107,107,.12)', color: '#ff9b9b', border: '1px solid rgba(255,107,107,.4)' } : { background: 'linear-gradient(90deg,var(--ind),var(--cyan))', color: '#08131f', border: 'none', boxShadow: '0 0 18px rgba(225,92,158,.3)' }) }}>
-          {overLimit ? <><Ban size={15} /> {t('g_too_long')}</> : copied ? <><Check size={15} /> {t('copied')}</> : <><Copy size={15} /> {t('copy_code')}</>}
-        </button>
-        <button onClick={share} className="flex-1 flex items-center justify-center gap-[7px]" style={{ fontSize: 13, fontWeight: 600, padding: '11px 0', borderRadius: 9, cursor: 'pointer', color: 'var(--ind)', background: 'transparent', border: '1px solid rgba(225,92,158,.4)' }}>
-          {shared ? <><Check size={15} /> {t('g_link_copied')}</> : <><Share2 size={15} /> {t('g_share')}</>}
-        </button>
-        <button onClick={onReset} className="flex items-center justify-center gap-[6px]" style={{ fontSize: 13, fontWeight: 600, padding: '11px 14px', borderRadius: 9, cursor: 'pointer', color: '#cdd9f0', background: 'transparent', border: '1px solid var(--border)' }}>
-          <RotateCcw size={15} /> {t('g_reset')}
-        </button>
+          <button className="btn btn-sm btn-ghost" onClick={onReset} title={t('reset_all')}>
+            <RotateCcw size={13} /> {t('g_reset')}
+          </button>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

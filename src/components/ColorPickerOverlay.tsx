@@ -59,14 +59,14 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
   };
 
   const previewBg = s.noColor
-    ? 'repeating-conic-gradient(#2a3650 0% 25%, transparent 0% 50%) 50% / 12px 12px'
+    ? 'repeating-conic-gradient(#3a4049 0% 25%, transparent 0% 50%) 50% / 12px 12px'
     : s.gradient
       ? `linear-gradient(90deg, ${s.c1}, ${s.c2})`
       : s.color;
 
   const segBtn = (active: boolean) =>
     `flex-1 text-[13px] font-medium py-1.5 rounded-md transition-colors ${
-      active ? 'text-[#06101f]' : 'text-[var(--muted)] hover:text-[var(--text)]'
+      active ? 'text-[#10121a]' : 'text-[var(--muted)] hover:text-[var(--text)]'
     }`;
 
   return (
@@ -74,7 +74,7 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
       {open && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(2,4,8,0.62)', backdropFilter: 'blur(4px)' }}
+          style={{ background: 'rgba(6,8,11,0.66)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -84,11 +84,11 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
           }}
         >
           <motion.div
-            className="w-[348px] max-w-[94vw] rounded-2xl border p-5"
+            className="w-[348px] max-w-[94vw] rounded-[14px] border p-5"
             style={{
               background: 'var(--surface-2)',
               borderColor: 'var(--border)',
-              boxShadow: '0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)',
+              boxShadow: '0 22px 60px rgba(0,0,0,0.5)',
             }}
             initial={{ scale: 0.94, opacity: 0, y: 8 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -127,14 +127,14 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
               <button
                 className={segBtn(!s.gradient && !s.noColor)}
                 onClick={() => setS((p) => ({ ...p, gradient: false, noColor: false }))}
-                style={!s.gradient && !s.noColor ? { background: 'linear-gradient(90deg,var(--ind),var(--cyan))' } : undefined}
+                style={!s.gradient && !s.noColor ? { background: 'var(--accent)' } : undefined}
               >
                 {t('g_solid')}
               </button>
               <button
                 className={segBtn(s.gradient && !s.noColor)}
                 onClick={() => setS((p) => ({ ...p, gradient: true, noColor: false }))}
-                style={s.gradient && !s.noColor ? { background: 'linear-gradient(90deg,var(--ind),var(--cyan))' } : undefined}
+                style={s.gradient && !s.noColor ? { background: 'var(--accent)' } : undefined}
               >
                 {t('gradient')}
               </button>
@@ -154,7 +154,7 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
                         className="w-full aspect-square rounded-md transition-transform hover:scale-110"
                         style={{
                           background: c,
-                          outline: sel ? '2px solid var(--cyan)' : 'none',
+                          outline: sel ? '2px solid var(--accent)' : 'none',
                           outlineOffset: '1px',
                           border: '1px solid rgba(0,0,0,0.25)',
                         }}
@@ -180,7 +180,7 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
                     placeholder="#rrggbb"
                     spellCheck={false}
                     className="mono flex-1 px-3 py-2 rounded-md text-[13px] tracking-wider outline-none border"
-                    style={{ background: 'rgba(0,0,0,0.3)', borderColor: 'var(--border)', color: 'var(--text)' }}
+                    style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--text)' }}
                   />
                 </div>
               </div>
@@ -215,7 +215,7 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
                           }}
                           spellCheck={false}
                           className="mono flex-1 min-w-0 px-2 py-1.5 rounded-md text-[12px] outline-none border"
-                          style={{ background: 'rgba(0,0,0,0.3)', borderColor: 'var(--border)', color: 'var(--text)' }}
+                          style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--text)' }}
                         />
                       </div>
                     </div>
@@ -228,13 +228,13 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
             <button
               onClick={() => setS((p) => ({ ...p, noColor: !p.noColor }))}
               className="flex items-center gap-2 w-full mt-4 pt-3 text-[12px] border-t"
-              style={{ borderColor: 'var(--border)', color: s.noColor ? 'var(--cyan)' : 'var(--muted)' }}
+              style={{ borderColor: 'var(--border)', color: s.noColor ? 'var(--accent)' : 'var(--muted)' }}
             >
               <span
                 className="grid place-items-center w-5 h-5 rounded-md border"
                 style={{
-                  borderColor: s.noColor ? 'var(--cyan)' : 'var(--border-2)',
-                  background: s.noColor ? 'rgba(95,207,255,0.15)' : 'transparent',
+                  borderColor: s.noColor ? 'var(--accent)' : 'var(--border)',
+                  background: s.noColor ? 'var(--accent-soft)' : 'transparent',
                 }}
               >
                 {s.noColor && <Check size={12} />}
@@ -248,7 +248,7 @@ export default function ColorPickerOverlay({ open, fieldLabel, initial, onApply,
               <button
                 onClick={() => onApply(s)}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-semibold"
-                style={{ background: 'linear-gradient(90deg,var(--ind),var(--cyan))', color: '#06101f' }}
+                style={{ background: 'var(--accent)', color: '#10121a' }}
               >
                 <Check size={15} /> {t('apply')}
               </button>
