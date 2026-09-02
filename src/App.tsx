@@ -182,7 +182,9 @@ export default function App() {
       ) : (
         <main
           className="flex-1 min-h-0 grid"
-          style={{ gridTemplateColumns: '298px minmax(0, 1fr) 316px', gap: 14, padding: 14 }}
+          // The side columns may shrink so the preview never starves on a narrow
+          // desktop (the breakpoint starts at 860px).
+          style={{ gridTemplateColumns: 'minmax(236px, 298px) minmax(320px, 1fr) minmax(262px, 316px)', gap: 14, padding: 14 }}
         >
           {templatesPanel}
           {previewPanel}

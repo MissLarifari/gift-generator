@@ -264,7 +264,7 @@ export default function PreviewPanel({
             <div style={{ height: 3, borderRadius: 2, background: 'var(--card)', overflow: 'hidden' }}>
               <div style={{ height: '100%', width: usedPct + '%', background: barColor, transition: 'width .16s ease, background .16s ease' }} />
             </div>
-            <div className="flex items-center justify-between" style={{ marginTop: 7 }}>
+            <div className="flex items-center justify-between flex-wrap" style={{ marginTop: 7, gap: '2px 10px' }}>
               <span style={{ fontSize: 11.5, color: overLimit ? 'var(--danger)' : 'var(--muted)' }}>
                 <span className="mono" style={{ color: overLimit ? 'var(--danger)' : 'var(--text)' }}>{result.chars}</span>
                 <span className="mono"> / 240</span> {t('g_characters')}

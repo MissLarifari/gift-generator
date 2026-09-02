@@ -61,16 +61,27 @@ export default function Topbar({
 
       {/* actions */}
       <div className="flex items-center" style={{ gap: 4 }}>
-        {/* sister tool — Lari's 3dx profile-text editor */}
+        {/* sister tool — Lari's 3dx profile-text editor. Labelled like the brand on
+            the left (THE CLOUD / Gifty) so it reads as "what it is › what it's called".
+            Compact keeps the icon only; the full label would overflow a phone header. */}
         <a
           className="btn btn-sm"
           href={PROFILLY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          title="Profilly · 3DX Profile Editor"
-          style={{ gap: 6, color: 'var(--muted)', textDecoration: 'none', marginRight: 4, ...(compact ? { padding: '6px 8px' } : null) }}
+          title={`Profilly · 3DX ${t('g_profile_editor')}`}
+          style={{ gap: 7, textDecoration: 'none', marginRight: 4, ...(compact ? { padding: '6px 8px' } : null) }}
         >
-          <UserPen size={14} /> {!compact && 'Profilly'}
+          <UserPen size={14} style={{ color: 'var(--muted)' }} />
+          {!compact && (
+            <>
+              <span style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '.09em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                {t('g_profile_editor')}
+              </span>
+              <span style={{ color: '#39414d' }}>›</span>
+              <span style={{ color: 'var(--text)' }}>Profilly</span>
+            </>
+          )}
         </a>
 
         <button className="icon-btn" title={t('undo_title')} onClick={undo} disabled={!canUndo}><Undo2 size={15} /></button>

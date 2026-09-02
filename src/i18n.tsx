@@ -77,6 +77,7 @@ export const I18N: Record<Lang, Dict> = {
     g_intro_1: 'Pick a template', g_intro_2: 'Customize', g_intro_3: 'Copy to 3DXChat',
     g_got_it: 'Got it', g_language: 'Language', g_help: 'Help & credits',
     g_made_by: 'made with ♥ by Lari', g_and_more: '… and many more',
+    g_profile_editor: 'Profile Editor',
   },
   de: {
     chars: 'Zeichen', bytes: 'Bytes',
@@ -139,6 +140,7 @@ export const I18N: Record<Lang, Dict> = {
     g_intro_1: 'Vorlage wählen', g_intro_2: 'Anpassen', g_intro_3: 'In 3DXChat einfügen',
     g_got_it: 'Alles klar', g_language: 'Sprache', g_help: 'Hilfe & Credits',
     g_made_by: 'made with ♥ by Lari', g_and_more: '… und viele mehr',
+    g_profile_editor: 'Profil-Editor',
   },
   fr: {
     chars: 'Caractères', bytes: 'Octets',
@@ -201,6 +203,7 @@ export const I18N: Record<Lang, Dict> = {
     g_intro_1: 'Choisis un modèle', g_intro_2: 'Personnalise', g_intro_3: 'Colle dans 3DXChat',
     g_got_it: 'Compris', g_language: 'Langue', g_help: 'Aide & crédits',
     g_made_by: 'made with ♥ by Lari', g_and_more: '… et bien d’autres',
+    g_profile_editor: 'Éditeur de profil',
   },
   ru: {
     chars: 'Знаки', bytes: 'Байты',
@@ -263,6 +266,7 @@ export const I18N: Record<Lang, Dict> = {
     g_intro_1: 'Выбери шаблон', g_intro_2: 'Настрой', g_intro_3: 'Скопируй в 3DXChat',
     g_got_it: 'Понятно', g_language: 'Язык', g_help: 'Помощь и благодарности',
     g_made_by: 'made with ♥ by Lari', g_and_more: '… и многие другие',
+    g_profile_editor: 'Редактор профиля',
   },
 };
 
