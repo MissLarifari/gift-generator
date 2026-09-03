@@ -29,6 +29,13 @@ export const HAS_BOLD_ITALIC: FieldId[] = ['topText', 'mainText', 'bottomText'];
 export const HAS_STAR: FieldId[] = ['dekoTop', 'topText', 'bottomText'];
 export const HAS_FONT: FieldId[] = ['dekoTop', 'topText', 'mainText', 'bottomText', 'dekoBottom'];
 
+// Deco lines that the Decoration section owns (dropdowns, not free text) —
+// except in the pyramid layout, where every field is a plain text line.
+export const DECO_FIELDS: FieldId[] = ['dekoTop', 'kaomoji', 'dekoBottom'];
+export type EditorSection = 'text' | 'style' | 'deco' | 'layout';
+export const editorSectionOf = (layout: Layout, f: FieldId): EditorSection =>
+  layout !== 'pyramid' && DECO_FIELDS.includes(f) ? 'deco' : 'text';
+
 export const DECO_PRESETS: Partial<Record<FieldId, string[]>> = {
   dekoTop: ['˚ ⋆ ✦ ⋆ ˚', '· ˚ ⋆ ✦ ⋆ ˚ ·', '♡ · ♥ · ♡', '· ily ·←', '❀ · ❀ · ❀', '✦ · · · ✦', '♥ · ♥ · ♥', '★.° ★.°', '· · ·'],
   dekoBottom: ['˚ ⋆ ✦ ⋆ ˚', '· ˚ ⋆ ✦ ⋆ ˚ ·', '♡ · ♥ · ♡', '.. ･ ✦ ･ ..', '· · · · ·', '♡ ·° ☆ ·° ♡', '❀ ♡ ✦ ♡ ❀', '~ · ~ · ~'],
@@ -36,7 +43,7 @@ export const DECO_PRESETS: Partial<Record<FieldId, string[]>> = {
 
 export const SYMBOLS = ['♡', '♥', '❀', '✿', '✦', '★', '·', '°', '˚', '⋆', '←', '→', '∞', '~', '｡ﾟ'];
 
-export const KAOMOJI = ['(✿˘‿˘)', '(❀◡❀)', '(✿╹‿╹)ノ', '(❀˘‿˘)ノ', '(✿≧‿≦)', '(◉_◉❀)', '(˘³˘)♥', '(♡˘▽˘♡)', '(◍•ᴗ•◍)❤', '(◕‿◕✿)'];
+export const KAOMOJI = ['ʚɞ', 'ʚ♡ɞ', '(✿˘‿˘)', '(❀◡❀)', '(✿╹‿╹)ノ', '(❀˘‿˘)ノ', '(✿≧‿≦)', '(◉_◉❀)', '(˘³˘)♥', '(♡˘▽˘♡)', '(◍•ᴗ•◍)❤', '(◕‿◕✿)'];
 
 export function createDefaultState(): GiftState {
   const grad = () => ({ on: false, c1: '#ff71b8', c2: '#b388ff', rainbow: false });

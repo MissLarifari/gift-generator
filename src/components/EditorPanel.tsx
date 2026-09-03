@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Type, Palette, LayoutGrid, Wand2, Trash2, Download, Upload, ChevronRight, Sparkles } from 'lucide-react';
+import { Type, Palette, LayoutGrid, Wand2, Trash2, Download, Upload, ChevronRight, ChevronsDownUp, ChevronsUpDown, Sparkles, Eraser } from 'lucide-react';
 import type { GiftState, FieldId, Layout, FontStyle } from '../engine';
-import { FIELDS, LAYOUTS, FONT_STYLES, HAS_BOLD_ITALIC, HAS_STAR, HAS_FONT, DECO_PRESETS, SYMBOLS, KAOMOJI, type Commit } from '../state';
+import { FIELDS, LAYOUTS, FONT_STYLES, HAS_BOLD_ITALIC, HAS_STAR, HAS_FONT, DECO_PRESETS, DECO_FIELDS, SYMBOLS, KAOMOJI, editorSectionOf, type Commit, type EditorSection } from '../state';
 import { buildShareUrl, decodeState } from '../share';
 import { TEMPLATE_CATEGORIES } from '../data/templates';
 import { useI18n } from '../i18n';
@@ -14,7 +14,14 @@ import CustomEditor from './CustomEditor';
 const BIKEY: Record<string, 'top' | 'main' | 'bottom'> = { topText: 'top', mainText: 'main', bottomText: 'bottom' };
 const LINE_LIMIT = 46;
 
-type Section = 'text' | 'style' | 'deco' | 'layout';
+type Section = EditorSection;
+
+// Sent by App when a preview line is clicked: reveal the field's section and
+// scroll its control into view. `focus` also moves keyboard focus there (mobile,
+// and deco dropdowns on desktop); without it the field only lights up briefly,
+// because the desktop preview is editing that text inline and must keep focus.
+export interface FocusRequest { f: FieldId; n: number; focus: boolean }
+const HILITE_MS = 1300;
 
 // Style targets, most-used first (FIELDS is in render order, which buries the main text).
 const STYLE_TARGETS: FieldId[] = ['mainText', 'topText', 'bottomText', 'dekoTop', 'kaomoji', 'dekoBottom'];
@@ -32,33 +39,54 @@ export default function EditorPanel(props: {
   commit: Commit;
   onOpenColor: (f: FieldId) => void;
   onSetLayout: (l: Layout) => void;
-  focusReq?: { f: FieldId; n: number } | null;
+  focusReq?: FocusRequest | null;
 }) {
   const { state, commit, onOpenColor, onSetLayout, focusReq } = props;
   const { t } = useI18n();
   const [open, setOpen] = useState<Record<Section, boolean>>({ text: true, style: false, deco: false, layout: true });
   const [styleTarget, setStyleTarget] = useState<FieldId>('mainText');
   const [flash, setFlash] = useState('');
+  const [pointAt, setPointAt] = useState<FocusRequest | null>(null);
   const fieldRefs = useRef<Partial<Record<FieldId, HTMLElement | null>>>({});
 
+  // The custom layout hides Style and Decoration, so only the sections actually
+  // on screen decide which way the fold-all button points.
+  const visibleSections: Section[] = state.layout === 'custom' ? ['layout', 'text'] : ['layout', 'text', 'style', 'deco'];
+  const anyOpen = visibleSections.some((s) => open[s]);
+  // One button for both directions: fold everything away to see the whole panel
+  // at a glance, unfold it again to reach every control without hunting.
+  const toggleAll = () => {
+    const to = !anyOpen;
+    setOpen({ layout: to, text: to, style: to, deco: to });
+  };
+
   const fieldLabel = (f: FieldId) => (state.layout === 'pyramid' ? t('pyr_' + f) : t('fl_' + f));
+  // In the pyramid layout the deco lines are plain text rows in the Text section,
+  // so the Decoration dropdowns must not claim those fields — otherwise both would
+  // register the same ref and both would light up on a preview click.
+  const decoOwnsFields = editorSectionOf(state.layout, 'dekoTop') === 'deco';
   const toggleSection = (s: Section) => setOpen((o) => ({ ...o, [s]: !o[s] }));
 
-  // Which section a field's control lives in (used by the mobile hand-off).
-  const sectionOf = (f: FieldId): Section =>
-    state.layout === 'pyramid' || f === 'mainText' || f === 'topText' || f === 'bottomText' ? 'text' : 'deco';
-
-  // Tapping a preview line (mobile) asks the editor to reveal + focus that field.
+  // Clicking a preview line asks the editor to reveal that field's section and
+  // point at its control — so people see where that line is edited.
   useEffect(() => {
     if (!focusReq) return;
-    const sec = sectionOf(focusReq.f);
-    setOpen((o) => ({ ...o, [sec]: true }));
-    requestAnimationFrame(() => {
-      const el = fieldRefs.current[focusReq.f];
-      if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    });
+    setOpen((o) => ({ ...o, [editorSectionOf(state.layout, focusReq.f)]: true }));
+    setPointAt(focusReq);
+    const timer = setTimeout(() => setPointAt(null), HILITE_MS);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusReq]);
+
+  // Scrolling/focusing waits for the render above: a collapsed section has no
+  // control to reach until it has actually opened.
+  useEffect(() => {
+    if (!pointAt) return;
+    const el = fieldRefs.current[pointAt.f];
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (pointAt.focus) el.focus({ preventScroll: true });
+  }, [pointAt]);
 
   const typeText = (f: FieldId, v: string) => commit((s) => ({ ...s, text: { ...s.text, [f]: v } }), 'text:' + f);
   const setFieldValue = (f: FieldId, v: string) => commit((s) => ({ ...s, text: { ...s.text, [f]: v } }));
@@ -72,6 +100,9 @@ export default function EditorPanel(props: {
   const appendSym = (f: FieldId, sym: string) => commit((s) => ({ ...s, text: { ...s.text, [f]: s.text[f] + sym } }));
 
   const clearAll = () => commit((s) => ({ ...s, text: { dekoTop: '', topText: '', mainText: '', bottomText: '', kaomoji: '', dekoBottom: '' } }));
+  // "Words only": drop every deco line (top/bottom deco + kaomoji), keep the text.
+  const hasDeco = DECO_FIELDS.some((f) => state.text[f] !== '');
+  const clearDeco = () => commit((s) => ({ ...s, text: { ...s.text, dekoTop: '', kaomoji: '', dekoBottom: '' } }));
 
   // Randomize = apply a random template (mirrors App.applyTemplate's core).
   const randomize = () => {
@@ -131,7 +162,7 @@ export default function EditorPanel(props: {
           <span className="sec-label" style={{ fontSize: 10 }}>{fieldLabel(f)}</span>
           <span className="mono" style={{ fontSize: 10, color: len > LINE_LIMIT ? 'var(--danger)' : 'var(--dim)' }}>{len}/{LINE_LIMIT}</span>
         </div>
-        <div className="field">
+        <div className="field" data-hilite={pointAt?.f === f}>
           <button className="swatch" aria-label={t('g_color')} title={t('g_color')} onClick={() => onOpenColor(f)} style={{ background: dotBg(f) }} />
           <input
             ref={(el) => { fieldRefs.current[f] = el; }}
@@ -211,8 +242,9 @@ export default function EditorPanel(props: {
       <div style={{ marginBottom: 12 }}>
         <div className="sec-label" style={{ fontSize: 10, marginBottom: 6 }}>{t('fl_' + id)}</div>
         <select
-          ref={(el) => { fieldRefs.current[id] = el; }}
+          ref={(el) => { if (decoOwnsFields) fieldRefs.current[id] = el; }}
           className="select"
+          data-hilite={decoOwnsFields && pointAt?.f === id}
           value={val}
           onChange={(e) => setFieldValue(id, e.target.value)}
           aria-label={t('fl_' + id)}
@@ -233,8 +265,9 @@ export default function EditorPanel(props: {
       <div style={{ marginBottom: 12 }}>
         <div className="sec-label" style={{ fontSize: 10, marginBottom: 6 }}>{t('fl_kaomoji')}</div>
         <select
-          ref={(el) => { fieldRefs.current.kaomoji = el; }}
+          ref={(el) => { if (decoOwnsFields) fieldRefs.current.kaomoji = el; }}
           className="select"
+          data-hilite={decoOwnsFields && pointAt?.f === 'kaomoji'}
           value={KAOMOJI.includes(kaoVal) ? kaoVal : kaoVal === '' ? '' : '__own'}
           onChange={(e) => { if (e.target.value !== '__own') setFieldValue('kaomoji', e.target.value); }}
           aria-label={t('fl_kaomoji')}
@@ -253,6 +286,11 @@ export default function EditorPanel(props: {
           <button key={s} className="tog" onClick={() => appendSym('dekoTop', s)} title={t('fl_dekoTop')} style={{ minWidth: 28, height: 26, padding: '0 7px' }}>{s}</button>
         ))}
       </div>
+
+      {/* words only — one click clears every deco line */}
+      <button className="btn btn-sm" onClick={clearDeco} disabled={!hasDeco} title={t('g_deco_clear_hint')} style={{ width: '100%', justifyContent: 'flex-start', marginTop: 16 }}>
+        <Eraser size={13} /> {t('g_deco_clear')}
+      </button>
     </>
   );
 
@@ -314,11 +352,28 @@ export default function EditorPanel(props: {
 
   return (
     <section className="panel flex flex-col" style={{ minHeight: 0, overflow: 'hidden' }}>
+      {/* panel header — mirrors the preview's own header row */}
+      <div className="flex items-center justify-between shrink-0" style={{ padding: '9px 12px 9px 14px', borderBottom: '1px solid var(--border)' }}>
+        <span className="sec-label">{t('g_customize')}</span>
+        <button
+          className="btn btn-sm btn-ghost"
+          onClick={toggleAll}
+          title={anyOpen ? t('g_collapse_all') : t('g_expand_all')}
+          aria-label={anyOpen ? t('g_collapse_all') : t('g_expand_all')}
+          style={{ padding: '4px 8px', fontSize: 11 }}
+        >
+          {anyOpen ? <ChevronsDownUp size={13} /> : <ChevronsUpDown size={13} />}
+          {anyOpen ? t('g_collapse_all') : t('g_expand_all')}
+        </button>
+      </div>
+
       <div className="scroll-y" style={{ flex: 1, minHeight: 0 }}>
+        {/* In the order you actually build a gift: pick the shape, write the
+            words, style them, then decorate. */}
+        {section('layout', <LayoutGrid size={14} />, t('g_sec_layout'), layoutSection)}
         {section('text', <Type size={14} />, t('g_sec_text'), textSection)}
         {state.layout !== 'custom' && section('style', <Palette size={14} />, t('g_sec_style'), styleSection)}
         {state.layout !== 'custom' && section('deco', <Sparkles size={14} />, t('g_sec_deco'), decoSection)}
-        {section('layout', <LayoutGrid size={14} />, t('g_sec_layout'), layoutSection)}
       </div>
 
       <div className="shrink-0" style={{ borderTop: '1px solid var(--border)', padding: 8 }}>

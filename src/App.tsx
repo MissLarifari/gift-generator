@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { LayoutGrid, Gift, SlidersHorizontal, X } from 'lucide-react';
 import { generate } from './engine';
+import { DEFAULT_SIZES } from './engine';
 import type { FieldId, Layout } from './engine';
-import { createDefaultState, favKey, FIELDS, LAYOUT_DEFAULTS } from './state';
+import { createDefaultState, editorSectionOf, favKey, FIELDS, LAYOUT_DEFAULTS } from './state';
 import { readShareFromUrl, clearShareHash } from './share';
 import { useHistory } from './useHistory';
 import { useIsMobile } from './useIsMobile';
 import { useI18n } from './i18n';
 import Topbar from './components/Topbar';
-import EditorPanel from './components/EditorPanel';
+import EditorPanel, { type FocusRequest } from './components/EditorPanel';
 import PreviewPanel from './components/PreviewPanel';
 import TemplatesPanel, { type TplCategory, type TplItem } from './components/TemplatesPanel';
 import ColorPickerOverlay, { type ColorState } from './components/ColorPickerOverlay';
@@ -54,18 +55,19 @@ export default function App() {
     try { localStorage.setItem(INTRO_KEY, '1'); } catch { /* ignore */ }
   }, []);
 
-  // A focus request the editor consumes to focus a field's input (nonce retriggers
-  // even for the same field). On mobile, focusing a field also jumps to the Edit tab
-  // so tapping a preview line lands on a real, keyboard-ready input.
+  // A focus request the editor consumes to reveal the section a field lives in
+  // (nonce retriggers even for the same field). On mobile it also jumps to the
+  // Edit tab so tapping a preview line lands on a real, keyboard-ready input.
+  // On desktop text lines edit inline in the preview, so the editor only
+  // highlights the matching input; deco lines have no inline editor and hand
+  // off fully (open the Decoration section + focus its dropdown).
   const focusNonce = useRef(0);
-  const [focusReq, setFocusReq] = useState<{ f: FieldId; n: number } | null>(null);
+  const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
   const focusField = useCallback((f: FieldId) => {
-    if (isMobile) {
-      setMobileTab('edit');
-      focusNonce.current += 1;
-      setFocusReq({ f, n: focusNonce.current });
-    }
-  }, [isMobile]);
+    if (isMobile) setMobileTab('edit');
+    focusNonce.current += 1;
+    setFocusReq({ f, n: focusNonce.current, focus: isMobile || editorSectionOf(state.layout, f) === 'deco' });
+  }, [isMobile, state.layout]);
 
   // A shared gift is loaded once into history; clear the hash so editing isn't pinned to it.
   useEffect(() => { clearShareHash(); }, []);
@@ -133,14 +135,17 @@ export default function App() {
       if (t.deco.dekoTop != null) text.dekoTop = t.deco.dekoTop;
       if (t.deco.dekoBottom != null) text.dekoBottom = t.deco.dekoBottom;
       if (t.deco.kaomoji != null) text.kaomoji = t.deco.kaomoji;
-      const colors = { ...s.colors, mainText: t.mainColor, topText: t.topColor, bottomText: t.botColor };
+      const colors = { ...s.colors, mainText: t.mainColor, topText: t.topColor, bottomText: t.botColor, ...t.decoColors };
       const grads = {
         ...s.grads,
         mainText: t.mainGrad ? { on: true, c1: t.mainGrad.c1, c2: t.mainGrad.c2, rainbow: t.mainGrad.rainbow } : { ...s.grads.mainText, on: false, rainbow: false },
       };
-      const fonts = t.mainGrad?.rainbow ? { ...s.fonts, topText: 'normal' as const, mainText: 'normal' as const, bottomText: 'normal' as const } : s.fonts;
-      const noColor = { ...s.noColor, mainText: false, topText: false, bottomText: false };
-      return { ...s, text, colors, grads, fonts, noColor };
+      const fonts = t.mainGrad?.rainbow
+        ? { ...s.fonts, topText: 'normal' as const, mainText: 'normal' as const, bottomText: 'normal' as const }
+        : { ...s.fonts, topText: 'normal' as const, mainText: 'normal' as const, bottomText: 'normal' as const, ...t.fonts };
+      const noColor = { ...s.noColor, mainText: false, topText: false, bottomText: false, ...t.noColor };
+      const sizes = { ...s.sizes, topText: DEFAULT_SIZES.topText, mainText: DEFAULT_SIZES.mainText, bottomText: DEFAULT_SIZES.bottomText, ...t.sizes };
+      return { ...s, text, colors, grads, fonts, noColor, sizes };
     });
 
   const colorInitial: ColorState = colorField

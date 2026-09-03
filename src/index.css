@@ -372,3 +372,12 @@ button { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* A preview click points at its editor control: the field pulses once so the
+   eye lands on it, then settles back to normal. */
+@keyframes hilite-pulse {
+  0% { box-shadow: 0 0 0 0 var(--accent-line); border-color: var(--accent-line); }
+  35% { box-shadow: 0 0 0 4px var(--accent-soft); border-color: var(--accent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.field[data-hilite='true'], .select[data-hilite='true'] { animation: hilite-pulse 1.3s ease-out; }

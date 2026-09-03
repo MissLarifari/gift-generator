@@ -2,6 +2,8 @@
 // (TEMPLATES.en + each category's themed colours/deco applied by its setFn).
 // Phrases stay English; clicking applies text + theme colours + deco.
 
+import type { FontStyle } from '../engine';
+
 export interface TplItem { l: string; main: string; top: string; bottom: string }
 export interface TplDeco { dekoTop: string | null; dekoBottom: string | null; kaomoji: string | null }
 export interface TplTheme {
@@ -10,6 +12,19 @@ export interface TplTheme {
   botColor: string;
   mainGrad: { c1: string; c2: string; rainbow: boolean } | null;
   deco: TplDeco;
+  // Optional: a category that also owns the colour of its deco lines. Left out
+  // everywhere else, so those categories keep whatever deco colours are set.
+  decoColors?: Partial<Record<'dekoTop' | 'kaomoji' | 'dekoBottom', string>>;
+  // Optional: a category whose look depends on a script (the ornate "fancy"
+  // font). Costs 2-3 bytes per letter instead of 1, so only set where measured.
+  fonts?: Partial<Record<'topText' | 'mainText' | 'bottomText', FontStyle>>;
+  // Optional: lines that stay untagged, so 3dx renders them in its default
+  // white. Saves the whole <color=…></color> wrapper — 24 bytes a line.
+  noColor?: Partial<Record<'topText' | 'mainText' | 'bottomText', boolean>>;
+  // Optional: a category with its own font sizes. The main line is always
+  // wrapped in <size=…> anyway, so overriding it is free; the small lines only
+  // grow a wrapper when they differ from their default, which costs bytes.
+  sizes?: Partial<Record<'topText' | 'mainText' | 'bottomText', number>>;
 }
 export interface TplCategory { label: string; group: string; items: TplItem[]; theme: TplTheme }
 
@@ -68,6 +83,65 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('same braincell', 'same braincell', '', '.. different body ..'),
     it('thank you', 'thank you for existing', '', ''),
     it('comfort person', 'certified comfort person', '', ''),
+  ] },
+  // Ninis Machart: jede Zeile in Schmuckschrift, die kleinen Zeilen in ".. so
+  // gerahmt ..", das grosse Wort in der Mitte farbig, und GENAU EINE Deko-Reihe —
+  // zwei davon sprengen mit dieser Schrift das 255-Byte-Limit (gemessen).
+  { label: 'Little Notes', group: 'Themen', theme: { ...th('#ff4fa3', '#f2f2f2', '#f2f2f2', deco('° ✿ ★ ✿ °', '', 'ʚɞ')),
+      decoColors: { dekoTop: '#ff9ec7', kaomoji: '#ff9ec7' },
+      fonts: { topText: 'fancy', mainText: 'fancy', bottomText: 'fancy' },
+      sizes: { mainText: 44 },
+      noColor: { topText: true, bottomText: true } }, items: [
+    it('Nur so', 'just because ♡', '.. this is ..', '.. no reason needed'),
+    it('Musste an dich denken', 'thought of you', '.. i just ..', '.. so this is yours ~'),
+    it('Da bist du ja', 'there you are', '.. oh ..', '.. where did you go ♡'),
+    it('Bleib kurz', 'stay a little', '.. please ..', '.. im comfy'),
+    it('Kleine Aufmerksamkeit', 'for you ♡', '.. this one is ..', '.. thats literally it'),
+    it('Hab dich vermisst', 'missed you', '.. i think i ..', '.. a tiny bit. maybe a lot.'),
+    it('Meld dich', 'text me later', '.. please ..', '.. i wanna hear about it'),
+    it('Bist du zuhause?', 'made it home?', '.. hey ..', '.. just checking ♡'),
+    it('Iss was', 'go eat', '.. gentle reminder ..', '.. yes, im checking'),
+    it('Trink was', 'drink some water', '.. tiny reminder ..', '.. thats all ♡'),
+    it('Schlaf gut', 'sleep well', '.. goodnight ..', '.. tomorrow can wait'),
+    it('Guten Morgen', 'morning you ♡', '.. good ..', '.. hope today is nice'),
+    it('Gut gemacht', 'you did good', '.. hey ..', '.. im proud of you'),
+    it('Komm her', 'come here', '.. now ..', '.. you look hug-shaped'),
+    it('Noch eine Umarmung', 'one more hug', '.. just ..', '.. okay maybe two'),
+    it('Mein Platz', 'saved you a spot', '.. i ..', '.. right here ♡'),
+    it('Du schon wieder', 'you again', '.. oh ..', '.. good.'),
+    it('Lieblingsnachricht', 'oh, its you ♡', '.. look ..', '.. my favourite one'),
+    it('Nicht verschwinden', 'dont disappear', '.. please ..', '.. i like you around'),
+    it('Heute an dich gedacht', 'crossed my mind', '.. you ..', '.. stayed there too ~'),
+    it('Kleine Freude', 'you made me smile', '.. today ..', '.. you should know'),
+    it('Einfach hier', 'im here', '.. just so you know ..', '.. thats all'),
+    it('Erzähl weiter', 'keep talking', '.. no really ..', '.. im listening ♡'),
+    it('Erzähl alles', 'tell me everything', '.. okay ..', '.. im invested now'),
+    it('Ich hör zu', 'im listening', '.. still here ..', '.. take your time'),
+    it('Alles okay?', 'you okay?', '.. hey ..', '.. actually asking'),
+    it('Pass auf dich auf', 'take care of you', '.. please ..', '.. for me? ♡'),
+    it('Sanfter Tag', 'be gentle today', '.. try to ..', '.. with yourself too'),
+    it('Kleine Pause', 'rest a little', '.. go on ..', '.. the world can wait'),
+    it('Du darfst bleiben', 'you can stay', '.. hey ..', '.. i dont mind ♡'),
+    it('Hab dich gern hier', 'like you here', '.. i really ..', '.. feels nice'),
+    it('Kleine Schwäche', 'soft spot', '.. found my ..', '.. yeah, its you'),
+    it('Ups', 'got attached', '.. so i ..', '.. that wasnt the plan'),
+    it('Deine Schuld', 'your fault', '.. this is ..', '.. now i miss you'),
+    it('Unfair süß', 'thats unfair', '.. okay ..', '.. why are you this cute'),
+    it('Frechheit', 'rude.', '.. that was ..', '.. now im smiling ♡'),
+    it('Stopp', 'stop that', '.. please ..', '.. im trying not to'),
+    it('Leider süß', 'still cute', '.. sadly ..', '.. inconvenient, honestly'),
+    it("Hab's bemerkt", 'i noticed', '.. yes ..', '.. of course i did'),
+    it('Kenn dich doch', 'thats so you', '.. okay but ..', '.. had to send this'),
+    it('Für später', 'keep this', '.. here ..', '.. for a bad day'),
+    it('Mini-Herz', 'tiny love ♡', '.. one ..', '.. dont spend it at once'),
+    it('Kleines Hallo', 'little hello', '.. just a ..', '.. from me to you'),
+    it('Keine Ahnung warum', 'no reason', '.. really ..', '.. just wanted you to have it'),
+    it('Du fehlst hier', 'somethings missing', '.. hm ..', '.. oh. its you.'),
+    it('Komm wieder', 'come back soon', '.. please ..', '.. its quieter without you'),
+    it('Nicht weit weg', 'stay close', '.. just ..', '.. my favourite distance'),
+    it('Heute du', 'todays favourite', '.. and the ..', '.. yes, its you'),
+    it('Immer noch du', 'still you', '.. somehow ..', '.. that keeps happening'),
+    it('Kleine Erinnerung', 'tiny reminder', '.. a very ..', '.. im happy youre here ♡'),
   ] },
   { label: 'Funny', group: 'Themen', theme: th('#c4a7ff', '#e9d5ff', '#7c3aed', DEFAULT_DECO), items: [
     it('a latte', 'i love you a latte', 'just so you know', '.. and thats no joke ..'),

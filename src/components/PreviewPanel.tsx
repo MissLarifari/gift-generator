@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo, type CSSProperties, type ReactNod
 import { Copy, Share2, RotateCcw, X, Check, Ban, TriangleAlert, Lightbulb, ArrowRight, ArrowUp, ArrowDown, ArrowUpDown, ChevronDown } from 'lucide-react';
 import { applyFont, buildOptimizeTips } from '../engine';
 import type { GiftState, GenerateResult, FieldId } from '../engine';
-import type { Commit } from '../state';
+import { editorSectionOf, type Commit } from '../state';
 import { buildShareUrl } from '../share';
 import { useI18n } from '../i18n';
 
@@ -55,10 +55,13 @@ export default function PreviewPanel({
     return () => { window.removeEventListener('mousedown', onDown); window.removeEventListener('keydown', onKey); };
   }, [optOpen]);
 
-  // Desktop: edit inline in the preview. Mobile: hand off to the editor (App jumps
-  // to the Edit tab and focuses the field) — the inline input is too fiddly on touch.
+  // Desktop: text lines edit inline in the preview (the editor just highlights the
+  // matching input). Deco lines are dropdowns in the editor, so clicking one hands
+  // off instead — the Decoration section opens with that dropdown focused, which
+  // also teaches where the decos live. Mobile: always hand off (App jumps to the
+  // Edit tab and focuses the field) — the inline input is too fiddly on touch.
   const startEdit = (f: FieldId) => {
-    if (!isMobile) setEditing(f);
+    if (!isMobile && editorSectionOf(state.layout, f) !== 'deco') setEditing(f);
     onFocusField(f);
   };
 
