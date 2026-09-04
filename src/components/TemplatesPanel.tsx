@@ -3,7 +3,7 @@ import {
   Search, Star, Sparkles, ChevronDown, X,
   Heart, CandyCane, Users, Smile, Laugh, Skull, HandHeart, WandSparkles, Flame, Lock, FlameKindling,
   Eye, Coffee, VenetianMask, Wine, Leaf, Rainbow, TreePine, Ghost, Egg, Clover, HeartPulse, Venus,
-  Flag, Drumstick, PartyPopper, Diamond, Gem, Cake, Feather, type LucideIcon,
+  Flag, Drumstick, PartyPopper, Diamond, Gem, Cake, Feather, Flower2, type LucideIcon,
 } from 'lucide-react';
 import { TEMPLATE_CATEGORIES, type TplCategory, type TplItem } from '../data/templates';
 import { favKey } from '../state';
@@ -16,7 +16,7 @@ export type { TplCategory, TplItem };
 // UI layer only; picking a card still calls onApply(category, item).
 
 const CATEGORY_ICON: Record<string, LucideIcon> = {
-  'Little Notes': Feather, New: Sparkles, Romance: Heart, Cute: CandyCane, Friendship: Users, Funny: Smile, 'Funny / Chaotic': Laugh,
+  'Little Notes': Feather, 'Cute Notes': Flower2, New: Sparkles, Romance: Heart, Cute: CandyCane, Friendship: Users, Funny: Smile, 'Funny / Chaotic': Laugh,
   'Friends / Roast': Skull, 'Flirty bold': HandHeart, Wicked: WandSparkles, Dominant: Flame,
   Submissive: Lock, Spicy: FlameKindling, Voyeur: Eye, Aftercare: Coffee, 'Goth / Dark': VenetianMask,
   'Drunk vibes': Wine, 'Soft / Cottagecore': Leaf, Pride: Rainbow, Christmas: TreePine, Halloween: Ghost,

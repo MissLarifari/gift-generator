@@ -32,6 +32,14 @@ export const HAS_FONT: FieldId[] = ['dekoTop', 'topText', 'mainText', 'bottomTex
 // Deco lines that the Decoration section owns (dropdowns, not free text) —
 // except in the pyramid layout, where every field is a plain text line.
 export const DECO_FIELDS: FieldId[] = ['dekoTop', 'kaomoji', 'dekoBottom'];
+
+// The deco colours a fresh gift starts with. Picking a template resets to these
+// before the template's own decoColors apply, so a category that colours its deco
+// doesn't leave that colour behind on the next template picked.
+export const DEFAULT_DECO_COLORS: Partial<Record<FieldId, string>> = { dekoTop: '#555555', kaomoji: '#ffd84d', dekoBottom: '#5c5c7a' };
+
+// The plain top-to-bottom stack every layout but the pyramid uses.
+export const DEFAULT_LINE_ORDER: FieldId[] = ['dekoTop', 'topText', 'mainText', 'bottomText', 'kaomoji', 'dekoBottom'];
 export type EditorSection = 'text' | 'style' | 'deco' | 'layout';
 export const editorSectionOf = (layout: Layout, f: FieldId): EditorSection =>
   layout !== 'pyramid' && DECO_FIELDS.includes(f) ? 'deco' : 'text';

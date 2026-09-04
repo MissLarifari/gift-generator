@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { LayoutGrid, Gift, SlidersHorizontal, X } from 'lucide-react';
 import { generate } from './engine';
 import { DEFAULT_SIZES } from './engine';
-import type { FieldId, Layout } from './engine';
-import { createDefaultState, editorSectionOf, favKey, FIELDS, LAYOUT_DEFAULTS } from './state';
+import type { FieldId, GiftState, Layout } from './engine';
+import { createDefaultState, DEFAULT_DECO_COLORS, DEFAULT_LINE_ORDER, editorSectionOf, favKey, FIELDS, LAYOUT_DEFAULTS } from './state';
 import { readShareFromUrl, clearShareHash } from './share';
 import { useHistory } from './useHistory';
 import { useIsMobile } from './useIsMobile';
@@ -130,22 +130,25 @@ export default function App() {
 
   const applyTemplate = (cat: TplCategory, item: TplItem) =>
     commit((s) => {
-      const t = cat.theme;
+      // A card may override parts of its category's look (see TplItem.theme).
+      const t = { ...cat.theme, ...item.theme };
       const text = { ...s.text, mainText: item.main, topText: item.top, bottomText: item.bottom };
       if (t.deco.dekoTop != null) text.dekoTop = t.deco.dekoTop;
       if (t.deco.dekoBottom != null) text.dekoBottom = t.deco.dekoBottom;
       if (t.deco.kaomoji != null) text.kaomoji = t.deco.kaomoji;
-      const colors = { ...s.colors, mainText: t.mainColor, topText: t.topColor, bottomText: t.botColor, ...t.decoColors };
+      const colors = { ...s.colors, ...DEFAULT_DECO_COLORS, mainText: t.mainColor, topText: t.topColor, bottomText: t.botColor, ...t.decoColors };
       const grads = {
         ...s.grads,
         mainText: t.mainGrad ? { on: true, c1: t.mainGrad.c1, c2: t.mainGrad.c2, rainbow: t.mainGrad.rainbow } : { ...s.grads.mainText, on: false, rainbow: false },
       };
-      const fonts = t.mainGrad?.rainbow
-        ? { ...s.fonts, topText: 'normal' as const, mainText: 'normal' as const, bottomText: 'normal' as const }
-        : { ...s.fonts, topText: 'normal' as const, mainText: 'normal' as const, bottomText: 'normal' as const, ...t.fonts };
-      const noColor = { ...s.noColor, mainText: false, topText: false, bottomText: false, ...t.noColor };
+      const plainFonts = { dekoTop: 'normal', topText: 'normal', mainText: 'normal', bottomText: 'normal', kaomoji: 'normal', dekoBottom: 'normal' } as GiftState['fonts'];
+      const fonts = t.mainGrad?.rainbow ? plainFonts : { ...plainFonts, ...t.fonts };
+      const noColor = { ...s.noColor, dekoTop: false, topText: false, mainText: false, bottomText: false, kaomoji: false, dekoBottom: false, ...t.noColor };
       const sizes = { ...s.sizes, topText: DEFAULT_SIZES.topText, mainText: DEFAULT_SIZES.mainText, bottomText: DEFAULT_SIZES.bottomText, ...t.sizes };
-      return { ...s, text, colors, grads, fonts, noColor, sizes };
+      // Only a template that asks for its own stack gets one; anything else falls
+      // back to the current layout's order, so a reordered card doesn't stick.
+      const lineOrder = t.lineOrder ? [...t.lineOrder] : (LAYOUT_DEFAULTS[s.layout].lineOrder ?? DEFAULT_LINE_ORDER);
+      return { ...s, text, colors, grads, fonts, noColor, sizes, lineOrder };
     });
 
   const colorInitial: ColorState = colorField

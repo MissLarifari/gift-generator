@@ -2,9 +2,15 @@
 // (TEMPLATES.en + each category's themed colours/deco applied by its setFn).
 // Phrases stay English; clicking applies text + theme colours + deco.
 
-import type { FontStyle } from '../engine';
+import type { FieldId, FontStyle } from '../engine';
 
-export interface TplItem { l: string; main: string; top: string; bottom: string }
+export interface TplItem {
+  l: string; main: string; top: string; bottom: string;
+  // Optional: a single card that looks different from the rest of its category.
+  // Each field given here REPLACES the category's field outright (it is not
+  // merged key by key), so an override states every value it needs.
+  theme?: Partial<TplTheme>;
+}
 export interface TplDeco { dekoTop: string | null; dekoBottom: string | null; kaomoji: string | null }
 export interface TplTheme {
   mainColor: string;
@@ -17,23 +23,42 @@ export interface TplTheme {
   decoColors?: Partial<Record<'dekoTop' | 'kaomoji' | 'dekoBottom', string>>;
   // Optional: a category whose look depends on a script (the ornate "fancy"
   // font). Costs 2-3 bytes per letter instead of 1, so only set where measured.
-  fonts?: Partial<Record<'topText' | 'mainText' | 'bottomText', FontStyle>>;
+  fonts?: Partial<Record<FieldId, FontStyle>>;
   // Optional: lines that stay untagged, so 3dx renders them in its default
   // white. Saves the whole <color=…></color> wrapper — 24 bytes a line.
-  noColor?: Partial<Record<'topText' | 'mainText' | 'bottomText', boolean>>;
+  noColor?: Partial<Record<FieldId, boolean>>;
   // Optional: a category with its own font sizes. The main line is always
   // wrapped in <size=…> anyway, so overriding it is free; the small lines only
   // grow a wrapper when they differ from their default, which costs bytes.
   sizes?: Partial<Record<'topText' | 'mainText' | 'bottomText', number>>;
+  // Optional: a category that stacks its lines in its own order - e.g. a deco
+  // row sitting BETWEEN two large words instead of above them.
+  lineOrder?: FieldId[];
 }
 export interface TplCategory { label: string; group: string; items: TplItem[]; theme: TplTheme }
 
 export const TEMPLATE_GROUPS = ['Themen', 'Vibes', 'Holidays', 'Celebrations'] as const;
 
-const it = (l: string, main: string, top: string, bottom: string): TplItem => ({ l, main, top, bottom });
+const it = (l: string, main: string, top: string, bottom: string, theme?: Partial<TplTheme>): TplItem =>
+  (theme ? { l, main, top, bottom, theme } : { l, main, top, bottom });
 const th = (mainColor: string, topColor: string, botColor: string, deco: TplDeco, mainGrad: TplTheme['mainGrad'] = null): TplTheme => ({ mainColor, topColor, botColor, mainGrad, deco });
 const deco = (dekoTop: string, dekoBottom: string, kaomoji: string): TplDeco => ({ dekoTop, dekoBottom, kaomoji });
 const DEFAULT_DECO = deco('· ily ·←', '.. ･ ✦ ･ ..', '(❀◡❀)');
+// "Cute Notes" runs two looks. The default is a sentence over three lines with
+// one pink accent word in the middle; LOOK_B is the other one - two large words
+// in gold and pink with the deco row stacked BETWEEN them. A card override
+// replaces each field outright, so LOOK_B restates everything it needs.
+const LOOK_B: Partial<TplTheme> = {
+  mainColor: '#ffd84d',
+  botColor: '#ff4fa3',
+  deco: deco('▶ .. you are .. ◀', '° ✦ ★ ✿ in my ° ✦ ✿', '↖(✿ ∩◡∩)↗'),
+  decoColors: { dekoBottom: '#ff9ec7', kaomoji: '#ff9ec7' },
+  fonts: { dekoTop: 'fancy', topText: 'fancy', mainText: 'fancy', bottomText: 'fancy', dekoBottom: 'fancy' },
+  sizes: { mainText: 44, bottomText: 44 },
+  noColor: { dekoTop: true, topText: true },
+  lineOrder: ['dekoTop', 'topText', 'mainText', 'dekoBottom', 'bottomText', 'kaomoji'],
+};
+
 
 export const TEMPLATE_CATEGORIES: TplCategory[] = [
   { label: 'Romance', group: 'Themen', theme: th('#ff6ba0', '#fbcfe8', '#be185d', DEFAULT_DECO), items: [
@@ -142,6 +167,17 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Heute du', 'todays favourite', '.. and the ..', '.. yes, its you'),
     it('Immer noch du', 'still you', '.. somehow ..', '.. that keeps happening'),
     it('Kleine Erinnerung', 'tiny reminder', '.. a very ..', '.. im happy youre here ♡'),
+  ] },
+  { label: 'Cute Notes', group: 'Themen', theme: { ...th('#ff4fa3', '#f2f2f2', '#f2f2f2', deco('· ˚ ★ ✦ ★ ˚ ·', '', 'ʚɞ')),
+      decoColors: { dekoTop: '#ff9ec7', kaomoji: '#ff9ec7' },
+      fonts: { topText: 'fancy', mainText: 'fancy', bottomText: 'fancy' },
+      sizes: { mainText: 20 },
+      noColor: { topText: true, bottomText: true } }, items: [
+    it('Nicht geplant', 'but here we are', 'i never planned any of this,', 'and im not complaining.'),
+    it('Der beste Teil', 'just the part', 'i dont need the whole day,', 'where you show up.'),
+    it('Sag nichts', 'just stay', 'you dont have to say anything,', 'im fine with quiet.'),
+    it('Ruhe im Chaos', 'calm', '.. the', 'chaos', LOOK_B),
+    it('Still im Lauten', 'quiet', '.. the', 'noise', LOOK_B),
   ] },
   { label: 'Funny', group: 'Themen', theme: th('#c4a7ff', '#e9d5ff', '#7c3aed', DEFAULT_DECO), items: [
     it('a latte', 'i love you a latte', 'just so you know', '.. and thats no joke ..'),
