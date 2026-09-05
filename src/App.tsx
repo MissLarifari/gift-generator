@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { LayoutGrid, Gift, SlidersHorizontal, X } from 'lucide-react';
+import { LayoutGrid, Gift, SlidersHorizontal, X, Sparkles } from 'lucide-react';
 import { generate } from './engine';
 import { DEFAULT_SIZES } from './engine';
 import type { FieldId, GiftState, Layout } from './engine';
@@ -16,6 +16,8 @@ import ColorPickerOverlay, { type ColorState } from './components/ColorPickerOve
 import AboutModal from './components/AboutModal';
 
 const INTRO_KEY = 'gifty_intro_seen';
+// Bump the suffix to announce the next thing — an old dismissal won't hide it.
+const UPDATE_KEY = 'gifty_update_seen_v1';
 
 // Tiny first-visit hint: pick → customize → copy. Dismissed for good.
 function IntroBar({ onClose }: { onClose: () => void }) {
@@ -39,6 +41,28 @@ function IntroBar({ onClose }: { onClose: () => void }) {
   );
 }
 
+// Announcement bar: something bigger is being uploaded, so the site may lag
+// behind for a while. Dismissed per visitor, per announcement.
+function UpdateBar({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div
+      className="flex items-center shrink-0"
+      style={{
+        gap: 10, padding: '9px 16px', borderBottom: '1px solid var(--border)',
+        background: 'color-mix(in srgb, var(--accent) 10%, var(--panel))', flexWrap: 'wrap',
+      }}
+    >
+      <Sparkles size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+      <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 600 }}>{t('g_update_title')}</span>
+      <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('g_update_text')}</span>
+      <button className="icon-btn" style={{ marginLeft: 'auto', width: 24, height: 24 }} onClick={onClose} aria-label={t('g_got_it')} title={t('g_got_it')}>
+        <X size={14} />
+      </button>
+    </div>
+  );
+}
+
 export default function App() {
   const { t } = useI18n();
   const { state, commit, undo, redo, reset, canUndo, canRedo } = useHistory(readShareFromUrl() ?? createDefaultState());
@@ -47,6 +71,13 @@ export default function App() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const isMobile = useIsMobile();
   const [mobileTab, setMobileTab] = useState<'templates' | 'preview' | 'edit'>('preview');
+  const [showUpdate, setShowUpdate] = useState(() => {
+    try { return localStorage.getItem(UPDATE_KEY) !== '1'; } catch { return true; }
+  });
+  const dismissUpdate = useCallback(() => {
+    setShowUpdate(false);
+    try { localStorage.setItem(UPDATE_KEY, '1'); } catch { /* private mode */ }
+  }, []);
   const [showIntro, setShowIntro] = useState(() => {
     try { return !localStorage.getItem(INTRO_KEY); } catch { return false; }
   });
@@ -172,6 +203,7 @@ export default function App() {
   return (
     <div className="h-full flex flex-col" style={{ background: 'var(--bg)' }}>
       <Topbar undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} onAbout={() => setAboutOpen(true)} compact={isMobile} />
+      {showUpdate && <UpdateBar onClose={dismissUpdate} />}
       {showIntro && <IntroBar onClose={dismissIntro} />}
 
       {isMobile ? (
