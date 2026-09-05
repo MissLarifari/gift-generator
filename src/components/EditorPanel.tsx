@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Type, Palette, LayoutGrid, Wand2, Trash2, Download, Upload, ChevronRight, ChevronsDownUp, ChevronsUpDown, Sparkles, Eraser } from 'lucide-react';
+import { Type, Palette, LayoutGrid, Dices, Trash2, Download, Upload, ChevronRight, ChevronsDownUp, ChevronsUpDown, Sparkles, Eraser, Wrench, Code2 } from 'lucide-react';
 import type { GiftState, FieldId, Layout, FontStyle } from '../engine';
-import { FIELDS, LAYOUTS, FONT_STYLES, HAS_BOLD_ITALIC, HAS_STAR, HAS_FONT, DECO_PRESETS, DECO_FIELDS, SYMBOLS, KAOMOJI, editorSectionOf, type Commit, type EditorSection } from '../state';
+import { FIELDS, LAYOUT_ALIGN, LAYOUT_PRESETS, FONT_STYLES, HAS_BOLD_ITALIC, HAS_STAR, HAS_FONT, DECO_PRESETS, DECO_FIELDS, SYMBOLS, KAOMOJI, editorSectionOf, type Commit, type EditorSection } from '../state';
 import { buildShareUrl, decodeState } from '../share';
 import { TEMPLATE_CATEGORIES } from '../data/templates';
 import { useI18n } from '../i18n';
@@ -43,21 +43,26 @@ export default function EditorPanel(props: {
 }) {
   const { state, commit, onOpenColor, onSetLayout, focusReq } = props;
   const { t } = useI18n();
-  const [open, setOpen] = useState<Record<Section, boolean>>({ text: true, style: false, deco: false, layout: true });
+  const [open, setOpen] = useState<Record<Section, boolean>>({ text: true, style: false, deco: false, layout: false, advanced: false });
   const [styleTarget, setStyleTarget] = useState<FieldId>('mainText');
   const [flash, setFlash] = useState('');
   const [pointAt, setPointAt] = useState<FocusRequest | null>(null);
   const fieldRefs = useRef<Partial<Record<FieldId, HTMLElement | null>>>({});
+  // Bumped by the per-line "Aa" button; the effect below does the scrolling once
+  // the Style section has actually rendered open.
+  const [styleJump, setStyleJump] = useState(0);
 
   // The custom layout hides Style and Decoration, so only the sections actually
   // on screen decide which way the fold-all button points.
-  const visibleSections: Section[] = state.layout === 'custom' ? ['layout', 'text'] : ['layout', 'text', 'style', 'deco'];
+  const visibleSections: Section[] = state.layout === 'custom'
+    ? ['text', 'layout', 'advanced']
+    : ['text', 'style', 'deco', 'layout', 'advanced'];
   const anyOpen = visibleSections.some((s) => open[s]);
   // One button for both directions: fold everything away to see the whole panel
   // at a glance, unfold it again to reach every control without hunting.
   const toggleAll = () => {
     const to = !anyOpen;
-    setOpen({ layout: to, text: to, style: to, deco: to });
+    setOpen({ layout: to, text: to, style: to, deco: to, advanced: to });
   };
 
   const fieldLabel = (f: FieldId) => (state.layout === 'pyramid' ? t('pyr_' + f) : t('fl_' + f));
@@ -87,6 +92,19 @@ export default function EditorPanel(props: {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     if (pointAt.focus) el.focus({ preventScroll: true });
   }, [pointAt]);
+
+  // Every line carries its own "Aa": open Style, aim it at that line, scroll
+  // there. Without it the font and colour controls are invisible from where the
+  // text is actually typed, and people conclude the font cannot be changed.
+  const jumpToStyle = (f: FieldId) => {
+    setStyleTarget(f);
+    setOpen((o) => ({ ...o, style: true }));
+    setStyleJump((n) => n + 1);
+  };
+  useEffect(() => {
+    if (!styleJump) return;
+    document.getElementById('sec-style')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [styleJump]);
 
   const typeText = (f: FieldId, v: string) => commit((s) => ({ ...s, text: { ...s.text, [f]: v } }), 'text:' + f);
   const setFieldValue = (f: FieldId, v: string) => commit((s) => ({ ...s, text: { ...s.text, [f]: v } }));
@@ -131,6 +149,11 @@ export default function EditorPanel(props: {
     if (st) commit(() => st); else window.alert(t('g_import_fail'));
   };
 
+  const styleBtn = (f: FieldId) => (
+    <button className="tog" onClick={() => jumpToStyle(f)} title={t('g_style_line')} aria-label={t('g_style_line')}
+      style={{ minWidth: 30, height: 28, padding: '0 7px', fontSize: 11 }}>Aa</button>
+  );
+
   const dotBg = (f: FieldId) => {
     const g = state.grads[f];
     if (state.noColor[f]) return 'repeating-conic-gradient(#3a4049 0% 25%, transparent 0% 50%) 50% / 8px 8px';
@@ -141,7 +164,7 @@ export default function EditorPanel(props: {
   /* ---------- section shell ---------- */
 
   const section = (id: Section, icon: ReactNode, label: string, children: ReactNode) => (
-    <div className="sec">
+    <div className="sec" id={'sec-' + id}>
       <button className="sec-head" data-open={open[id]} onClick={() => toggleSection(id)} aria-expanded={open[id]}>
         <ChevronRight size={14} style={{ flex: '0 0 auto', transform: open[id] ? 'rotate(90deg)' : 'none', transition: 'transform .14s ease' }} />
         {icon}
@@ -171,6 +194,7 @@ export default function EditorPanel(props: {
             placeholder={t('g_text_ph')}
             aria-label={fieldLabel(f)}
           />
+          {styleBtn(f)}
         </div>
       </div>
     );
@@ -235,26 +259,38 @@ export default function EditorPanel(props: {
 
   /* ---------- DECORATION ---------- */
 
+  // Deco lines now carry the same colour dot and "Aa" button as the text lines.
+  // They had neither, so their colour was only reachable through the Style
+  // section — which is exactly the thing nobody finds.
+  const decoRow = (id: 'dekoTop' | 'kaomoji' | 'dekoBottom', control: ReactNode) => (
+    <div style={{ marginBottom: 12 }}>
+      <div className="sec-label" style={{ fontSize: 10, marginBottom: 6 }}>{t('fl_' + id)}</div>
+      <div className="flex items-center" style={{ gap: 8 }}>
+        <button className="swatch" aria-label={t('g_color')} title={t('g_color')} onClick={() => onOpenColor(id)} style={{ background: dotBg(id) }} />
+        {control}
+        {styleBtn(id)}
+      </div>
+    </div>
+  );
+
   const decoSelect = (id: 'dekoTop' | 'dekoBottom') => {
     const val = state.text[id];
     const presets = DECO_PRESETS[id] || [];
-    return (
-      <div style={{ marginBottom: 12 }}>
-        <div className="sec-label" style={{ fontSize: 10, marginBottom: 6 }}>{t('fl_' + id)}</div>
-        <select
-          ref={(el) => { if (decoOwnsFields) fieldRefs.current[id] = el; }}
-          className="select"
-          data-hilite={decoOwnsFields && pointAt?.f === id}
-          value={val}
-          onChange={(e) => setFieldValue(id, e.target.value)}
-          aria-label={t('fl_' + id)}
-        >
-          <option value="">{t('g_none')}</option>
-          {val !== '' && !presets.includes(val) && <option value={val}>{val}</option>}
-          {presets.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
-      </div>
-    );
+    return decoRow(id, (
+      <select
+        ref={(el) => { if (decoOwnsFields) fieldRefs.current[id] = el; }}
+        className="select"
+        style={{ flex: 1, minWidth: 0 }}
+        data-hilite={decoOwnsFields && pointAt?.f === id}
+        value={val}
+        onChange={(e) => setFieldValue(id, e.target.value)}
+        aria-label={t('fl_' + id)}
+      >
+        <option value="">{t('g_none')}</option>
+        {val !== '' && !presets.includes(val) && <option value={val}>{val}</option>}
+        {presets.map((p) => <option key={p} value={p}>{p}</option>)}
+      </select>
+    ));
   };
 
   const kaoVal = state.text.kaomoji;
@@ -262,11 +298,11 @@ export default function EditorPanel(props: {
     <>
       {decoSelect('dekoTop')}
 
-      <div style={{ marginBottom: 12 }}>
-        <div className="sec-label" style={{ fontSize: 10, marginBottom: 6 }}>{t('fl_kaomoji')}</div>
+      {decoRow('kaomoji', (
         <select
           ref={(el) => { if (decoOwnsFields) fieldRefs.current.kaomoji = el; }}
           className="select"
+          style={{ flex: 1, minWidth: 0 }}
           data-hilite={decoOwnsFields && pointAt?.f === 'kaomoji'}
           value={KAOMOJI.includes(kaoVal) ? kaoVal : kaoVal === '' ? '' : '__own'}
           onChange={(e) => { if (e.target.value !== '__own') setFieldValue('kaomoji', e.target.value); }}
@@ -276,7 +312,7 @@ export default function EditorPanel(props: {
           {kaoVal !== '' && !KAOMOJI.includes(kaoVal) && <option value="__own">{kaoVal}</option>}
           {KAOMOJI.map((k) => <option key={k} value={k}>{k}</option>)}
         </select>
-      </div>
+      ))}
 
       {decoSelect('dekoBottom')}
 
@@ -292,6 +328,12 @@ export default function EditorPanel(props: {
         <Eraser size={13} /> {t('g_deco_clear')}
       </button>
     </>
+  );
+
+  const quick = (icon: ReactNode, label: string, onClick: () => void) => (
+    <button className="btn btn-sm" onClick={onClick} title={label} style={{ minWidth: 0, padding: '7px 9px', fontSize: 11.5, justifyContent: 'flex-start' }}>
+      {icon}<span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+    </button>
   );
 
   /* ---------- LAYOUT ---------- */
@@ -331,24 +373,61 @@ export default function EditorPanel(props: {
     }
   };
 
-  const layoutSection = (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
-      {LAYOUTS.map((l) => (
-        <button key={l} className="lay" data-on={state.layout === l} onClick={() => onSetLayout(l)}>
-          <span className="lay-canvas">{layoutThumb(l)}</span>
-          <span style={{ fontSize: 11.5, color: state.layout === l ? 'var(--text)' : 'var(--muted)' }}>{t('layout_' + l)}</span>
-        </button>
-      ))}
+  const layoutTile = (l: Layout) => (
+    <button key={l} className="lay" data-on={state.layout === l} onClick={() => onSetLayout(l)}>
+      <span className="lay-canvas">{layoutThumb(l)}</span>
+      <span style={{ fontSize: 11.5, color: state.layout === l ? 'var(--text)' : 'var(--muted)' }}>{t('layout_' + l)}</span>
+    </button>
+  );
+
+  // Two groups instead of one wall of six: plain alignments, then the shaped
+  // presets. 'custom' is not a look — it is the raw-code mode and lives under
+  // Advanced, so it no longer sits between two ways of arranging real text.
+  const layoutGroup = (label: string, list: Layout[]) => (
+    <div key={label}>
+      <div className="sec-label" style={{ fontSize: 10, marginBottom: 7 }}>{label}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginBottom: 15 }}>
+        {list.map(layoutTile)}
+      </div>
     </div>
   );
 
-  /* ---------- panel ---------- */
-
-  const quick = (icon: ReactNode, label: string, onClick: () => void) => (
-    <button className="btn btn-sm btn-ghost" onClick={onClick} title={label} style={{ minWidth: 0, padding: '6px 8px', fontSize: 11.5, justifyContent: 'flex-start' }}>
-      {icon}<span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
-    </button>
+  const layoutSection = (
+    <>
+      {layoutGroup(t('g_lay_align'), LAYOUT_ALIGN)}
+      {layoutGroup(t('g_lay_presets'), LAYOUT_PRESETS)}
+    </>
   );
+
+  /* ---------- ADVANCED ---------- */
+
+  // Everything technical in one quiet drawer: raw code, import/export, clear all.
+  // Nothing is removed — it just stops competing with Text and Style for attention.
+  const rawOn = state.layout === 'custom';
+  const advancedSection = (
+    <>
+      <div className="hint" style={{ marginBottom: 11 }}>{t('g_advanced_hint')}</div>
+      <button
+        className="btn btn-sm"
+        onClick={() => onSetLayout('custom')}
+        disabled={rawOn}
+        style={{ width: '100%', justifyContent: 'flex-start', marginBottom: rawOn ? 7 : 13 }}
+      >
+        <Code2 size={13} /> {t('g_raw_code')}
+      </button>
+      {rawOn && <div className="hint" style={{ marginBottom: 13 }}>{t('g_raw_code_on')}</div>}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginBottom: 7 }}>
+        {quick(<Download size={13} />, t('g_import'), importGift)}
+        {quick(<Upload size={13} />, t('g_export'), exportGift)}
+      </div>
+      <button className="btn btn-sm" onClick={clearAll} style={{ width: '100%', justifyContent: 'flex-start' }}>
+        <Trash2 size={13} /> {t('g_clear_all')}
+      </button>
+    </>
+  );
+
+  /* ---------- panel ---------- */
 
   return (
     <section className="panel flex flex-col" style={{ minHeight: 0, overflow: 'hidden' }}>
@@ -370,19 +449,17 @@ export default function EditorPanel(props: {
       <div className="scroll-y" style={{ flex: 1, minHeight: 0 }}>
         {/* In the order you actually build a gift: pick the shape, write the
             words, style them, then decorate. */}
-        {section('layout', <LayoutGrid size={14} />, t('g_sec_layout'), layoutSection)}
         {section('text', <Type size={14} />, t('g_sec_text'), textSection)}
         {state.layout !== 'custom' && section('style', <Palette size={14} />, t('g_sec_style'), styleSection)}
         {state.layout !== 'custom' && section('deco', <Sparkles size={14} />, t('g_sec_deco'), decoSection)}
+        {section('layout', <LayoutGrid size={14} />, t('g_sec_layout'), layoutSection)}
+        {section('advanced', <Wrench size={14} />, t('g_sec_advanced'), advancedSection)}
       </div>
 
-      <div className="shrink-0" style={{ borderTop: '1px solid var(--border)', padding: 8 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-          {quick(<Wand2 size={13} />, t('g_randomize'), randomize)}
-          {quick(<Trash2 size={13} />, t('g_clear_all'), clearAll)}
-          {quick(<Download size={13} />, t('g_import'), importGift)}
-          {quick(<Upload size={13} />, t('g_export'), exportGift)}
-        </div>
+      <div className="shrink-0" style={{ borderTop: '1px solid var(--border)', padding: 10 }}>
+        <button className="btn" onClick={randomize} style={{ width: '100%', gap: 9 }}>
+          <Dices size={16} /> {t('g_surprise')}
+        </button>
         {flash && <div style={{ fontSize: 11, color: 'var(--accent)', textAlign: 'center', marginTop: 6 }}>{flash}</div>}
       </div>
     </section>

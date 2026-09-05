@@ -6,6 +6,11 @@ export const favKey = (catLabel: string, itemL: string) => `${catLabel}::${itemL
 
 export const FIELDS: FieldId[] = ['dekoTop', 'topText', 'mainText', 'bottomText', 'kaomoji', 'dekoBottom'];
 export const LAYOUTS: Layout[] = ['center', 'inline', 'pyramid', 'sparkle', 'heart', 'custom'];
+// How the Layout section groups them: plain alignments first, shaped presets
+// after. 'custom' is deliberately absent — it is the raw-code mode and lives
+// under Advanced, not among the looks.
+export const LAYOUT_ALIGN: Layout[] = ['center', 'inline'];
+export const LAYOUT_PRESETS: Layout[] = ['pyramid', 'sparkle', 'heart'];
 
 export const FIELD_LABELS: Record<FieldId, string> = {
   dekoTop: 'Deco Top',
@@ -40,7 +45,7 @@ export const DEFAULT_DECO_COLORS: Partial<Record<FieldId, string>> = { dekoTop: 
 
 // The plain top-to-bottom stack every layout but the pyramid uses.
 export const DEFAULT_LINE_ORDER: FieldId[] = ['dekoTop', 'topText', 'mainText', 'bottomText', 'kaomoji', 'dekoBottom'];
-export type EditorSection = 'text' | 'style' | 'deco' | 'layout';
+export type EditorSection = 'text' | 'style' | 'deco' | 'layout' | 'advanced';
 export const editorSectionOf = (layout: Layout, f: FieldId): EditorSection =>
   layout !== 'pyramid' && DECO_FIELDS.includes(f) ? 'deco' : 'text';
 

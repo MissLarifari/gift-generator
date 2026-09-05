@@ -121,9 +121,10 @@ button { color: inherit; }
   border-color: var(--accent);
   color: #10121a;
   font-weight: 600;
+  box-shadow: 0 6px 18px rgba(139, 141, 255, 0.18);
 }
-.btn-primary:hover { background: #9b9dff; border-color: #9b9dff; }
-.btn-primary:disabled { background: var(--card); border-color: var(--border); color: var(--muted); }
+.btn-primary:hover { background: #9b9dff; border-color: #9b9dff; box-shadow: 0 8px 22px rgba(139, 141, 255, 0.26); }
+.btn-primary:disabled { background: var(--card); border-color: var(--border); color: var(--muted); box-shadow: none; }
 .btn-primary:disabled:hover { background: var(--card); }
 
 .btn-ghost { background: transparent; border-color: transparent; color: var(--muted); }
@@ -172,8 +173,8 @@ button { color: inherit; }
 
 /* square-ish toggle used for B / I / ★ / fonts */
 .tog {
-  min-width: 30px;
-  height: 28px;
+  min-width: 32px;
+  height: 30px;
   padding: 0 9px;
   font-size: 12px;
   border-radius: var(--r-sm);
@@ -238,8 +239,8 @@ button { color: inherit; }
 
 /* colour swatch button */
 .swatch {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
   border-radius: 5px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -257,15 +258,15 @@ button { color: inherit; }
   align-items: center;
   gap: 9px;
   width: 100%;
-  padding: 12px 14px;
+  padding: 14px;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   color: var(--muted);
-  transition: color 0.13s ease;
+  transition: color 0.13s ease, background 0.13s ease;
 }
-.sec-head:hover { color: var(--text); }
+.sec-head:hover { color: var(--text); background: var(--hover); }
 .sec-head[data-open='true'] { color: var(--text); }
 .sec-body { padding: 0 14px 16px; }
 

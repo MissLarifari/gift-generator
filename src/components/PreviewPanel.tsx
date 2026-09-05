@@ -264,12 +264,12 @@ export default function PreviewPanel({
       <div className="shrink-0" style={{ maxWidth: MAX, width: '100%', margin: '0 auto', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* budget: thin bar + plain counts */}
           <div>
-            <div style={{ height: 3, borderRadius: 2, background: 'var(--card)', overflow: 'hidden' }}>
+            <div style={{ height: 5, borderRadius: 3, background: 'var(--card)', overflow: 'hidden' }}>
               <div style={{ height: '100%', width: usedPct + '%', background: barColor, transition: 'width .16s ease, background .16s ease' }} />
             </div>
             <div className="flex items-center justify-between flex-wrap" style={{ marginTop: 7, gap: '2px 10px' }}>
-              <span style={{ fontSize: 11.5, color: overLimit ? 'var(--danger)' : 'var(--muted)' }}>
-                <span className="mono" style={{ color: overLimit ? 'var(--danger)' : 'var(--text)' }}>{result.chars}</span>
+              <span style={{ fontSize: 12.5, color: overLimit ? 'var(--danger)' : 'var(--muted)' }}>
+                <span className="mono" style={{ fontSize: 14, fontWeight: 600, color: overLimit ? 'var(--danger)' : 'var(--text)' }}>{result.chars}</span>
                 <span className="mono"> / 240</span> {t('g_characters')}
               </span>
               <span className="mono" style={{ fontSize: 11, color: result.byteStatus === 'over' ? 'var(--danger)' : 'var(--dim)' }}>
@@ -280,7 +280,7 @@ export default function PreviewPanel({
 
           {/* primary actions stay with the preview, always reachable */}
           <div className="flex" style={{ gap: 8 }}>
-            <button className="btn btn-primary" onClick={copy} disabled={overLimit} style={{ flex: 1 }}>
+            <button className="btn btn-primary" onClick={copy} disabled={overLimit} style={{ flex: 1, padding: '12px 14px', fontSize: 13.5 }}>
               {overLimit ? <><Ban size={15} /> {t('g_too_long')}</> : copied ? <><Check size={15} /> {t('copied')}</> : <><Copy size={15} /> {t('g_copy_gift')}</>}
             </button>
             <button className="btn" onClick={share} style={{ minWidth: 112 }}>
