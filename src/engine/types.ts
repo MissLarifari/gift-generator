@@ -1,11 +1,18 @@
 import type { FontStyle } from './fonts';
 import type { Grad } from './colorTags';
+import type { StyleRange } from './ranges';
 
 export type FieldId = 'dekoTop' | 'topText' | 'mainText' | 'bottomText' | 'kaomoji' | 'dekoBottom';
 export type Layout = 'center' | 'inline' | 'pyramid' | 'sparkle' | 'heart' | 'custom';
 
 export interface GiftState {
   text: Record<FieldId, string>;
+  /**
+   * Styling inside a line, as character ranges over `text[field]`. A field
+   * without ranges renders exactly as it always has — one string, one style —
+   * which is what keeps the byte-exact tests untouched. See engine/ranges.ts.
+   */
+  ranges?: Partial<Record<FieldId, StyleRange[]>>;
   sizes: Record<FieldId, number>;
   fonts: Record<FieldId, FontStyle>;
   colors: Record<FieldId, string>;

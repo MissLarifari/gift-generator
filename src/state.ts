@@ -61,13 +61,15 @@ export const KAOMOJI = ['ʚɞ', 'ʚ♡ɞ', '(✿˘‿˘)', '(❀◡❀)', '(✿�
 export function createDefaultState(): GiftState {
   const grad = () => ({ on: false, c1: '#ff71b8', c2: '#b388ff', rainbow: false });
   return {
+    // Empty on purpose since 2026-09-05: a new gift starts blank, not with
+    // somebody else's example words in it.
     text: {
-      dekoTop: '· ily ·←',
-      topText: '.. stop being ..',
-      mainText: 'so cute',
-      bottomText: '.. i cant handle it ..',
-      kaomoji: '(❀◡❀)',
-      dekoBottom: '.. ･ ✦ ･ ..',
+      dekoTop: '',
+      topText: '',
+      mainText: '',
+      bottomText: '',
+      kaomoji: '',
+      dekoBottom: '',
     },
     sizes: { dekoTop: 12, topText: 14, mainText: 60, bottomText: 14, kaomoji: 16, dekoBottom: 12 },
     fonts: { dekoTop: 'normal', topText: 'normal', mainText: 'normal', bottomText: 'normal', kaomoji: 'normal', dekoBottom: 'normal' },

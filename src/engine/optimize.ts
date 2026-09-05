@@ -1,77 +1,123 @@
-import type { GiftState, FieldId } from './types';
-import { applyFont } from './fonts';
-import { byteLen } from './count';
-import type { LineMap } from './layouts';
+import { byteLen, giftBytes, giftChars } from './count';
+import { normalizeFontChars } from './fonts';
 
-// Ported 1:1 from the legacy updateOptimizeTips(): the "getting long" panel
-// with per-field overhead warnings and one-click removal suggestions.
-// Text is localized via an injected translator `t` (see i18n) so the tips
-// follow the chosen UI language; the legacy opt_* / fl_* keys are reused.
+// Getting the gift under 255 bytes.
+//
+// Rewritten 2026-09-06 for the code-first editor. The old one read a structured
+// GiftState and described what you could do; this one WORKS ON THE CODE and
+// hands back the finished result, so a tip is a thing you press, not advice.
+//
+// Every saving here is measured, never estimated: a tip produces the fixed code
+// and the difference in bytes is taken from it. If a rewrite saves nothing it
+// does not appear.
 
-export type TipLevel = 'action' | 'warn' | 'info' | 'tip';
-export interface Tip { level: TipLevel; msg: string; field?: FieldId; action?: 'remove' | 'font' }
-export interface OptimizeResult { show: boolean; state: 'over' | 'warn' | 'info'; headerMsg: string; tips: Tip[] }
+export type TipId = 'white' | 'size14' | 'empty' | 'merge' | 'plain';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type T = (key: string, ...args: any[]) => string;
+export interface Tip {
+  id: TipId;
+  /** i18n key for the one-line explanation. */
+  key: string;
+  /** Bytes this actually saves, measured on the result. */
+  saves: number;
+  /** The code with this one change applied. */
+  fixed: string;
+  /**
+   * Does the gift look different afterwards? White loses its exact shade to
+   * 3dxchat's own default, and plain script is a different script. The rest
+   * render identically — they only drop weight the client ignores anyway.
+   */
+  changesLook: boolean;
+}
 
-const FIELD_KEY: Record<FieldId, string> = {
-  dekoTop: 'fl_dekoTop', topText: 'fl_topText', mainText: 'fl_mainText', bottomText: 'fl_bottomText', kaomoji: 'fl_kaomoji', dekoBottom: 'fl_dekoBottom',
+const TAG = /<\/?(size|color|b|i)(?:=([^<>]*))?>/gi;
+
+/** #ffffff, #fff, and the shades close enough that the default passes for them. */
+const isWhite = (v: string): boolean => {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(v.trim());
+  if (!m) return false;
+  const h = m[1].length === 3 ? m[1].replace(/(.)/g, '$1$1') : m[1];
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  return r >= 235 && g >= 235 && b >= 235;
 };
 
-export function buildOptimizeTips(s: GiftState, chars: number, bytes: number, lm: LineMap, t: T): OptimizeResult {
-  const isOver = chars > 240 || bytes > 255;
-  const isWarn = chars > 210 || bytes > 230;
-  if (chars < 185 && bytes < 200) return { show: false, state: 'info', headerMsg: '', tips: [] };
-
-  const raw = s.text;
-  const tips: Tip[] = [];
-  const fields = Object.keys(FIELD_KEY) as FieldId[];
-  const label = (f: FieldId) => t(FIELD_KEY[f]);
-
-  // font byte overhead
-  fields.forEach((f) => {
-    if (s.fonts[f] === 'normal') return;
-    const text = raw[f] || '';
-    if (!text) return;
-    const overhead = byteLen(applyFont(text, s.fonts[f])) - byteLen(text);
-    if (overhead > 3) {
-      if (bytes > 220) tips.push({ level: 'action', field: f, action: 'font', msg: t('opt_rm_font', label(f), overhead) });
-      else tips.push({ level: 'warn', msg: t('opt_rm_font', label(f), overhead) });
+/** Drops one tag and its partner, keeping what sat between them. */
+function unwrap(code: string, keep: (name: string, value: string | undefined) => boolean): string {
+  const open: { name: string; drop: boolean; at: number; end: number }[] = [];
+  const cut: [number, number][] = [];
+  TAG.lastIndex = 0;
+  for (let m = TAG.exec(code); m; m = TAG.exec(code)) {
+    const closing = m[0][1] === '/';
+    const name = m[1].toLowerCase();
+    if (!closing) {
+      open.push({ name, drop: !keep(name, m[2]), at: m.index, end: m.index + m[0].length });
+      continue;
     }
-  });
-
-  // gradient overhead
-  fields.forEach((f) => {
-    if (!s.grads[f].on) return;
-    const words = (raw[f] || '').trim().split(/\s+/).filter((w) => w.length > 0);
-    if (!words.length) return;
-    tips.push({ level: 'warn', msg: t('opt_grad', label(f), words.length * 17, words.length) });
-  });
-
-  // biggest field
-  const lens = (Object.entries(lm) as [FieldId, string | null][])
-    .filter(([, v]) => v)
-    .map(([k, v]) => [k, (v as string).length] as [FieldId, number])
-    .sort((a, b) => b[1] - a[1]);
-  if (lens.length) tips.push({ level: 'info', msg: t('opt_longest', label(lens[0][0]), lens[0][1]) });
-
-  // deco / kaomoji length
-  if (raw.dekoTop && raw.dekoTop.length > 14) tips.push({ level: 'tip', msg: t('opt_deko_top_long') });
-  if (raw.dekoBottom && raw.dekoBottom.length > 14) tips.push({ level: 'tip', msg: t('opt_deko_bot_long') });
-  if (raw.kaomoji && raw.kaomoji.length > 9) tips.push({ level: 'tip', msg: t('opt_kao_long', raw.kaomoji.length) });
-
-  const gradCount = Object.values(s.grads).filter((g) => g.on).length;
-  if (raw.kaomoji && gradCount >= 1) tips.push({ level: 'warn', msg: t('opt_kao_grad', gradCount) });
-  if (raw.dekoTop && raw.dekoTop.length > 8 && /(.)\1{2,}/.test(raw.dekoTop)) tips.push({ level: 'tip', msg: t('opt_dup_deko') });
-
-  // one-click removal actions
-  if (chars > 210 || bytes > 230) {
-    if (raw.kaomoji) { const save = lm.kaomoji ? (lm.kaomoji as string).length + 1 : raw.kaomoji.length; tips.push({ level: 'action', field: 'kaomoji', action: 'remove', msg: t('opt_rm_kao', save) }); }
-    if (raw.dekoTop) { const save = lm.dekoTop ? (lm.dekoTop as string).length + 1 : raw.dekoTop.length; tips.push({ level: 'action', field: 'dekoTop', action: 'remove', msg: t('opt_rm_dt', save) }); }
-    if (raw.dekoBottom) { const save = lm.dekoBottom ? (lm.dekoBottom as string).length + 1 : raw.dekoBottom.length; tips.push({ level: 'action', field: 'dekoBottom', action: 'remove', msg: t('opt_rm_db', save) }); }
+    for (let i = open.length - 1; i >= 0; i--) {
+      if (open[i].name !== name) continue;
+      if (open[i].drop) { cut.push([open[i].at, open[i].end], [m.index, m.index + m[0].length]); }
+      open.splice(i, 1);
+      break;
+    }
   }
+  if (cut.length === 0) return code;
+  cut.sort((a, b) => b[0] - a[0]);
+  let out = code;
+  for (const [a, b] of cut) out = out.slice(0, a) + out.slice(b);
+  return out;
+}
 
-  const headerMsg = isOver ? t('opt_over') : isWarn ? t('opt_warn') : t('opt_info');
-  return { show: true, state: isOver ? 'over' : isWarn ? 'warn' : 'info', headerMsg, tips };
+/** A tag pair with nothing but other tags between it does nothing at all. */
+function dropEmpty(code: string): string {
+  let out = code;
+  for (let i = 0; i < 4; i++) {
+    const next = out.replace(/<(size|color|b|i)(?:=[^<>]*)?>\s*<\/\1>/gi, '');
+    if (next === out) return out;
+    out = next;
+  }
+  return out;
+}
+
+/** "</color><color=#same>" is a seam that costs bytes and shows nothing. */
+function mergeSeams(code: string): string {
+  let out = code;
+  for (let i = 0; i < 6; i++) {
+    const next = out
+      .replace(/<color=([^<>]*)>([^<>]*)<\/color><color=\1>/gi, '<color=$1>$2')
+      .replace(/<size=([^<>]*)>([^<>]*)<\/size><size=\1>/gi, '<size=$1>$2')
+      .replace(/<b>([^<>]*)<\/b><b>/gi, '<b>$1')
+      .replace(/<i>([^<>]*)<\/i><i>/gi, '<i>$1');
+    if (next === out) return out;
+    out = next;
+  }
+  return out;
+}
+
+/** Doubled spaces and trailing ones cost a byte each and show nothing. */
+const build = (id: TipId, key: string, code: string, fixed: string, changesLook: boolean): Tip | null => {
+  if (fixed === code) return null;
+  const saves = byteLen(code) - byteLen(fixed);
+  return saves > 0 ? { id, key, saves, fixed, changesLook } : null;
+};
+
+/**
+ * Everything worth pressing, biggest saving first. Each tip is measured against
+ * the code as it stands, so applying one and asking again is the honest way to
+ * stack them.
+ */
+export function optimize(code: string): Tip[] {
+  const tips: (Tip | null)[] = [
+    build('white', 'opt_white', code, unwrap(code, (n, v) => !(n === 'color' && !!v && isWhite(v))), true),
+    build('size14', 'opt_size14', code, unwrap(code, (n, v) => !(n === 'size' && v?.trim() === '14')), false),
+    build('empty', 'opt_empty', code, dropEmpty(code), false),
+    build('merge', 'opt_merge', code, mergeSeams(code), false),
+    build('plain', 'opt_plain', code, normalizeFontChars(code), true),
+  ];
+  return tips.filter((t): t is Tip => t !== null).sort((a, b) => b.saves - a.saves);
+}
+
+/** How much room is left, and whether it is time to worry. */
+export function pressure(code: string): { chars: number; bytes: number; over: boolean; tight: boolean } {
+  const chars = giftChars(code);
+  const bytes = giftBytes(code);
+  return { chars, bytes, over: chars > 240 || bytes > 255, tight: chars > 210 || bytes > 225 };
 }

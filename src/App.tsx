@@ -1,118 +1,95 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { LayoutGrid, Gift, SlidersHorizontal, X, Sparkles } from 'lucide-react';
-import { generate } from './engine';
-import { DEFAULT_SIZES } from './engine';
-import type { FieldId, GiftState, Layout } from './engine';
-import { createDefaultState, DEFAULT_DECO_COLORS, DEFAULT_LINE_ORDER, editorSectionOf, favKey, FIELDS, LAYOUT_DEFAULTS } from './state';
-import { readShareFromUrl, clearShareHash } from './share';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { LayoutGrid, ChevronRight } from 'lucide-react';
+import Header from './components/Header';
+import Shelf from './components/Shelf';
+import Editor, { type EditorHandle } from './components/Editor';
+import Preview from './components/Preview';
+import Actions, { ThankYou } from './components/Actions';
+import About from './components/About';
+import Guestbook from './components/Guestbook';
+import { generate, type GiftState } from './engine';
+import { composeTemplate, type TplCategory, type TplItem } from './data/templates';
+import { LOOKS, composeLook, lookIdOf, type Look } from './data/looks';
+import { createDefaultState } from './state';
 import { useHistory } from './useHistory';
-import { useIsMobile } from './useIsMobile';
+import { readShareCodeFromUrl, clearShareHash } from './share';
 import { useI18n } from './i18n';
-import Topbar from './components/Topbar';
-import EditorPanel, { type FocusRequest } from './components/EditorPanel';
-import PreviewPanel from './components/PreviewPanel';
-import TemplatesPanel, { type TplCategory, type TplItem } from './components/TemplatesPanel';
-import ColorPickerOverlay, { type ColorState } from './components/ColorPickerOverlay';
-import AboutModal from './components/AboutModal';
 
-const INTRO_KEY = 'gifty_intro_seen';
-// Bump the suffix to announce the next thing — an old dismissal won't hide it.
-const UPDATE_KEY = 'gifty_update_seen_v1';
+// Rebuilt 2026-09-05 around the way the 3dxchat tool works, which is the way
+// Lari already works:
+//   left   — the shelf of ready-made gifts, folded to a tab until wanted
+//   middle — the editor: the real code, with the tool column beside it
+//   right  — the gift as the recipient will see it
+//
+// The code in the box is the single source of truth. Templates and looks still
+// compose a structured gift, but only to PRINT it into the box; nothing reads
+// the structure back. That is what lets a finished gift be pasted in from the
+// game and edited like anything else.
 
-// Tiny first-visit hint: pick → customize → copy. Dismissed for good.
-function IntroBar({ onClose }: { onClose: () => void }) {
-  const { t } = useI18n();
-  const steps = [t('g_intro_1'), t('g_intro_2'), t('g_intro_3')];
+const PANELS_KEY = 'gifty_panels_v2';
+
+// Arriving at an empty page tells you nothing about what the tool does, so it
+// opens on a finished gift: Lari's own two-part build, byte for byte. Built
+// through composeLook, the same path the layout chip takes, so the two cannot
+// drift apart. A shared link wins over it.
+const START = composeLook(createDefaultState(), LOOKS.find((l) => l.id === 'twoWords') ?? LOOKS[0]);
+
+// A folded panel: a tab you click to bring it back. The label runs vertically
+// so the panel still says what it is while costing almost no width.
+function Tab({ label, icon, onOpen }: { label: string; icon: ReactNode; onOpen: () => void }) {
   return (
-    <div
-      className="flex items-center shrink-0"
-      style={{ gap: 16, padding: '9px 16px', borderBottom: '1px solid var(--border)', background: 'var(--panel)', flexWrap: 'wrap' }}
-    >
-      {steps.map((s, i) => (
-        <span key={s} className="flex items-center" style={{ gap: 7, fontSize: 12, color: 'var(--muted)' }}>
-          <span className="mono" style={{ display: 'grid', placeItems: 'center', width: 18, height: 18, borderRadius: 5, background: 'var(--card)', border: '1px solid var(--border)', fontSize: 10, color: 'var(--accent)' }}>{i + 1}</span>
-          {s}
-        </span>
-      ))}
-      <button className="icon-btn" style={{ marginLeft: 'auto', width: 24, height: 24 }} onClick={onClose} aria-label={t('g_got_it')} title={t('g_got_it')}>
-        <X size={14} />
-      </button>
-    </div>
-  );
-}
-
-// Announcement bar: something bigger is being uploaded, so the site may lag
-// behind for a while. Dismissed per visitor, per announcement.
-function UpdateBar({ onClose }: { onClose: () => void }) {
-  const { t } = useI18n();
-  return (
-    <div
-      className="flex items-center shrink-0"
-      style={{
-        gap: 10, padding: '9px 16px', borderBottom: '1px solid var(--border)',
-        background: 'color-mix(in srgb, var(--accent) 10%, var(--panel))', flexWrap: 'wrap',
-      }}
-    >
-      <Sparkles size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-      <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 600 }}>{t('g_update_title')}</span>
-      <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('g_update_text')}</span>
-      <button className="icon-btn" style={{ marginLeft: 'auto', width: 24, height: 24 }} onClick={onClose} aria-label={t('g_got_it')} title={t('g_got_it')}>
-        <X size={14} />
-      </button>
-    </div>
+    <button className="handle" onClick={onOpen} title={label} aria-label={label} aria-expanded={false}>
+      <ChevronRight size={14} />
+      {icon}
+      <span className="handle-label">{label}</span>
+    </button>
   );
 }
 
 export default function App() {
   const { t } = useI18n();
-  const { state, commit, undo, redo, reset, canUndo, canRedo } = useHistory(readShareFromUrl() ?? createDefaultState());
-  const result = useMemo(() => generate(state), [state]);
-  const [colorField, setColorField] = useState<FieldId | null>(null);
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const isMobile = useIsMobile();
-  const [mobileTab, setMobileTab] = useState<'templates' | 'preview' | 'edit'>('preview');
-  const [showUpdate, setShowUpdate] = useState(() => {
-    try { return localStorage.getItem(UPDATE_KEY) !== '1'; } catch { return true; }
+  const shared = readShareCodeFromUrl();
+  const { state: code, commit, undo, redo, reset, canUndo, canRedo } = useHistory<string>(shared ?? generate(START).code);
+  const setCode = useCallback((next: string, coalesceKey?: string) => commit(() => next, coalesceKey), [commit]);
+
+  // The composition behind the last template or look. It is write-only: it
+  // feeds generate(), and hand edits in the box never flow back into it.
+  // The preview hands clicks to the editor: click a line of the gift and it
+  // is selected in the code, ready for the tools.
+  const editor = useRef<EditorHandle>(null);
+  const build = useRef<GiftState>(shared ? createDefaultState() : START);
+  const [about, setAbout] = useState(false);
+  const [lookId, setLookId] = useState<string | null>(shared ? null : lookIdOf(START));
+  // The layout you picked, kept as a choice rather than read back off the gift:
+  // loading a card would otherwise silently drop you back into its own build.
+  const picked = useRef<Look | null>(shared ? null : (LOOKS.find((l) => l.id === 'twoWords') ?? null));
+
+  const emit = useCallback((next: GiftState) => {
+    build.current = next;
+    setLookId(lookIdOf(next));
+    setCode(generate(next).code);
+  }, [setCode]);
+
+  const [panels, setPanels] = useState<{ left: boolean }>(() => {
+    try {
+      const raw = localStorage.getItem(PANELS_KEY);
+      if (raw) return { left: !!JSON.parse(raw).left };
+    } catch { /* ignore */ }
+    // Below this the shelf, the editor and a 506px gift cannot all fit, and
+    // the code box is the one that gets squeezed. So it starts folded — one
+    // click still opens it, and then the gift column scrolls instead.
+    return { left: window.innerWidth >= 1280 };
   });
-  const dismissUpdate = useCallback(() => {
-    setShowUpdate(false);
-    try { localStorage.setItem(UPDATE_KEY, '1'); } catch { /* private mode */ }
-  }, []);
-  const [showIntro, setShowIntro] = useState(() => {
-    try { return !localStorage.getItem(INTRO_KEY); } catch { return false; }
-  });
-  const dismissIntro = useCallback(() => {
-    setShowIntro(false);
-    try { localStorage.setItem(INTRO_KEY, '1'); } catch { /* ignore */ }
+  const toggleShelf = useCallback(() => {
+    setPanels((p) => {
+      const next = { left: !p.left };
+      try { localStorage.setItem(PANELS_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
   }, []);
 
-  // A focus request the editor consumes to reveal the section a field lives in
-  // (nonce retriggers even for the same field). On mobile it also jumps to the
-  // Edit tab so tapping a preview line lands on a real, keyboard-ready input.
-  // On desktop text lines edit inline in the preview, so the editor only
-  // highlights the matching input; deco lines have no inline editor and hand
-  // off fully (open the Decoration section + focus its dropdown).
-  const focusNonce = useRef(0);
-  const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
-  const focusField = useCallback((f: FieldId) => {
-    if (isMobile) setMobileTab('edit');
-    focusNonce.current += 1;
-    setFocusReq({ f, n: focusNonce.current, focus: isMobile || editorSectionOf(state.layout, f) === 'deco' });
-  }, [isMobile, state.layout]);
-
-  // A shared gift is loaded once into history; clear the hash so editing isn't pinned to it.
+  // A shared gift loads once; clear the hash so editing isn't pinned to it.
   useEffect(() => { clearShareHash(); }, []);
-
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem('gifty_favs') || '[]'); } catch { return []; }
-  });
-  useEffect(() => {
-    try { localStorage.setItem('gifty_favs', JSON.stringify(favorites)); } catch { /* ignore */ }
-  }, [favorites]);
-  const toggleFav = useCallback((cat: TplCategory, item: TplItem) => {
-    const k = favKey(cat.label, item.l);
-    setFavorites((f) => (f.includes(k) ? f.filter((x) => x !== k) : [...f, k]));
-  }, []);
 
   // Ctrl/Cmd+Z undo, Ctrl+Y / Ctrl+Shift+Z redo
   useEffect(() => {
@@ -126,123 +103,78 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [undo, redo]);
 
-  const applyColor = (f: FieldId, cs: ColorState) =>
-    commit((s) => ({
-      ...s,
-      colors: { ...s.colors, [f]: cs.color },
-      noColor: { ...s.noColor, [f]: cs.noColor },
-      grads: { ...s.grads, [f]: { ...s.grads[f], on: cs.gradient, c1: cs.c1, c2: cs.c2, rainbow: false } },
-    }));
+  // A card arrives in the layout you are standing in, not in the one it was
+  // written for.
+  const applyTemplate = useCallback((cat: TplCategory, item: TplItem) => {
+    const built = composeTemplate(build.current, cat, item);
+    const look = picked.current;
+    emit(look && lookIdOf(built) !== look.id ? composeLook(built, look, true) : built);
+  }, [emit]);
 
-  // Picking a layout loads its preset while pristine (text still matches the current
-  // layout's preset); once edited, it only changes the join mode + line order.
-  const setLayout = (l: Layout) =>
-    commit((s) => {
-      // custom starts empty — no pre-fill, no auto-preview
-      if (l === 'custom') return { ...s, layout: 'custom' };
-      const d = LAYOUT_DEFAULTS[l];
-      const curD = LAYOUT_DEFAULTS[s.layout];
-      const pristine = !!curD && FIELDS.every((f) => s.text[f] === curD.text[f]);
-      if (pristine) {
-        const base = createDefaultState();
-        return {
-          ...base,
-          text: { ...d.text },
-          fonts: { ...base.fonts, ...(d.fonts ?? {}) },
-          sizes: { ...base.sizes, ...(d.sizes ?? {}) },
-          colors: { ...base.colors, ...(d.colors ?? {}) },
-          noColor: { ...base.noColor, ...(d.noColor ?? {}) },
-          layout: l,
-          lineOrder: d.lineOrder ? [...d.lineOrder] : [...base.lineOrder],
-        };
-      }
-      return { ...s, layout: l, lineOrder: d.lineOrder ? [...d.lineOrder] : s.lineOrder };
-    });
+  const applyLook = useCallback((look: Look) => { picked.current = look; emit(composeLook(build.current, look)); }, [emit]);
 
-  const applyTemplate = (cat: TplCategory, item: TplItem) =>
-    commit((s) => {
-      // A card may override parts of its category's look (see TplItem.theme).
-      const t = { ...cat.theme, ...item.theme };
-      const text = { ...s.text, mainText: item.main, topText: item.top, bottomText: item.bottom };
-      if (t.deco.dekoTop != null) text.dekoTop = t.deco.dekoTop;
-      if (t.deco.dekoBottom != null) text.dekoBottom = t.deco.dekoBottom;
-      if (t.deco.kaomoji != null) text.kaomoji = t.deco.kaomoji;
-      const colors = { ...s.colors, ...DEFAULT_DECO_COLORS, mainText: t.mainColor, topText: t.topColor, bottomText: t.botColor, ...t.decoColors };
-      const grads = {
-        ...s.grads,
-        mainText: t.mainGrad ? { on: true, c1: t.mainGrad.c1, c2: t.mainGrad.c2, rainbow: t.mainGrad.rainbow } : { ...s.grads.mainText, on: false, rainbow: false },
-      };
-      const plainFonts = { dekoTop: 'normal', topText: 'normal', mainText: 'normal', bottomText: 'normal', kaomoji: 'normal', dekoBottom: 'normal' } as GiftState['fonts'];
-      const fonts = t.mainGrad?.rainbow ? plainFonts : { ...plainFonts, ...t.fonts };
-      const noColor = { ...s.noColor, dekoTop: false, topText: false, mainText: false, bottomText: false, kaomoji: false, dekoBottom: false, ...t.noColor };
-      const sizes = { ...s.sizes, topText: DEFAULT_SIZES.topText, mainText: DEFAULT_SIZES.mainText, bottomText: DEFAULT_SIZES.bottomText, ...t.sizes };
-      // Only a template that asks for its own stack gets one; anything else falls
-      // back to the current layout's order, so a reordered card doesn't stick.
-      const lineOrder = t.lineOrder ? [...t.lineOrder] : (LAYOUT_DEFAULTS[s.layout].lineOrder ?? DEFAULT_LINE_ORDER);
-      return { ...s, text, colors, grads, fonts, noColor, sizes, lineOrder };
-    });
-
-  const colorInitial: ColorState = colorField
-    ? { noColor: state.noColor[colorField], gradient: state.grads[colorField].on, color: state.colors[colorField], c1: state.grads[colorField].c1, c2: state.grads[colorField].c2 }
-    : { noColor: false, gradient: false, color: '#ffffff', c1: '#ff71b8', c2: '#b388ff' };
-
-  const editorPanel = <EditorPanel state={state} commit={commit} onOpenColor={setColorField} onSetLayout={setLayout} focusReq={focusReq} />;
-  const previewPanel = <PreviewPanel state={state} result={result} commit={commit} onReset={() => reset(createDefaultState())} onFocusField={focusField} isMobile={isMobile} />;
-  const templatesPanel = <TemplatesPanel onApply={(c, i) => { applyTemplate(c, i); if (isMobile) setMobileTab('preview'); }} favorites={favorites} onToggleFav={toggleFav} />;
-
-  const mobileTabBtn = (id: 'templates' | 'preview' | 'edit', icon: ReactNode, label: string) => (
-    <button
-      onClick={() => setMobileTab(id)}
-      className="flex flex-col items-center justify-center"
-      style={{ gap: 3, padding: '9px 0', fontSize: 10.5, fontWeight: 500, cursor: 'pointer', background: 'transparent', border: 'none', borderTop: `2px solid ${mobileTab === id ? 'var(--accent)' : 'transparent'}`, color: mobileTab === id ? 'var(--text)' : 'var(--muted)' }}
-    >
-      {icon}{label}
-    </button>
-  );
+  const resetAll = useCallback(() => {
+    build.current = createDefaultState();
+    setLookId(null);
+    reset('');
+  }, [reset]);
 
   return (
-    <div className="h-full flex flex-col" style={{ background: 'var(--bg)' }}>
-      <Topbar undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} onAbout={() => setAboutOpen(true)} compact={isMobile} />
-      {showUpdate && <UpdateBar onClose={dismissUpdate} />}
-      {showIntro && <IntroBar onClose={dismissIntro} />}
+    <div className="h-full flex flex-col">
+      <Header undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} onAbout={() => setAbout(true)} />
 
-      {isMobile ? (
-        <>
-          <div className="flex-1 min-h-0 scroll-y" style={{ padding: 10 }}>
-            <div style={{ display: mobileTab === 'templates' ? 'block' : 'none', height: '100%' }}>{templatesPanel}</div>
-            <div style={{ display: mobileTab === 'preview' ? 'block' : 'none' }}>{previewPanel}</div>
-            <div style={{ display: mobileTab === 'edit' ? 'block' : 'none', height: '100%' }}>{editorPanel}</div>
-          </div>
-          <nav className="shrink-0 grid grid-cols-3" style={{ borderTop: '1px solid var(--border)', background: 'var(--panel)' }}>
-            {mobileTabBtn('templates', <LayoutGrid size={17} />, t('g_tab_templates'))}
-            {mobileTabBtn('preview', <Gift size={17} />, t('preview'))}
-            {mobileTabBtn('edit', <SlidersHorizontal size={17} />, t('g_tab_edit'))}
-          </nav>
-        </>
-      ) : (
-        <main
-          className="flex-1 min-h-0 grid"
-          // The side columns may shrink so the preview never starves on a narrow
-          // desktop (the breakpoint starts at 860px).
-          style={{ gridTemplateColumns: 'minmax(236px, 298px) minmax(320px, 1fr) minmax(262px, 316px)', gap: 14, padding: 14 }}
-        >
-          {templatesPanel}
-          {previewPanel}
-          {editorPanel}
-        </main>
-      )}
-
-      <ColorPickerOverlay
-        open={!!colorField}
-        fieldLabel={colorField ? t((state.layout === 'pyramid' ? 'pyr_' : 'fl_') + colorField) : ''}
-        initial={colorInitial}
-        onClose={() => setColorField(null)}
-        onApply={(cs) => {
-          if (colorField) applyColor(colorField, cs);
-          setColorField(null);
+      <main
+        className="flex-1 min-h-0 grid"
+        // Editor in the middle, gift on the right — the shape of the tool Lari
+        // already uses. The shelf folds to a 46px tab and gives back its width.
+        style={{
+          // Capped and centred: on a wide monitor an editor that keeps growing
+          // is just a huge empty box — a line of gift code is rarely 80 chars.
+          //
+          // The gift column is a hard 506px. It is a replica measured against
+          // the client, so a preview that quietly squeezes to 414 to make room
+          // is worse than useless — it would lie about what the recipient sees.
+          // Shelf and editor both take fr, so spare width is SHARED instead of
+          // filling one to its cap before the other sees any — that ordering
+          // once left the code box at 194px beside a fat shelf. The shelf gets
+          // an equal share. Weighting it 1.3 looked right on a 1920 screen and
+          // pinned the editor to its 420 floor on a 1480 one — the code box
+          // back at 286 beside a 482 shelf.
+          gridTemplateColumns: `${panels.left ? 'minmax(248px, 1fr)' : '46px'} minmax(420px, 1fr) 522px`,
+          gap: 14,
+          padding: 14,
+          width: '100%',
+          maxWidth: 1740,
+          // Below roughly 1030 with the shelf open the three columns cannot
+          // fit; scrolling sideways is honest, clipping the gift is not.
+          overflowX: 'auto',
+          margin: '0 auto',
+          transition: 'grid-template-columns .22s ease',
         }}
-      />
-      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      >
+        {panels.left
+          ? <Shelf onApply={applyTemplate} onApplyLook={applyLook} activeLook={lookId} onFold={toggleShelf} />
+          : <Tab label={t('g_templates')} icon={<LayoutGrid size={15} />} onOpen={toggleShelf} />}
+
+        {/* Der Editor steht auf seiner natuerlichen Hoehe; darunter blieb die
+            halbe Spalte leer. Da gehoert das Gaestebuch hin. */}
+        <div className="flex flex-col" style={{ minWidth: 0, minHeight: 0, gap: 14 }}>
+          <Editor ref={editor} code={code} setCode={setCode} undo={undo} canUndo={canUndo} />
+          <Guestbook />
+        </div>
+
+        {/* The gutter is reserved whether or not this scrolls, so the 506px
+            replica keeps its width instead of losing 10px to a scrollbar. */}
+        <section className="scroll-y" style={{ minHeight: 0, paddingTop: 4, overflowX: 'auto', scrollbarGutter: 'stable' }}>
+          <div style={{ height: 'fit-content', width: 506, maxWidth: '100%', paddingBottom: 8 }}>
+            <Preview code={code} onPickLine={(a, b, deco) => editor.current?.selectLine(a, b, deco)} />
+            <Actions code={code} setCode={setCode} onReset={resetAll} />
+            <ThankYou />
+          </div>
+        </section>
+      </main>
+
+      {about && <About onClose={() => setAbout(false)} />}
     </div>
   );
 }

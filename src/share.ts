@@ -1,5 +1,5 @@
 import { createDefaultState } from './state';
-import type { GiftState } from './engine';
+import { generate, type GiftState } from './engine';
 
 // A shared gift is the whole GiftState, JSON → URL-safe base64, behind "#g=".
 const PREFIX = 'g=';
@@ -61,7 +61,27 @@ export function readShareFromUrl(): GiftState | null {
 
 // Strip the share hash so later edits aren't pinned to the shared URL.
 export function clearShareHash(): void {
-  if (location.hash.replace(/^#/, '').startsWith(PREFIX)) {
+  const h = location.hash.replace(/^#/, '');
+  if (h.startsWith(PREFIX) || h.startsWith('c=')) {
     history.replaceState(null, '', location.pathname + location.search);
   }
+}
+
+// --- code links ---------------------------------------------------------
+// Since the rewrite the code itself is the gift, so a link carries the code:
+// far shorter than a whole state, and it survives hand-written tags.
+const CODE_PREFIX = 'c=';
+
+export function buildCodeShareUrl(code: string): string {
+  return location.origin + location.pathname + '#' + CODE_PREFIX + b64encode(code);
+}
+
+/** The shared gift as code — reading links from before the rewrite too. */
+export function readShareCodeFromUrl(): string | null {
+  const h = location.hash.replace(/^#/, '');
+  if (h.startsWith(CODE_PREFIX)) {
+    try { return b64decode(h.slice(CODE_PREFIX.length)); } catch { return null; }
+  }
+  const old = readShareFromUrl();
+  return old ? generate(old).code : null;
 }
