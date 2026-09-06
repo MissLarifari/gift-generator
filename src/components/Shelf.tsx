@@ -22,8 +22,20 @@ const FAVS_KEY = 'gifty_favs_v2';
 const RECENT_KEY = 'gifty_recent';
 const RECENT_MAX = 30;
 const USES_KEY = 'gifty_uses';
+const LANG_KEY = 'gifty_gift_lang';
 /** How many recents to show as a strip under the categories. */
 const STRIP = 8;
+
+/** Which language the gift TEXT is in. Not the interface language — someone
+ *  can browse German sayings with an English interface, and does. */
+type GiftLang = 'all' | 'en' | 'de';
+const readGiftLang = (): GiftLang => {
+  try {
+    const v = localStorage.getItem(LANG_KEY);
+    if (v === 'en' || v === 'de' || v === 'all') return v;
+  } catch { /* private mode */ }
+  return 'all';
+};
 
 type View =
   | { k: 'home' }
@@ -82,14 +94,29 @@ export default function Shelf({
   const [favs, setFavs] = useState<string[]>(() => readList(FAVS_KEY));
   const [recent, setRecent] = useState<string[]>(() => readList(RECENT_KEY));
   const [uses, setUses] = useState<Record<string, number>>(readCounts);
+  const [giftLang, setGiftLang] = useState<GiftLang>(readGiftLang);
   const query = q.trim().toLowerCase();
 
   /* ---------- what the layout allows ---------- */
 
   const base = useMemo(
-    () => ENTRIES.filter((e) => fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), activeLook)),
-    [activeLook],
+    () => ENTRIES.filter((e) =>
+      (giftLang === 'all' || e.lang === giftLang)
+      && fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), activeLook)),
+    [activeLook, giftLang],
   );
+
+  // How many there are in each language, so the control can say so before it
+  // is pressed — an empty section after a click is the worse way to find out.
+  const langCounts = useMemo(() => {
+    const fits = ENTRIES.filter((e) => fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), activeLook));
+    return { all: fits.length, en: fits.filter((e) => e.lang === 'en').length, de: fits.filter((e) => e.lang === 'de').length };
+  }, [activeLook]);
+
+  const pickLang = useCallback((v: GiftLang) => {
+    setGiftLang(v);
+    try { localStorage.setItem(LANG_KEY, v); } catch { /* private mode */ }
+  }, []);
 
   const everyday = useMemo(() => base.filter((e) => !e.tags.holiday && !e.tags.celebration), [base]);
   const holidays = useMemo(() => base.filter((e) => e.tags.holiday), [base]);
@@ -209,7 +236,10 @@ export default function Shelf({
     return (
       <div key={e.key + '#' + i} className="spark-wrap">
         <button className="spark" onClick={() => use(e)} title={e.cat.label}>
-          <div className="spark-t">{e.item.main || e.item.l}</div>
+          <div className="spark-t">
+            {e.lang === 'de' && <span className="spark-lang">DE</span>}
+            {e.item.main || e.item.l}
+          </div>
           {(e.item.top || e.item.bottom) && (
             <div className="spark-s">{[e.item.top, e.item.bottom].filter(Boolean).join(' · ')}</div>
           )}
@@ -407,6 +437,19 @@ export default function Shelf({
           {LOOKS.map((l) => (
             <button key={l.id} data-on={activeLook === l.id} onClick={() => onApplyLook(l)} title={t('look_' + l.id + '_h')}>
               {t('look_' + l.id)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 2b — and which language the sayings are written in */}
+      <div className="sec">
+        <div className="sec-t">{t('g_lang_title')}</div>
+        <div className="sec-s">{t('g_lang_sub')}</div>
+        <div className="seg" role="group" aria-label={t('g_lang_title')}>
+          {(['all', 'en', 'de'] as GiftLang[]).map((v) => (
+            <button key={v} data-on={giftLang === v} onClick={() => pickLang(v)} disabled={langCounts[v] === 0}>
+              {t('g_lang_' + v)} <span className="seg-n">{langCounts[v]}</span>
             </button>
           ))}
         </div>

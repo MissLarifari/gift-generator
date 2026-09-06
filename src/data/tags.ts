@@ -1,4 +1,4 @@
-import { TEMPLATE_CATEGORIES, type TplCategory, type TplItem } from './templates';
+import { TEMPLATE_CATEGORIES, type TplCategory, type TplItem, type TplLang } from './templates';
 
 // Tags instead of one long list of categories.
 //
@@ -140,6 +140,8 @@ export interface Entry {
   cat: TplCategory;
   item: TplItem;
   tags: Tags;
+  /** The language of the gift text, so the shelf can show one or both. */
+  lang: TplLang;
   /**
    * What favourites and recents are stored under, so it has to survive a
    * reload AND new cards being inserted anywhere. Hence the words, not an
@@ -158,7 +160,7 @@ const entryKey = (cat: TplCategory, item: TplItem): string => {
 };
 
 export const ENTRIES: Entry[] = TEMPLATE_CATEGORIES.flatMap((cat) =>
-  cat.items.map((item) => ({ cat, item, tags: tagsOf(cat, item), key: entryKey(cat, item) })),
+  cat.items.map((item) => ({ cat, item, tags: tagsOf(cat, item), lang: item.lang ?? 'en', key: entryKey(cat, item) })),
 );
 
 /** The tags that actually have gifts, in the order the lists above declare. */

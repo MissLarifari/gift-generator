@@ -114,3 +114,49 @@ describe('Sparkle', () => {
     expect(lookIdOf({ text: two.text, fonts: two.fonts, sizes: two.sizes })).toBe('sparkle');
   });
 });
+
+describe('the German sayings', () => {
+  const german = TEMPLATE_CATEGORIES.flatMap((cat) => cat.items.filter((i) => i.lang === 'de').map((i) => ({ cat, i })));
+
+  it('there are some, spread over more than one category', () => {
+    expect(german.length).toBeGreaterThan(100);
+    expect(new Set(german.map(({ cat }) => cat.label)).size).toBeGreaterThan(8);
+  });
+
+  // The ornate script maps a-z and nothing else. An umlaut inside a word comes
+  // out unconverted, so "fur" with dots renders as f-u-with-dots-я — the one
+  // German mistake that cannot be seen in the preview without looking closely.
+  it('carry no umlaut in the gift text — the script cannot draw one', () => {
+    const bad = german
+      .flatMap(({ cat, i }) => [i.main, i.top, i.bottom].map((line) => ({ cat, i, line })))
+      .filter(({ line }) => /[äöüßÄÖÜẞ]/.test(line))
+      .map(({ cat, i, line }) => `${cat.label} · ${i.l}: ${line}`);
+    expect(bad).toEqual([]);
+  });
+
+  // A two-parter carries half its sentence in the deco rows, so those have to
+  // hold the line as well.
+  it('carry no umlaut in the deco either', () => {
+    const bad = german
+      .flatMap(({ cat, i }) => [i.theme?.deco?.dekoTop ?? '', i.theme?.deco?.dekoBottom ?? ''].map((line) => ({ cat, i, line })))
+      .filter(({ line }) => /[äöüßÄÖÜẞ]/.test(line))
+      .map(({ cat, i, line }) => `${cat.label} · ${i.l}: ${line}`);
+    expect(bad).toEqual([]);
+  });
+
+  it('carry no apostrophes, same as the English ones', () => {
+    const bad = german.filter(({ i }) => /['’]/.test(`${i.main}${i.top}${i.bottom}`)).map(({ i }) => i.l);
+    expect(bad).toEqual([]);
+  });
+
+  // Labels are the browsing titles, not the gift — umlauts belong there.
+  it('are labelled in German', () => {
+    expect(german.some(({ i }) => /[äöüß]/.test(i.l))).toBe(true);
+  });
+
+  it('leave the English ones unmarked, so nothing had to be touched', () => {
+    const english = TEMPLATE_CATEGORIES.flatMap((c) => c.items).filter((i) => i.lang !== 'de');
+    expect(english.every((i) => i.lang === undefined)).toBe(true);
+    expect(english.length).toBeGreaterThan(600);
+  });
+});
