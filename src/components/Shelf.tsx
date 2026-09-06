@@ -99,19 +99,30 @@ export default function Shelf({
 
   /* ---------- what the layout allows ---------- */
 
-  const base = useMemo(
-    () => ENTRIES.filter((e) =>
-      (giftLang === 'all' || e.lang === giftLang)
-      && fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), activeLook)),
-    [activeLook, giftLang],
-  );
-
   // How many there are in each language, so the control can say so before it
   // is pressed — an empty section after a click is the worse way to find out.
   const langCounts = useMemo(() => {
     const fits = ENTRIES.filter((e) => fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), activeLook));
     return { all: fits.length, en: fits.filter((e) => e.lang === 'en').length, de: fits.filter((e) => e.lang === 'de').length };
   }, [activeLook]);
+
+  /**
+   * A remembered language that has nothing behind it is ignored.
+   *
+   * Without this the shelf can strand you: pick German, the German cards go
+   * away in a later version, and every count reads 0 — while the switch that
+   * would undo it is hidden, because it hides itself when there is nothing to
+   * sort. An empty shelf and no way back. So the stored choice only counts as
+   * long as it holds cards.
+   */
+  const shownLang: GiftLang = langCounts[giftLang] > 0 ? giftLang : 'all';
+
+  const base = useMemo(
+    () => ENTRIES.filter((e) =>
+      (shownLang === 'all' || e.lang === shownLang)
+      && fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), activeLook)),
+    [activeLook, shownLang],
+  );
 
   const pickLang = useCallback((v: GiftLang) => {
     setGiftLang(v);
@@ -445,12 +456,12 @@ export default function Shelf({
       {/* 2b — and which language the sayings are written in. Hidden while the
           library is English only: a switch with nothing behind it is a promise
           the shelf cannot keep. */}
-      {langCounts.de > 0 && <div className="sec">
+      {langCounts.de > 0 && langCounts.en > 0 && <div className="sec">
         <div className="sec-t">{t('g_lang_title')}</div>
         <div className="sec-s">{t('g_lang_sub')}</div>
         <div className="seg" role="group" aria-label={t('g_lang_title')}>
           {(['all', 'en', 'de'] as GiftLang[]).map((v) => (
-            <button key={v} data-on={giftLang === v} onClick={() => pickLang(v)} disabled={langCounts[v] === 0}>
+            <button key={v} data-on={shownLang === v} onClick={() => pickLang(v)} disabled={langCounts[v] === 0}>
               {t('g_lang_' + v)} <span className="seg-n">{langCounts[v]}</span>
             </button>
           ))}

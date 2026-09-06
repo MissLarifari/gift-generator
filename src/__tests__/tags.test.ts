@@ -86,3 +86,23 @@ describe('every tag carries its own look', () => {
     expect(usedThemes(ENTRIES).length).toBeGreaterThanOrEqual(9);
   });
 });
+
+describe('a remembered language that has nothing behind it', () => {
+  // The shelf reads its stored choice, but a stored language only counts while
+  // it holds cards — otherwise picking German and then losing the German cards
+  // leaves every count at 0 with the switch hidden and no way back.
+  const shown = (stored: 'all' | 'en' | 'de', counts: Record<string, number>) =>
+    (counts[stored] > 0 ? stored : 'all');
+
+  it('is ignored, so the shelf never empties itself', () => {
+    expect(shown('de', { all: 791, en: 791, de: 0 })).toBe('all');
+  });
+
+  it('still counts while it holds cards', () => {
+    expect(shown('de', { all: 927, en: 791, de: 136 })).toBe('de');
+  });
+
+  it('leaves "both" alone even in an empty library', () => {
+    expect(shown('all', { all: 0, en: 0, de: 0 })).toBe('all');
+  });
+});

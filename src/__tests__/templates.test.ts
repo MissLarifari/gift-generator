@@ -152,10 +152,25 @@ describe('the German sayings', () => {
     expect(bad).toEqual([]);
   });
 
-  // Labels are the browsing titles, not the gift — umlauts belong there.
-  it('are labelled in German', () => {
-    if (german.length === 0) return;
-    expect(german.some(({ i }) => /[äöüß]/.test(i.l))).toBe(true);
+  // The house rule: the three lines have to read as ONE sentence, not as three
+  // chopped pieces. A card that leaves a line empty cannot do that — the first
+  // German batch was pulled on 2026-09-06 for exactly this.
+  it('use all three lines, because that is what carries the sentence', () => {
+    const bad = german
+      .filter(({ i }) => !i.theme?.lineOrder)   // two-parters carry theirs in the deco
+      .filter(({ i }) => !i.top.trim() || !i.main.trim() || !i.bottom.trim())
+      .map(({ cat, i }) => `${cat.label} · ${i.l}`);
+    expect(bad).toEqual([]);
+  });
+
+  // The small lines are the run-up and the tail, and they are marked as such
+  // with the leading dots the whole library uses.
+  it('mark the small lines as the run-up and the tail', () => {
+    const bad = german
+      .filter(({ i }) => !i.theme?.lineOrder)
+      .filter(({ i }) => !i.top.startsWith('..') || !i.bottom.startsWith('..'))
+      .map(({ cat, i }) => `${cat.label} · ${i.l}`);
+    expect(bad).toEqual([]);
   });
 
   it('leave the English ones unmarked, so nothing had to be touched', () => {
