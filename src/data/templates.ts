@@ -151,6 +151,8 @@ const twoIn = (kao: string) =>
       lineOrder: ['dekoTop', 'topText', 'mainText', 'dekoBottom', 'bottomText', 'kaomoji'],
     });
 
+const twoNote = twoIn('ʚɞ');
+const twoCuteNote = twoIn('ʚɞ');
 const twoCute = twoIn('ʚɞ');
 const twoFunny = twoIn('(˘◡˘)');
 const twoChaotic = twoIn('\\(°◡°)/');
@@ -269,6 +271,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Kurze Frage', 'hope youre okay', '.. just ..', '.. checking'),
     it('Ein Gedanke', 'this is yours', '.. just ..', '.. today'),
     it('Kurz Vorbei', 'thought of you', '.. just ..', '.. now'),
+    ...de([
+      it('Kleiner gedanke', 'ich hab dich gern', '.. ich wollte nur sagen ..', '.. einfach so'),
+      twoNote('Licht im alltag', 'du bist', '.. mein', 'licht', 'in meinem', 'alltag'),
+      it('Nur so', 'an dich', '.. ich dachte kurz ..', '.. und musste grinsen'),
+    ]),
   ] },
   { label: 'Cute Notes', group: 'Themen', theme: { ...th('#ff4fa3', '#f2f2f2', '#f2f2f2', deco('· ˚ ★ ✦ ★ ˚ ·', '', 'ʚɞ')),
       decoColors: { dekoTop: '#ff9ec7', kaomoji: '#ff9ec7' },
@@ -290,6 +297,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Kleine Ruhe', 'you make me exhale', '.. in the best way ..', '.. like things are okay'),
     it('Einfach Warm', 'you feel like comfort', '.. in small moments ..', '.. and thats enough'),
     it('Leichtes Laecheln', 'you bring good energy', '.. without forcing it ..', '.. and i appreciate that'),
+    ...de([
+      it('Mein liebling', 'ist alles leichter', '.. wenn du bei mir bist ..', '.. und mein herz ganz warm'),
+      twoCuteNote('Stern in der nacht', 'du bist', '.. mein', 'stern', 'in meiner', 'nacht'),
+      it('Wegen dir', 'wird der tag gut', '.. wenn du da bist ..', '.. nur du'),
+    ]),
   ] },
   // Spicy — same whisper build as the notes, but hotter colours and the star
   // deco Lari specified. Only these two; the old Spicy set is not coming back.
@@ -334,6 +346,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Funkenflug', 'theres chemistry here', '.. pretty obvious ..', '.. im not complaining'),
     it('Ganz Warm', 'you changed the room', '.. somehow ..', '.. it feels hotter now'),
     it('Nur Andeutung', 'keep me guessing', '.. just a little ..', '.. thats half the fun'),
+    ...de([
+      it('Ganz nah', 'will ich noch mehr', '.. wenn du so nah bist ..', '.. von dir ganz allein'),
+      twoHot('Funke unter haut', 'du bist', '.. der', 'funke', 'unter meiner', 'haut'),
+      it('Mehr von dir', 'will ich noch mehr', '.. wenn du nah bist ..', '.. von dir'),
+    ]),
   ] },
   // The two-part build: one sentence carried by four lines, two of them loud.
   // Lari asked for a set of these on 2026-09-05 - the layout had exactly two
@@ -447,6 +464,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Immer Ehrlich', 'you keep it real', '.. even when its awkward ..', '.. thats why it works'),
     it('Wir Passen', 'we make sense', '.. somehow as friends ..', '.. and thats plenty'),
     it('Einfach Loyal', 'youre still here', '.. through all the weird ..', '.. that means a lot'),
+    ...de([
+      it('Mein mensch', 'mit dir wird er besser', '.. egal wie der tag war ..', '.. weil du einfach du bist'),
+      twoFriend('Mein mensch', 'du bist', '.. mein', 'mensch', 'in jedem', 'chaos'),
+      it('Mein mensch', 'bleib ich', '.. egal was kommt ..', '.. weil ich dich mag'),
+    ]),
   ] },
   // Romance, rebuilt 2026-09-05. The name comes from the set cleared in the
   // redesign; the words are new.
@@ -479,6 +501,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Echte Naehe', 'you matter deeply', '.. more than casually ..', '.. and i wont hide that'),
     it('Bei Dir Bleiben', 'you feel worth it', '.. even on hard days ..', '.. especially then'),
     it('Meine Wahl', 'still you', '.. after everything ..', '.. and thats deliberate'),
+    ...de([
+      it('Bei dir', 'will ich einfach bleiben', '.. wenn du mich ansiehst ..', '.. ganz nah bei dir'),
+      twoRose('Mein zuhause', 'du bist', '.. mein', 'zuhause', 'in dieser', 'welt'),
+      it('Ganz nah', 'bleib ich bei dir', '.. wenn du da bist ..', '.. ganz lange'),
+    ]),
   ] },
   // 2026-09-05: the groups from the set cleared in the redesign, written
   // fresh with ChatGPT against the measured limits. Each category holds both
@@ -514,6 +541,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Gemuetlich Du', 'you make things cozy', '.. without trying ..', '.. thats very rude'),
     it('Kleines Glueck', 'you bring tiny joy', '.. simple fact ..', '.. keep doing that'),
     it('Sanfte Bohne', 'youre quietly cute', '.. not dramatic ..', '.. just very obvious'),
+    ...de([
+      it('Ganz viel du', 'muss ich sofort grinsen', '.. wenn ich an dich denke ..', '.. jedes einzelne mal'),
+      twoCute('Keks und kaffee', 'du bist', '.. mein', 'keks', 'zu meinem', 'kaffee'),
+      it('Warmes herz', 'wird mein herz warm', '.. wenn du lachst ..', '.. jedes mal'),
+    ]),
   ] },
   { label: 'Funny', group: 'Themen', theme: { ...th('#c4a7ff', '#f2f2f2', '#8b5cf6', deco('° ✦ · ✦ °', '', '(˘◡˘)')),
       decoColors: { dekoTop: '#d9c8ff', dekoBottom: '#d9c8ff', kaomoji: '#d9c8ff' },
@@ -546,6 +578,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Sehr Vernuenftig', 'that seemed smart', '.. for a moment ..', '.. then it happened'),
     it('Leicht Besorgt', 'you seem functional', '.. from a distance ..', '.. good enough'),
     it('Trockenes Lob', 'mildly impressive', '.. official verdict ..', '.. no applause needed'),
+    ...de([
+      it('Deine schuld', 'grinse ich viel zu oft', '.. seit du da bist ..', '.. also bist du schuld'),
+      twoFunny('Mein chaos', 'du bist', '.. mein', 'chaos', 'mit viel', 'charme'),
+      it('Deine schuld', 'grinse ich viel', '.. seit du da bist ..', '.. deine schuld'),
+    ]),
   ] },
   { label: 'Funny / Chaotic', group: 'Themen', theme: { ...th('#ffd84d', '#f2f2f2', '#ff7a45', deco('° ✦ ★ ✦ °', '', '\\(°◡°)/')),
       decoColors: { dekoTop: '#ffe89a', dekoBottom: '#ffe89a', kaomoji: '#ffe89a' },
@@ -639,6 +676,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Kein Zoegern', 'i want your attention', '.. all of it ..', '.. right here'),
     it('Mutige Wahl', 'you look dangerous', '.. good ..', '.. i like dangerous'),
     it('Offene Karten', 'im flirting with you', '.. yes directly ..', '.. no mystery here'),
+    ...de([
+      it('Dieser blick', 'muss ich grinsen', '.. wenn du mich so ansiehst ..', '.. und will ganz nah sein'),
+      twoFlirty('Grund zum grinsen', 'du bist', '.. der', 'grund', 'hinter meinem', 'grinsen'),
+      it('Dein blick', 'werd ich ganz weich', '.. wenn du so guckst ..', '.. jedes mal'),
+    ]),
   ] },
   { label: 'Wicked', group: 'Themen', theme: { ...th('#e879f9', '#f2f2f2', '#a855f7', deco('° ✦ ♡ ✦ °', '', '(◕‿◕)')),
       decoColors: { dekoTop: '#f0b4fb', dekoBottom: '#f0b4fb', kaomoji: '#f0b4fb' },
@@ -855,6 +897,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Leise Waerme', 'this feels cozy', '.. blankets nearby ..', '.. morning light everywhere'),
     it('Kleine Huette', 'stay where its warm', '.. tea is ready ..', '.. outside can wait'),
     it('Weicher Tag', 'keep today gentle', '.. slow morning ..', '.. soft light and no pressure'),
+    ...de([
+      it('Bleib bei mir', 'bleib einfach bei mir', '.. wenn dein tag zu viel war ..', '.. ich halt dich ganz nah'),
+      twoSoft('Mein halt', 'du bist', '.. mein', 'halt', 'an grauen', 'tagen'),
+      it('Bleib hier', 'bleib einfach hier', '.. wenn alles viel ist ..', '.. bei mir'),
+    ]),
   ] },
   { label: 'Pride', group: 'Vibes', theme: { ...th('#ff71b8', '#f2f2f2', '#7fd4ff', deco('° ✦ ♥ ✦ °', '', '(◕‿◕)')),
       decoColors: { dekoTop: '#ffa8d4', dekoBottom: '#ffa8d4', kaomoji: '#ffa8d4' },
@@ -910,6 +957,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     twoXmas('Weihnachten Gemeinsam', 'christmas', '.. with', 'you', 'makes home', 'warmer'),
     it('Leise Weihnacht', 'christmas feels softer', '.. when youre here ..', '.. thats my favorite part'),
     it('Warme Feiertage', 'you make christmas glow', '.. in a quiet way ..', '.. better than any decoration'),
+    ...de([
+      it('Bei dir warm', 'wird mir bei dir warm', '.. wenn der winter kalt ist ..', '.. weil du bei mir bist'),
+      twoXmas('Licht der nacht', 'du bist', '.. mein', 'licht', 'in jeder', 'nacht'),
+      it('Ganz warm', 'bleib ganz nah', '.. wenn es kalt ist ..', '.. bei mir'),
+    ]),
   ] },
   { label: 'Halloween', group: 'Holidays', theme: { ...th('#fb923c', '#f2f2f2', '#a855f7', deco('° ☾ ✦ ☾ °', '', '(◉_◉❀)')),
       decoColors: { dekoTop: '#fdc99a', dekoBottom: '#fdc99a', kaomoji: '#fdc99a' },
@@ -1023,6 +1075,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Direkter Valentin', 'come here', '.. valentines day rule ..', '.. i want you close'),
     it('Valentinsgedanke', 'i want us', '.. this valentines day ..', '.. simple and real'),
     it('Heute Mit Dir', 'valentine feels right', '.. with you here ..', '.. thats enough'),
+    ...de([
+      it('Mein herz', 'mein herz mag nur dich', '.. heute sag ich einfach ..', '.. und das jeden tag'),
+      twoValentine('Mein herzschlag', 'du bist', '.. der', 'grund', 'hinter jedem', 'herzschlag'),
+      it('Nur du', 'mein herz will dich', '.. heute sag ich ..', '.. ganz klar'),
+    ]),
   ] },
   { label: 'Womens Day', group: 'Holidays', theme: { ...th('#c084fc', '#f2f2f2', '#ec4899', deco('° ✿ ♡ ✿ °', '', '(◕‿◕✿)')),
       decoColors: { dekoTop: '#d9b4fd', dekoBottom: '#d9b4fd', kaomoji: '#d9b4fd' },
@@ -1152,6 +1209,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Mitternachtswunsch', 'my new year wish', '.. right at midnight ..', '.. keep you close next year'),
     it('Jahreswechsel Mit Dir', 'start again with me', '.. new years eve ..', '.. thats my favorite plan'),
     it('Erste Minute', 'be there at midnight', '.. new year begins ..', '.. i want you in minute one'),
+    ...de([
+      it('Mit dir', 'will ich dich dabei', '.. wenn ein neues jahr beginnt ..', '.. genau wie jetzt'),
+      twoNewYear('Mein wunsch', 'du bist', '.. mein', 'wunsch', 'in diesem', 'jahr'),
+      it('Mit dir', 'geh ich mit dir', '.. wenn das jahr kommt ..', '.. weiter'),
+    ]),
   ] },
   { label: 'Wedding', group: 'Celebrations', theme: { ...th('#d4af37', '#f2f2f2', '#e8b4b8', deco('° ❀ ♡ ❀ °', '', '(◍•ᴗ•◍)')),
       decoColors: { dekoTop: '#e8d59a', dekoBottom: '#e8d59a', kaomoji: '#e8d59a' },
@@ -1224,6 +1286,11 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     twoBirthday('Aelter Noch Cool', 'birthday', '.. made you', 'older', 'but still', 'cool'),
     it('Kuchen Und Chaos', 'birthday rules apply', '.. cake first ..', '.. decisions later'),
     it('Heute Hauptperson', 'its your birthday', '.. official notice ..', '.. act accordingly'),
+    ...de([
+      it('Dein tag', 'wie gern ich dich hab', '.. heute darfst du wissen ..', '.. und zwar ganz doll'),
+      twoBirthday('Dein tag', 'heute bist du', '.. der', 'held', 'von diesem', 'tag'),
+      it('Heute du', 'mein liebling', '.. heute bist du ..', '.. mehr als sonst'),
+    ]),
   ] },
 ];
 
