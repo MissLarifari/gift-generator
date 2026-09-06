@@ -8,6 +8,12 @@ export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/gift-generator/' : '/',
   plugins: [react()],
   server: {
+    // Festgenagelt, weil die Vorschau des Editors aus .claude/launch.json
+    // eine feste Portnummer aufruft. Ohne das sucht sich Vite bei belegtem
+    // Port still den naechsten - und die Vorschau zeigt "nicht erreichbar",
+    // obwohl der Server laeuft. strictPort laesst ihn lieber laut scheitern.
+    port: 5173,
+    strictPort: true,
     // The guestbook API only answers to https://sophey.vodka (ALLOWED_ORIGIN).
     // Live that is the same origin as Gifty, so there is no CORS at all; from a
     // dev server on localhost the browser would be turned away. This hands the
