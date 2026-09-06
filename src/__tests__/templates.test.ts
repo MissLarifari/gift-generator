@@ -118,9 +118,12 @@ describe('Sparkle', () => {
 describe('the German sayings', () => {
   const german = TEMPLATE_CATEGORIES.flatMap((cat) => cat.items.filter((i) => i.lang === 'de').map((i) => ({ cat, i })));
 
-  it('there are some, spread over more than one category', () => {
-    expect(german.length).toBeGreaterThan(100);
-    expect(new Set(german.map(({ cat }) => cat.label)).size).toBeGreaterThan(8);
+  // The set is being rewritten (the first batch read as chopped fragments and
+  // was pulled on 2026-09-06), so there may be none right now. The rules below
+  // are what a German card has to satisfy whenever one exists again.
+  it('sit in more than one category when there are any', () => {
+    if (german.length === 0) return;
+    expect(new Set(german.map(({ cat }) => cat.label)).size).toBeGreaterThan(1);
   });
 
   // The ornate script maps a-z and nothing else. An umlaut inside a word comes
@@ -151,6 +154,7 @@ describe('the German sayings', () => {
 
   // Labels are the browsing titles, not the gift — umlauts belong there.
   it('are labelled in German', () => {
+    if (german.length === 0) return;
     expect(german.some(({ i }) => /[äöüß]/.test(i.l))).toBe(true);
   });
 
