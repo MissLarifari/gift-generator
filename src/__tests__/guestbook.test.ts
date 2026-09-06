@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { reasonOf, submitEntry, listEntries, GuestbookError, MAX_NAME, MAX_TEXT } from '../guestbook';
+import {
+  reasonOf, submitEntry, listEntries, checkSecret, deleteEntry,
+  loadSecret, saveSecret, forgetSecret,
+  GuestbookError, MAX_NAME, MAX_TEXT,
+} from '../guestbook';
 
 // The point of these tests is that Gifty and guestbook-api agree. The sentences
 // below are copied verbatim out of guestbook-api/src/filters.js — including the
@@ -94,5 +98,70 @@ describe('listEntries', () => {
   it('throws when the guestbook is unreachable, so the panel can say so', async () => {
     mockFetch({ ok: false, status: 502 });
     await expect(listEntries()).rejects.toThrow();
+  });
+});
+
+describe('moderation', () => {
+  // Deleting rides on the API's `reject`, the same route the Cloud bot's
+  // buttons use. There is no separate delete endpoint to get wrong.
+  it('rejects the entry through the moderate route, with the secret in the header', async () => {
+    const spy = mockFetch({});
+    await deleteEntry(7, 's3cret');
+    const [url, init] = spy.mock.calls[0];
+    expect(url).toMatch(/\/entries\/7\/moderate$/);
+    expect(init.headers['x-mod-secret']).toBe('s3cret');
+    expect(JSON.parse(init.body)).toEqual({ action: 'reject' });
+  });
+
+  it('says so when the secret is not accepted', async () => {
+    mockFetch({ ok: false, status: 401, json: async () => ({ error: 'unauthorized' }) });
+    await expect(deleteEntry(7, 'wrong')).rejects.toMatchObject({ reason: 'unauthorized' });
+  });
+
+  // The probe must never remove anything: id 0 cannot exist, ids start at 1.
+  it('checks a secret against an entry that cannot exist', async () => {
+    const spy = mockFetch({ ok: false, status: 404, json: async () => ({ error: 'not found' }) });
+    expect(await checkSecret('right')).toBe(true);
+    expect(spy.mock.calls[0][0]).toMatch(/\/entries\/0\/moderate$/);
+  });
+
+  it('reads a 401 as the wrong secret rather than an outage', async () => {
+    mockFetch({ ok: false, status: 401, json: async () => ({ error: 'unauthorized' }) });
+    expect(await checkSecret('wrong')).toBe(false);
+  });
+
+  it('does not call a broken server a wrong secret', async () => {
+    mockFetch({ ok: false, status: 502, json: async () => ({}) });
+    await expect(checkSecret('right')).rejects.toBeInstanceOf(GuestbookError);
+  });
+
+  it('keeps the secret in this browser and gives it back', () => {
+    // The tests run in Node, where there is no localStorage. The client's own
+    // try/catch hides that, so the store has to be supplied to test it at all.
+    const box = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => box.get(k) ?? null,
+      setItem: (k: string, v: string) => void box.set(k, v),
+      removeItem: (k: string) => void box.delete(k),
+    });
+    forgetSecret();
+    expect(loadSecret()).toBe('');
+    saveSecret('abc');
+    expect(loadSecret()).toBe('abc');
+    forgetSecret();
+    expect(loadSecret()).toBe('');
+  });
+
+  it('never puts the secret in the address', async () => {
+    const spy = mockFetch({});
+    await deleteEntry(7, 's3cret');
+    expect(String(spy.mock.calls[0][0])).not.toContain('s3cret');
+  });
+
+  it('does not fall over where there is no storage at all', () => {
+    vi.stubGlobal('localStorage', undefined);
+    expect(loadSecret()).toBe('');
+    expect(() => saveSecret('abc')).not.toThrow();
+    expect(() => forgetSecret()).not.toThrow();
   });
 });

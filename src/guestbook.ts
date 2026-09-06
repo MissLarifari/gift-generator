@@ -45,7 +45,10 @@ export const MAX_TEXT = 500;
  * speaks four languages, so its sentence is turned back into a reason here and
  * the wording is picked in i18n.
  */
-export type Refusal = 'name' | 'length' | 'links' | 'friendly' | 'spam' | 'shout' | 'rate' | 'failed';
+export const REFUSALS = [
+  'name', 'length', 'links', 'friendly', 'spam', 'shout', 'rate', 'unauthorized', 'failed',
+] as const;
+export type Refusal = (typeof REFUSALS)[number];
 
 export class GuestbookError extends Error {
   readonly reason: Refusal;
@@ -98,4 +101,56 @@ export async function submitEntry(name: string, message: string): Promise<void> 
   const body: unknown = await res.json().catch(() => null);
   const sentence = (body as { error?: unknown } | null)?.error;
   throw new GuestbookError(typeof sentence === 'string' ? reasonOf(sentence) : 'failed');
+}
+
+// ─── Moderation ──────────────────────────────────────────────────────────────
+//
+// Deleting needs the API's MOD_SECRET, the same one the Cloud bot uses for the
+// buttons in #gb-moderation. There is no separate delete route: `reject` on an
+// entry removes it whatever its state, so an entry that is already public comes
+// down the same way a pending one is turned away.
+//
+// The secret lives in this browser and nowhere else — never in a URL, never in
+// a log, never in the page's markup. It is Lari's own device; `forgetSecret()`
+// takes it back out.
+
+const SECRET_KEY = 'gifty_gb_mod';
+
+export function loadSecret(): string {
+  try { return localStorage.getItem(SECRET_KEY) ?? ''; } catch { return ''; }
+}
+export function saveSecret(secret: string): void {
+  try { localStorage.setItem(SECRET_KEY, secret); } catch { /* private window */ }
+}
+export function forgetSecret(): void {
+  try { localStorage.removeItem(SECRET_KEY); } catch { /* private window */ }
+}
+
+function moderate(id: number | string, action: 'approve' | 'reject', secret: string): Promise<Response> {
+  return fetch(`${BASE}/entries/${encodeURIComponent(String(id))}/moderate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-mod-secret': secret },
+    body: JSON.stringify({ action }),
+  });
+}
+
+/**
+ * Is this the right secret? Asked without changing anything: entry 0 cannot
+ * exist (ids start at 1), so a correct secret gets past the guard and lands on
+ * "not found", while a wrong one is turned away at the door.
+ *
+ *   401 -> wrong secret        404 -> right secret, no such entry
+ */
+export async function checkSecret(secret: string): Promise<boolean> {
+  const res = await moderate(0, 'reject', secret);
+  if (res.status === 401) return false;
+  if (res.status === 404) return true;
+  throw new GuestbookError('failed');
+}
+
+/** Takes one entry off the guestbook. There is no undo — the row is gone. */
+export async function deleteEntry(id: number | string, secret: string): Promise<void> {
+  const res = await moderate(id, 'reject', secret);
+  if (res.ok) return;
+  throw new GuestbookError(res.status === 401 ? 'unauthorized' : 'failed');
 }

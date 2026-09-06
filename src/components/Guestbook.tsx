@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Send, MessageSquare, ShieldCheck, Loader2, MessageSquareHeart } from 'lucide-react';
+import {
+  Send, MessageSquare, ShieldCheck, Loader2, MessageSquareHeart, Trash2, KeyRound, Lock,
+} from 'lucide-react';
 import {
   listEntries, submitEntry, guestbookReady,
   MIN_NAME, MAX_NAME, MIN_TEXT, MAX_TEXT,
+  loadSecret, saveSecret, forgetSecret, checkSecret, deleteEntry,
   GuestbookError, type GuestEntry,
 } from '../guestbook';
 import { useI18n } from '../i18n';
@@ -21,6 +24,13 @@ import { useI18n } from '../i18n';
 // The name is REQUIRED: the server refuses an entry without one. Saying
 // "optional" here and letting the server say no afterwards is the worse of the
 // two, so the form asks for it up front.
+//
+// MODERATION: the Discord buttons only exist while an entry is still new. Once
+// something is public there was no way to take it down again — that is what the
+// admin strip is for. It is invisible until the address ends in `#mod`, and it
+// can do nothing without the secret.
+
+const ADMIN_HASH = '#mod';
 
 type Phase = 'loading' | 'ready' | 'failed' | 'off';
 
@@ -33,6 +43,23 @@ export default function Guestbook() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
+
+  // Moderation. An empty `secret` means locked; `asked` is the hash being used.
+  const [secret, setSecret] = useState(() => loadSecret());
+  const [asked, setAsked] = useState(false);
+  const [keyDraft, setKeyDraft] = useState('');
+  const [keyBusy, setKeyBusy] = useState(false);
+  const [keyBad, setKeyBad] = useState(false);
+  const [arming, setArming] = useState<GuestEntry['id'] | null>(null);
+  const [removing, setRemoving] = useState<GuestEntry['id'] | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    const read = () => setAsked(window.location.hash === ADMIN_HASH);
+    read();
+    window.addEventListener('hashchange', read);
+    return () => window.removeEventListener('hashchange', read);
+  }, []);
 
   useEffect(() => {
     if (!guestbookReady()) return;
@@ -65,6 +92,45 @@ export default function Guestbook() {
     }
   }, [canSend, name, text, t]);
 
+  const unlock = useCallback(async () => {
+    const key = keyDraft.trim();
+    if (!key || keyBusy) return;
+    setKeyBusy(true);
+    setKeyBad(false);
+    try {
+      if (!(await checkSecret(key))) { setKeyBad(true); return; }
+      saveSecret(key);
+      setSecret(key);
+      setKeyDraft('');
+    } catch {
+      setKeyBad(true);
+    } finally {
+      setKeyBusy(false);
+    }
+  }, [keyDraft, keyBusy]);
+
+  const lock = useCallback(() => {
+    forgetSecret();
+    setSecret('');
+    setArming(null);
+    setNote(null);
+  }, []);
+
+  const remove = useCallback(async (id: GuestEntry['id']) => {
+    setRemoving(id);
+    setNote(null);
+    try {
+      await deleteEntry(id, secret);
+      setEntries((list) => list.filter((e) => e.id !== id));
+      setNote(t('gb_mod_gone'));
+    } catch (e) {
+      setNote(t(e instanceof GuestbookError ? `gb_e_${e.reason}` : 'gb_e_failed'));
+    } finally {
+      setRemoving(null);
+      setArming(null);
+    }
+  }, [secret, t]);
+
   // A refusal is about what stood in the box a moment ago. As soon as it is
   // being changed, the sentence is stale — it must not sit there over new text.
   const edit = (set: (v: string) => void) => (v: string) => { set(v); if (failed) setFailed(null); };
@@ -76,6 +142,8 @@ export default function Guestbook() {
     : !okName ? t('gb_need_name')
     : !okText ? t('gb_need_text')
     : undefined;
+
+  const modOpen = secret !== '' || asked;
 
   return (
     <section className="slab flex flex-col" style={{ minHeight: 0, flex: '2 1 0', overflow: 'hidden' }}>
@@ -126,6 +194,39 @@ export default function Guestbook() {
           </div>
         )}
 
+        {/* Moderation. Nobody sees this without putting #mod in the address. */}
+        {modOpen && (
+          <div className="gb-mod">
+            {secret ? (
+              <div className="gb-mod-on">
+                <span className="hint"><ShieldCheck size={12} /> {t('gb_mod_on')}</span>
+                <button className="btn btn-sm" onClick={lock}><Lock size={12} /> {t('gb_mod_lock')}</button>
+              </div>
+            ) : (
+              <>
+                <div className="gb-mod-row">
+                  <KeyRound size={13} style={{ color: 'var(--muted)', flex: '0 0 auto' }} />
+                  <input
+                    type="password"
+                    autoComplete="off"
+                    className="gb-key"
+                    value={keyDraft}
+                    onChange={(e) => { setKeyDraft(e.target.value); setKeyBad(false); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') unlock(); }}
+                    placeholder={t('gb_mod_ph')}
+                    aria-label={t('gb_mod_ph')}
+                  />
+                  <button className="btn btn-sm" onClick={unlock} disabled={!keyDraft.trim() || keyBusy}>
+                    {keyBusy ? <Loader2 size={12} className="spin" /> : <KeyRound size={12} />} {t('gb_mod_unlock')}
+                  </button>
+                </div>
+                <p className="hint" style={{ marginTop: 6 }}>{keyBad ? t('gb_mod_wrong') : t('gb_mod_hint')}</p>
+              </>
+            )}
+            {note && <p className="hint" style={{ marginTop: 6 }}>{note}</p>}
+          </div>
+        )}
+
         <div className="sechead" style={{ marginTop: 18 }}>
           <span className="sechead-t">{t('gb_entries')}</span>
           {phase === 'ready' && <span className="sechead-n">{entries.length}</span>}
@@ -143,8 +244,23 @@ export default function Guestbook() {
                   <MessageSquare size={11} />
                   <span className="gb-who">{e.name || t('gb_anon')}</span>
                   <span className="gb-when">{new Date(e.createdAt).toLocaleDateString()}</span>
+                  {secret && arming !== e.id && (
+                    <button className="gb-del" onClick={() => setArming(e.id)} title={t('gb_mod_del')} aria-label={t('gb_mod_del')}>
+                      <Trash2 size={11} />
+                    </button>
+                  )}
                 </div>
                 <p className="gb-body">{e.message}</p>
+                {/* Deleting cannot be taken back, so it takes two decisions. */}
+                {secret && arming === e.id && (
+                  <div className="gb-sure">
+                    <span>{t('gb_mod_sure')}</span>
+                    <button className="btn btn-sm btn-danger" onClick={() => remove(e.id)} disabled={removing === e.id}>
+                      {removing === e.id ? <Loader2 size={12} className="spin" /> : <Trash2 size={12} />} {t('gb_mod_yes')}
+                    </button>
+                    <button className="btn btn-sm" onClick={() => setArming(null)}>{t('gb_mod_no')}</button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

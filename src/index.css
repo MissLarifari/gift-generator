@@ -1296,6 +1296,65 @@ button { color: inherit; }
 .gb-when { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9.5px; }
 .gb-body { margin: 6px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
 
+/* Moderation — unsichtbar, bis #mod in der Adresse steht. Bewusst schmal und
+   grau: das ist Werkzeug, kein Teil der Seite, die Besucher sehen sollen. */
+.gb-mod {
+  margin-top: 12px;
+  padding: 10px 11px;
+  background: var(--card);
+  border: 1px dashed var(--line-soft);
+  border-radius: 12px;
+}
+.gb-mod-row { display: flex; align-items: center; gap: 8px; }
+.gb-mod-on { display: flex; align-items: center; gap: 9px; }
+.gb-mod-on .hint { flex: 1; display: flex; align-items: center; gap: 5px; }
+.gb-mod .hint { display: flex; align-items: center; gap: 5px; }
+.gb-key {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 9px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  outline: none;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.gb-key:focus { border-color: var(--accent-line); }
+
+/* Der Papierkorb sitzt in der Kopfzeile des Eintrags und faellt erst auf,
+   wenn man auf den Eintrag zeigt. */
+.gb-del {
+  flex: 0 0 auto;
+  display: inline-flex;
+  padding: 3px;
+  color: var(--dim);
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.gb-list li:hover .gb-del { opacity: 1; }
+.gb-del:hover { color: var(--danger); background: rgba(224, 117, 122, 0.12); }
+
+.gb-sure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.gb-sure > span { flex: 1; }
+.btn-danger { color: #fff; background: var(--danger); border-color: transparent; }
+.btn-danger:hover:not(:disabled) { background: #ea868b; }
+
 .spin { animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { I18N, LANGS } from '../i18n';
-import type { Refusal } from '../guestbook';
+import { REFUSALS } from '../guestbook';
 
 // A missing key does not crash: t() quietly falls back to English, so a gap
 // shows up as one stray English word in an otherwise German panel — easy to
@@ -77,10 +77,15 @@ describe('the guestbook speaks every language', () => {
   // Every reason the server can refuse an entry for is turned into a
   // `gb_e_<reason>` key. Add a reason without its sentence and the panel
   // silently shows the bare key, in all four languages.
-  const REASONS: Refusal[] = ['name', 'length', 'links', 'friendly', 'spam', 'shout', 'rate', 'failed'];
+  // Straight from the source list, so a new reason cannot be added without a
+  // sentence for it in all four languages.
+  const REASONS = REFUSALS;
   const KEYS = ['gb_title', 'gb_sub', 'gb_name_ph', 'gb_text_ph', 'gb_send', 'gb_moderated', 'gb_queued',
     'gb_entries', 'gb_empty', 'gb_anon', 'gb_loading', 'gb_unreachable', 'gb_off',
-    'gb_need_name', 'gb_need_text', ...REASONS.map((r) => `gb_e_${r}`)];
+    'gb_need_name', 'gb_need_text',
+    'gb_mod_title', 'gb_mod_hint', 'gb_mod_ph', 'gb_mod_unlock', 'gb_mod_wrong', 'gb_mod_on',
+    'gb_mod_lock', 'gb_mod_del', 'gb_mod_sure', 'gb_mod_yes', 'gb_mod_no', 'gb_mod_gone',
+    ...REASONS.map((r) => `gb_e_${r}`)];
 
   for (const lang of LANGS)
     it(`${lang} has a sentence for every part of it`, () => {
