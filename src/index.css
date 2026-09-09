@@ -833,6 +833,9 @@ button { color: inherit; }
   transition: background 0.12s ease;
 }
 .gift-row:hover { background: rgba(255, 255, 255, 0.06); }
+/* Die Zeile, in der gerade geschrieben wird. Sie leuchtet im Geschenk auf,
+   damit man beim Tippen im Feld sieht, welche Stelle man aendert. */
+.gift-row-on { background: rgba(139, 141, 255, 0.16); box-shadow: inset 2px 0 0 var(--accent); border-radius: 4px; }
 
 /* A group heading in the shelf — four shelves, not one heap. */
 .band {

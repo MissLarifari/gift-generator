@@ -9,7 +9,7 @@ import About from './components/About';
 import Guestbook from './components/Guestbook';
 import EditorPanel from './components/EditorPanel';
 import ColorPickerOverlay, { type ColorState } from './components/ColorPickerOverlay';
-import { generate, type GiftState, type FieldId } from './engine';
+import { generate, stripTags, type GiftState, type FieldId } from './engine';
 import { composeTemplate, type TplCategory, type TplItem } from './data/templates';
 import { LOOKS, composeLook, lookIdOf, type Look } from './data/looks';
 import { createDefaultState, type Commit } from './state';
@@ -83,6 +83,7 @@ export default function App() {
   const [mode, setMode] = useState<EditMode>(readMode);
   const [askSwitch, setAskSwitch] = useState(false);
   const [colorField, setColorField] = useState<FieldId | null>(null);
+  const [hiField, setHiField] = useState<FieldId | null>(null);
   const [about, setAbout] = useState(false);
   const [lookId, setLookId] = useState<string | null>(shared ? null : lookIdOf(START));
   // The layout you picked, kept as a choice rather than read back off the gift:
@@ -110,6 +111,25 @@ export default function App() {
     setLookId(lookIdOf(next));
     setCode(generate(next).code, coalesceKey);
   }, [build, setCode]);
+
+  /**
+   * Welche Zeile des Geschenks gehoert zu dem Feld, in dem gerade geschrieben
+   * wird? generate() gibt die fertig gesetzten Zeilen mit heraus — die suchen
+   * wir im Code, statt die Reihenfolge ein zweites Mal nachzubauen. Findet sich
+   * nichts, wird eben nichts hervorgehoben; falsch zeigen waere schlimmer.
+   */
+  const hiLine = useMemo(() => {
+    if (!hiField) return null;
+    const piece = generate(build).lines[hiField];
+    if (!piece) return null;
+    // Verglichen wird der reine Text, nicht der Code: generate() gibt die
+    // Feld-Stuecke heraus, BEVOR benachbarte Tags zusammengefasst werden — die
+    // fertige Zeile traegt also andere Tags, aber dieselben Buchstaben.
+    const want = stripTags(piece).trim();
+    if (!want) return null;
+    const i = code.split('\n').findIndex((l) => stripTags(l).trim() === want);
+    return i >= 0 ? i : null;
+  }, [hiField, build, code]);
 
   // Steht im Kasten noch das, was aus den Feldern kommt? Wenn nicht, hat jemand
   // von Hand getippt — und ein Wechsel in die Felder wuerde das ueberschreiben.
@@ -259,7 +279,7 @@ export default function App() {
 
           {mode === 'code'
             ? <Editor ref={editor} code={code} setCode={setCode} undo={undo} canUndo={canUndo} />
-            : <EditorPanel state={build} commit={commitBuild} onOpenColor={setColorField} looks={LOOKS} activeLook={lookId} onApplyLook={applyLook} />}
+            : <EditorPanel state={build} commit={commitBuild} onOpenColor={setColorField} looks={LOOKS} activeLook={lookId} onApplyLook={applyLook} onFocusField={setHiField} />}
           <Guestbook />
         </div>
 
@@ -267,7 +287,7 @@ export default function App() {
             replica keeps its width instead of losing 10px to a scrollbar. */}
         <section className="scroll-y" style={{ minHeight: 0, paddingTop: 4, overflowX: 'auto', scrollbarGutter: 'stable' }}>
           <div style={{ height: 'fit-content', width: 506, maxWidth: '100%', paddingBottom: 8 }}>
-            <Preview code={code} onPickLine={(a, b, deco) => editor.current?.selectLine(a, b, deco)} />
+            <Preview code={code} hiLine={hiLine} onPickLine={mode === 'code' ? (a, b, deco) => editor.current?.selectLine(a, b, deco) : undefined} />
             <Actions code={code} setCode={setCode} onReset={resetAll} />
             <ThankYou />
           </div>

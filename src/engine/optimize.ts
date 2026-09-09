@@ -1,5 +1,6 @@
 import { byteLen, giftBytes, giftChars } from './count';
 import { normalizeFontChars } from './fonts';
+import { isDecoLine, stripTags } from './parse';
 
 // Getting the gift under 255 bytes.
 //
@@ -11,12 +12,16 @@ import { normalizeFontChars } from './fonts';
 // and the difference in bytes is taken from it. If a rewrite saves nothing it
 // does not appear.
 
-export type TipId = 'white' | 'size14' | 'empty' | 'merge' | 'plain';
+export type TipId = 'white' | 'size14' | 'empty' | 'merge' | 'plain' | 'cutdeco';
 
 export interface Tip {
   id: TipId;
+  /** Eindeutig, weil es mehrere Deko-Zeilen zum Streichen geben kann. */
+  uid: string;
   /** i18n key for the one-line explanation. */
   key: string;
+  /** Was der Satz einsetzen soll — bei einer Deko-Zeile die Zeile selbst. */
+  arg?: string;
   /** Bytes this actually saves, measured on the result. */
   saves: number;
   /** The code with this one change applied. */
@@ -96,8 +101,32 @@ function mergeSeams(code: string): string {
 const build = (id: TipId, key: string, code: string, fixed: string, changesLook: boolean): Tip | null => {
   if (fixed === code) return null;
   const saves = byteLen(code) - byteLen(fixed);
-  return saves > 0 ? { id, key, saves, fixed, changesLook } : null;
+  return saves > 0 ? { id, uid: id, key, saves, fixed, changesLook } : null;
 };
+
+/**
+ * Ganze Deko-Zeilen zum Streichen — eine je Zeile, mit der Zeile im Satz, damit
+ * man vor dem Druecken sieht welche gemeint ist.
+ *
+ * Nur Deko: eine Zeile mit Woertern darin traegt die Botschaft, und die schlaegt
+ * niemand zum Loeschen vor. Deko ist der Schmuck, und wenn ein Geschenk nicht
+ * passt, ist Schmuck das erste was gehen kann — bei Sparkle mit seinen zwei
+ * Reihen oft der ganze Unterschied.
+ */
+function cutDecoTips(code: string): Tip[] {
+  const lines = code.split('\n');
+  if (lines.length < 2) return [];
+  const out: Tip[] = [];
+  lines.forEach((line, i) => {
+    const plain = stripTags(line).trim();
+    if (!plain) return;               // leere Zeilen macht der 'empty'-Tipp
+    if (!isDecoLine(line)) return;    // Woerter bleiben
+    const fixed = lines.filter((_, j) => j !== i).join('\n');
+    const saves = byteLen(code) - byteLen(fixed);
+    if (saves > 0) out.push({ id: 'cutdeco', uid: `cutdeco:${i}`, key: 'opt_cut_deco', arg: plain, saves, fixed, changesLook: true });
+  });
+  return out;
+}
 
 /**
  * Everything worth pressing, biggest saving first. Each tip is measured against
@@ -111,6 +140,7 @@ export function optimize(code: string): Tip[] {
     build('empty', 'opt_empty', code, dropEmpty(code), false),
     build('merge', 'opt_merge', code, mergeSeams(code), false),
     build('plain', 'opt_plain', code, normalizeFontChars(code), true),
+    ...cutDecoTips(code),
   ];
   return tips.filter((t): t is Tip => t !== null).sort((a, b) => b.saves - a.saves);
 }

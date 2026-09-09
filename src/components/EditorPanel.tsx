@@ -48,9 +48,11 @@ export default function EditorPanel(props: {
   looks: Look[];
   activeLook: string | null;
   onApplyLook: (l: Look) => void;
+  /** Welche Zeile gerade bearbeitet wird — die Vorschau hebt sie hervor. */
+  onFocusField?: (f: FieldId | null) => void;
   focusReq?: FocusRequest | null;
 }) {
-  const { state, commit, onOpenColor, looks, activeLook, onApplyLook, focusReq } = props;
+  const { state, commit, onOpenColor, looks, activeLook, onApplyLook, onFocusField, focusReq } = props;
   const { t } = useI18n();
   const [open, setOpen] = useState<Record<Section, boolean>>({ text: true, style: false, deco: false, layout: true });
   const [styleTarget, setStyleTarget] = useState<FieldId>('mainText');
@@ -181,6 +183,8 @@ export default function EditorPanel(props: {
             ref={(el) => { fieldRefs.current[f] = el; }}
             value={val}
             onChange={(e) => typeText(f, e.target.value)}
+            onFocus={() => onFocusField?.(f)}
+            onBlur={() => onFocusField?.(null)}
             placeholder={t('g_text_ph')}
             aria-label={fieldLabel(f)}
           />

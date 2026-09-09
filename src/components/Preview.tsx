@@ -57,7 +57,13 @@ const tab = (label: string, on = false) => (
   </span>
 );
 
-export default function Preview({ code, onPickLine }: { code: string; onPickLine?: (start: number, end: number, deco: boolean) => void }) {
+export default function Preview({ code, onPickLine, hiLine }: {
+  code: string;
+  onPickLine?: (start: number, end: number, deco: boolean) => void;
+  /** Zeile, die gerade im Feld bearbeitet wird — sie leuchtet hier auf, damit
+   *  man sieht, an welcher Stelle des Geschenks man schreibt. */
+  hiLine?: number | null;
+}) {
   const { t } = useI18n();
   const { lines } = parseCode(code);
   // One span per drawn line — only then can a click be mapped back to the code
@@ -102,7 +108,7 @@ export default function Preview({ code, onPickLine }: { code: string; onPickLine
               return (
               <div
                 key={i}
-                className={clickable ? 'gift-row' : undefined}
+                className={[clickable ? 'gift-row' : '', hiLine === i ? 'gift-row-on' : ''].filter(Boolean).join(' ') || undefined}
                 title={clickable ? t(deco ? 'e_pick_deco' : 'e_pick_line') : undefined}
                 onClick={clickable ? () => onPickLine(a, b, deco) : undefined}
                 style={{ minHeight: 4, lineHeight: 1.25 }}

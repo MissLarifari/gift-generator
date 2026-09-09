@@ -78,10 +78,10 @@ export default function Actions({ code, setCode, onReset }: { code: string; setC
         {openTips && tips.length > 0 && (
           <div className="optlist">
             {tips.map((tip) => (
-              <button key={tip.id} className="opt" onClick={() => { setCode(tip.fixed); setOpenTips(false); }}>
+              <button key={tip.uid} className="opt" onClick={() => { setCode(tip.fixed); setOpenTips(false); }}>
                 <span className="opt-save">-{tip.saves}</span>
                 <span className="opt-body">
-                  <span className="opt-t">{t(tip.key)}</span>
+                  <span className="opt-t">{t(tip.key, tip.arg)}</span>
                   {tip.changesLook && <span className="opt-warn">{t('g_opt_changes')}</span>}
                 </span>
               </button>
