@@ -7,7 +7,7 @@ import Preview from './components/Preview';
 import Actions, { ThankYou } from './components/Actions';
 import About from './components/About';
 import Guestbook from './components/Guestbook';
-import EditorPanel from './components/EditorPanel';
+import EditorPanel, { type FocusRequest } from './components/EditorPanel';
 import ColorPickerOverlay, { type ColorState } from './components/ColorPickerOverlay';
 import { generate, stripTags, type GiftState, type FieldId } from './engine';
 import { composeTemplate, type TplCategory, type TplItem } from './data/templates';
@@ -84,6 +84,9 @@ export default function App() {
   const [askSwitch, setAskSwitch] = useState(false);
   const [colorField, setColorField] = useState<FieldId | null>(null);
   const [hiField, setHiField] = useState<FieldId | null>(null);
+  // Der Zaehler sorgt dafuer, dass zweimal dieselbe Zeile auch zweimal wirkt.
+  const focusNonce = useRef(0);
+  const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
   const [about, setAbout] = useState(false);
   const [lookId, setLookId] = useState<string | null>(shared ? null : lookIdOf(START));
   // The layout you picked, kept as a choice rather than read back off the gift:
@@ -118,6 +121,31 @@ export default function App() {
    * wir im Code, statt die Reihenfolge ein zweites Mal nachzubauen. Findet sich
    * nichts, wird eben nichts hervorgehoben; falsch zeigen waere schlimmer.
    */
+  /**
+   * Welche Zeile des Codes gehoert zu welchem Feld — einmal berechnet, in beide
+   * Richtungen benutzt: das Feld leuchtet die Zeile an, und ein Klick auf die
+   * Zeile springt ins Feld.
+   */
+  const lineOfField = useMemo(() => {
+    const out = new Map<FieldId, number>();
+    const rendered = generate(build).lines;
+    const zeilen = code.split('\n').map((l) => stripTags(l).trim());
+    for (const [f, piece] of Object.entries(rendered) as [FieldId, string | null][]) {
+      if (!piece) continue;
+      const want = stripTags(piece).trim();
+      if (!want) continue;
+      const i = zeilen.indexOf(want);
+      if (i >= 0) out.set(f, i);
+    }
+    return out;
+  }, [build, code]);
+
+  /** Die Zeile anklicken und im richtigen Feld landen. */
+  const pickField = useCallback((start: number) => {
+    const i = code.slice(0, start).split('\n').length - 1;
+    for (const [f, n] of lineOfField) if (n === i) { focusNonce.current += 1; setFocusReq({ f, n: focusNonce.current, focus: true }); return; }
+  }, [code, lineOfField]);
+
   const hiLine = useMemo(() => {
     if (!hiField) return null;
     const piece = generate(build).lines[hiField];
@@ -279,7 +307,7 @@ export default function App() {
 
           {mode === 'code'
             ? <Editor ref={editor} code={code} setCode={setCode} undo={undo} canUndo={canUndo} />
-            : <EditorPanel state={build} commit={commitBuild} onOpenColor={setColorField} looks={LOOKS} activeLook={lookId} onApplyLook={applyLook} onFocusField={setHiField} />}
+            : <EditorPanel state={build} commit={commitBuild} onOpenColor={setColorField} looks={LOOKS} activeLook={lookId} onApplyLook={applyLook} onFocusField={setHiField} focusReq={focusReq} />}
           <Guestbook />
         </div>
 
@@ -287,7 +315,7 @@ export default function App() {
             replica keeps its width instead of losing 10px to a scrollbar. */}
         <section className="scroll-y" style={{ minHeight: 0, paddingTop: 4, overflowX: 'auto', scrollbarGutter: 'stable' }}>
           <div style={{ height: 'fit-content', width: 506, maxWidth: '100%', paddingBottom: 8 }}>
-            <Preview code={code} hiLine={hiLine} onPickLine={mode === 'code' ? (a, b, deco) => editor.current?.selectLine(a, b, deco) : undefined} />
+            <Preview code={code} hiLine={hiLine} onPickLine={mode === 'code' ? (a, b, deco) => editor.current?.selectLine(a, b, deco) : (a) => pickField(a)} />
             <Actions code={code} setCode={setCode} onReset={resetAll} />
             <ThankYou />
           </div>

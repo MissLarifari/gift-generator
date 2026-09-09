@@ -6,6 +6,7 @@ import { buildShareUrl, decodeState } from '../share';
 import { TEMPLATE_CATEGORIES } from '../data/templates';
 import { useI18n } from '../i18n';
 import { type Look } from '../data/looks';
+import { isDecoLine } from '../engine';
 
 // Customization sidebar — the same controls as before, regrouped into four
 // collapsible sections (Text / Style / Decoration / Layout) so the important
@@ -196,7 +197,19 @@ export default function EditorPanel(props: {
   // Frueher konnte hier auch die Bauform 'custom' stehen — der rohe Code in
   // einem Kasten. Den gibt es jetzt als eigenen Reiter neben diesem Feld, und
   // waehlbar ist er hier nicht mehr; die Verzweigung ist damit weg.
-  const textFields: FieldId[] = state.layout === 'pyramid' ? FIELDS : ['mainText', 'topText', 'bottomText'];
+  //
+  // Welche Zeilen hier stehen, entscheidet ihr INHALT, nicht ihr Name. Beim
+  // Zweiklang laeuft der Satz durch die Deko-Reihen — "du bist" oben, "in
+  // meinem" in der Mitte. Das sind Woerter, also gehoeren sie in den Text und
+  // nicht in eine Deko-Auswahlliste. Eine Reihe aus reinen Symbolen bleibt bei
+  // der Deko. In der Reihenfolge des Geschenks, damit die Felder von oben nach
+  // unten dasselbe erzaehlen wie die Vorschau daneben.
+  const hasWords = (f: FieldId) => {
+    const v = state.text[f] ?? '';
+    return v.trim() !== '' && !isDecoLine(v);
+  };
+  const inText = (f: FieldId) => !DECO_FIELDS.includes(f) || hasWords(f);
+  const textFields: FieldId[] = (state.lineOrder.length ? state.lineOrder : FIELDS).filter(inText);
   const textSection = <div style={{ marginBottom: -11 }}>{textFields.map((f) => lineRow(f))}</div>;
 
   /* ---------- STYLE ---------- */
