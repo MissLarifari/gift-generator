@@ -9,10 +9,10 @@ import About from './components/About';
 import Guestbook from './components/Guestbook';
 import EditorPanel from './components/EditorPanel';
 import ColorPickerOverlay, { type ColorState } from './components/ColorPickerOverlay';
-import { generate, type GiftState, type FieldId, type Layout } from './engine';
+import { generate, type GiftState, type FieldId } from './engine';
 import { composeTemplate, type TplCategory, type TplItem } from './data/templates';
 import { LOOKS, composeLook, lookIdOf, type Look } from './data/looks';
-import { createDefaultState, FIELDS, LAYOUT_DEFAULTS, type Commit } from './state';
+import { createDefaultState, type Commit } from './state';
 import { useHistory } from './useHistory';
 import { readShareCodeFromUrl, clearShareHash } from './share';
 import { useI18n } from './i18n';
@@ -140,33 +140,6 @@ export default function App() {
       grads: { ...s2.grads, [f]: { ...s2.grads[f], on: cs.gradient, c1: cs.c1, c2: cs.c2, rainbow: false } },
     })), [commitBuild]);
 
-  /**
-   * Ein Layout zu waehlen laedt seine Vorlage, solange noch nichts getippt ist
-   * (der Text also noch dem der aktuellen Vorlage entspricht). Sobald etwas
-   * eigenes drinsteht, aendert es nur noch Anordnung und Zeilenreihenfolge —
-   * sonst waere der eigene Text mit einem Klick weg.
-   */
-  const setLayout = useCallback((l: Layout) =>
-    commitBuild((s2) => {
-      if (l === 'custom') return { ...s2, layout: 'custom' };
-      const d = LAYOUT_DEFAULTS[l];
-      const curD = LAYOUT_DEFAULTS[s2.layout];
-      const pristine = !!curD && FIELDS.every((f) => s2.text[f] === curD.text[f]);
-      if (pristine) {
-        const base = createDefaultState();
-        return {
-          ...base,
-          text: { ...d.text },
-          fonts: { ...base.fonts, ...(d.fonts ?? {}) },
-          sizes: { ...base.sizes, ...(d.sizes ?? {}) },
-          colors: { ...base.colors, ...(d.colors ?? {}) },
-          noColor: { ...base.noColor, ...(d.noColor ?? {}) },
-          layout: l,
-          lineOrder: d.lineOrder ? [...d.lineOrder] : [...base.lineOrder],
-        };
-      }
-      return { ...s2, layout: l, lineOrder: d.lineOrder ? [...d.lineOrder] : s2.lineOrder };
-    }), [commitBuild]);
 
   const [panels, setPanels] = useState<{ left: boolean }>(() => {
     try {
@@ -286,7 +259,7 @@ export default function App() {
 
           {mode === 'code'
             ? <Editor ref={editor} code={code} setCode={setCode} undo={undo} canUndo={canUndo} />
-            : <EditorPanel state={build} commit={commitBuild} onOpenColor={setColorField} onSetLayout={setLayout} />}
+            : <EditorPanel state={build} commit={commitBuild} onOpenColor={setColorField} looks={LOOKS} activeLook={lookId} onApplyLook={applyLook} />}
           <Guestbook />
         </div>
 

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Type, Palette, LayoutGrid, Wand2, Trash2, Download, Upload, ChevronRight, ChevronsDownUp, ChevronsUpDown, Sparkles, Eraser } from 'lucide-react';
-import type { GiftState, FieldId, Layout, FontStyle } from '../engine';
-import { FIELDS, LAYOUTS, FONT_STYLES, HAS_BOLD_ITALIC, HAS_STAR, HAS_FONT, DECO_PRESETS, DECO_FIELDS, SYMBOLS, KAOMOJI, editorSectionOf, type Commit, type EditorSection } from '../state';
+import type { GiftState, FieldId, FontStyle } from '../engine';
+import { FIELDS, FONT_STYLES, HAS_BOLD_ITALIC, HAS_STAR, HAS_FONT, DECO_PRESETS, DECO_FIELDS, SYMBOLS, KAOMOJI, editorSectionOf, type Commit, type EditorSection } from '../state';
 import { buildShareUrl, decodeState } from '../share';
 import { TEMPLATE_CATEGORIES } from '../data/templates';
 import { useI18n } from '../i18n';
-import CustomEditor from './CustomEditor';
+import { type Look } from '../data/looks';
 
 // Customization sidebar — the same controls as before, regrouped into four
 // collapsible sections (Text / Style / Decoration / Layout) so the important
@@ -42,10 +42,15 @@ export default function EditorPanel(props: {
   state: GiftState;
   commit: Commit;
   onOpenColor: (f: FieldId) => void;
-  onSetLayout: (l: Layout) => void;
+  /** Die drei Bauformen von heute — Zettel, Zweiklang, Sparkle. Sie haben die
+   *  sechs alten Anordnungen abgeloest; 'custom' war die Rohcode-Ansicht und
+   *  ist jetzt der Code-Reiter neben diesem Feld. */
+  looks: Look[];
+  activeLook: string | null;
+  onApplyLook: (l: Look) => void;
   focusReq?: FocusRequest | null;
 }) {
-  const { state, commit, onOpenColor, onSetLayout, focusReq } = props;
+  const { state, commit, onOpenColor, looks, activeLook, onApplyLook, focusReq } = props;
   const { t } = useI18n();
   const [open, setOpen] = useState<Record<Section, boolean>>({ text: true, style: false, deco: false, layout: true });
   const [styleTarget, setStyleTarget] = useState<FieldId>('mainText');
@@ -53,9 +58,7 @@ export default function EditorPanel(props: {
   const [pointAt, setPointAt] = useState<FocusRequest | null>(null);
   const fieldRefs = useRef<Partial<Record<FieldId, HTMLElement | null>>>({});
 
-  // The custom layout hides Style and Decoration, so only the sections actually
-  // on screen decide which way the fold-all button points.
-  const visibleSections: Section[] = state.layout === 'custom' ? ['layout', 'text'] : ['layout', 'text', 'style', 'deco'];
+  const visibleSections: Section[] = ['layout', 'text', 'style', 'deco'];
   const anyOpen = visibleSections.some((s) => open[s]);
   // One button for both directions: fold everything away to see the whole panel
   // at a glance, unfold it again to reach every control without hunting.
@@ -186,10 +189,11 @@ export default function EditorPanel(props: {
     );
   };
 
+  // Frueher konnte hier auch die Bauform 'custom' stehen — der rohe Code in
+  // einem Kasten. Den gibt es jetzt als eigenen Reiter neben diesem Feld, und
+  // waehlbar ist er hier nicht mehr; die Verzweigung ist damit weg.
   const textFields: FieldId[] = state.layout === 'pyramid' ? FIELDS : ['mainText', 'topText', 'bottomText'];
-  const textSection = state.layout === 'custom'
-    ? <CustomEditor value={state.customText} commit={commit} />
-    : <div style={{ marginBottom: -11 }}>{textFields.map((f) => lineRow(f))}</div>;
+  const textSection = <div style={{ marginBottom: -11 }}>{textFields.map((f) => lineRow(f))}</div>;
 
   /* ---------- STYLE ---------- */
 
@@ -306,8 +310,8 @@ export default function EditorPanel(props: {
 
   /* ---------- LAYOUT ---------- */
 
-  // Rough thumbnail of where the text lands, per layout.
-  const layoutThumb = (l: Layout) => {
+  // Grobe Skizze, wo der Text landet — je Bauform.
+  const lookThumb = (id: string) => {
     const bar = (k: string, w: string, main = false) => <span key={k} className={'lay-bar' + (main ? ' lay-bar-main' : '')} style={{ width: w }} />;
     const dot = (k: string) => <span key={k} style={{ width: 3, height: 3, borderRadius: '50%', background: '#4a515c' }} />;
     const dots = (k: string) => (
@@ -315,38 +319,17 @@ export default function EditorPanel(props: {
         {[0, 1, 2].map((i) => dot(k + i))}
       </span>
     );
-    switch (l) {
-      case 'inline':
-        return <>{bar('a', '74%', true)}{bar('b', '44%')}</>;
-      case 'pyramid':
-        return <>{bar('a', '18%')}{bar('b', '38%')}{bar('c', '58%')}{bar('d', '72%', true)}</>;
-      case 'sparkle':
-        return <>{dots('a')}{bar('b', '64%', true)}{dots('c')}</>;
-      case 'heart':
-        return (
-          <>
-            {dots('a')}
-            <span key="mid" className="flex items-center" style={{ gap: 4 }}>
-              {dot('l')}
-              {bar('m', '46px', true)}
-              {dot('r')}
-            </span>
-            {dots('c')}
-          </>
-        );
-      case 'custom':
-        return <span className="mono" style={{ fontSize: 12, color: 'var(--dim)' }}>{'</>'}</span>;
-      default:
-        return <>{bar('a', '40%')}{bar('b', '66%', true)}{bar('c', '40%')}</>;
-    }
+    if (id === 'twoWords') return <>{bar('a', '34%')}{bar('b', '70%', true)}{dots('c')}{bar('d', '70%', true)}</>;
+    if (id === 'sparkle') return <>{dots('a')}{bar('b', '40%')}{bar('c', '66%', true)}{dots('d')}</>;
+    return <>{dots('a')}{bar('b', '40%')}{bar('c', '66%', true)}{bar('d', '40%')}</>;
   };
 
   const layoutSection = (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
-      {LAYOUTS.map((l) => (
-        <button key={l} className="lay" data-on={state.layout === l} onClick={() => onSetLayout(l)}>
-          <span className="lay-canvas">{layoutThumb(l)}</span>
-          <span style={{ fontSize: 11.5, color: state.layout === l ? 'var(--text)' : 'var(--muted)' }}>{t('layout_' + l)}</span>
+      {looks.map((l) => (
+        <button key={l.id} className="lay" data-on={activeLook === l.id} onClick={() => onApplyLook(l)} title={t('look_' + l.id + '_h')}>
+          <span className="lay-canvas">{lookThumb(l.id)}</span>
+          <span style={{ fontSize: 11.5, color: activeLook === l.id ? 'var(--text)' : 'var(--muted)' }}>{t('look_' + l.id)}</span>
         </button>
       ))}
     </div>
@@ -382,8 +365,8 @@ export default function EditorPanel(props: {
             words, style them, then decorate. */}
         {section('layout', <LayoutGrid size={14} />, t('g_sec_layout'), layoutSection)}
         {section('text', <Type size={14} />, t('g_sec_text'), textSection)}
-        {state.layout !== 'custom' && section('style', <Palette size={14} />, t('g_sec_style'), styleSection)}
-        {state.layout !== 'custom' && section('deco', <Sparkles size={14} />, t('g_sec_deco'), decoSection)}
+        {section('style', <Palette size={14} />, t('g_sec_style'), styleSection)}
+        {section('deco', <Sparkles size={14} />, t('g_sec_deco'), decoSection)}
       </div>
 
       <div className="shrink-0" style={{ borderTop: '1px solid var(--border)', padding: 8 }}>
