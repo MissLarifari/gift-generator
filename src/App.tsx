@@ -30,6 +30,20 @@ import { useI18n } from './i18n';
 
 const PANELS_KEY = 'gifty_panels_v2';
 const MODE_KEY = 'gifty_edit_mode';
+const INTRO_KEY = 'gifty_seen_intro';
+
+/**
+ * Beim ersten Besuch geht das Blatt von selbst auf — sonst steht man vor einem
+ * Werkzeug, ohne zu wissen wofuer es da ist. Wegklicken merkt es sich; wer es
+ * wieder braucht, hat das Fragezeichen oben.
+ *
+ * Nicht bei einem geteilten Geschenk: wer einem Link folgt, kam wegen des
+ * Geschenks und nicht wegen der Anleitung.
+ */
+const firstVisit = (shared: boolean): boolean => {
+  if (shared) return false;
+  try { return !localStorage.getItem(INTRO_KEY); } catch { return false; }
+};
 
 /**
  * Zwei Arten, dasselbe Geschenk zu bearbeiten.
@@ -87,7 +101,7 @@ export default function App() {
   // Der Zaehler sorgt dafuer, dass zweimal dieselbe Zeile auch zweimal wirkt.
   const focusNonce = useRef(0);
   const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
-  const [about, setAbout] = useState(false);
+  const [about, setAbout] = useState(() => firstVisit(!!shared));
   const [lookId, setLookId] = useState<string | null>(shared ? null : lookIdOf(START));
   // The layout you picked, kept as a choice rather than read back off the gift:
   // loading a card would otherwise silently drop you back into its own build.
@@ -331,7 +345,12 @@ export default function App() {
         onClose={() => setColorField(null)}
         onApply={(cs) => { if (colorField) applyColor(colorField, cs); setColorField(null); }}
       />
-      {about && <About onClose={() => setAbout(false)} />}
+      {about && (
+        <About onClose={() => {
+          setAbout(false);
+          try { localStorage.setItem(INTRO_KEY, '1'); } catch { /* privates Fenster */ }
+        }} />
+      )}
     </div>
   );
 }
