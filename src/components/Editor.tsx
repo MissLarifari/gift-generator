@@ -1,6 +1,6 @@
 import { useCallback, useImperativeHandle, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
 import { Bold, Italic, Palette, Type, CaseSensitive, Smile, Eraser, Undo2, Rainbow, ArrowLeft, Pipette } from 'lucide-react';
-import { applyFont, detectFont, scriptTyped, gradientText, giftChars, giftBytes, parseCode, hasTag, retag, untag, type FontStyle } from '../engine';
+import { applyFont, detectFont, scriptTyped, stripTags, gradientText, giftChars, giftBytes, parseCode, hasTag, retag, untag, type FontStyle } from '../engine';
 import { FONT_STYLES, SYMBOLS, KAOMOJI } from '../state';
 import { useI18n } from '../i18n';
 import { hexToHsv, hsvToHex, hexToRgb, rgbToHex, type Rgb } from '../color';
@@ -470,15 +470,26 @@ export default function Editor({
   const selectLine = useCallback((start: number, end: number, deco: boolean) => {
     const el = box.current;
     if (!el) return;
-    // Markiert werden die WOERTER, nicht die Zeile mit ihren Tags. Wer eine
-    // Zeile anklickt und lostippt, will den Text austauschen — und nicht Farbe
+    // Markiert werden die WOERTER, nicht die Zeile mit ihren Tags — wer eine
+    // Zeile anklickt und lostippt, will den Text austauschen und nicht Farbe
     // und Groesse gleich mit wegwerfen.
+    //
+    // Das geht aber nur, wenn die Tags die ganze Zeile umschliessen. Bei
+    // ".. ∂єя <size=40>ѕυρρє</size>" steht Deko VOR dem Tag; liesse man dort
+    // nur den Schluss stehen, bliebe nach dem Tippen ein "</size>" ohne Anfang
+    // uebrig. Solche Zeilen werden ganz markiert: die Farbe geht verloren, der
+    // Code bleibt heil — und kaputter Code ist das Schlimmere.
     const raw = code.slice(start, end);
     const vorn = /^(?:<[^<>]*>)*/.exec(raw)?.[0].length ?? 0;
     const hinten = /(?:<[^<>]*>)*$/.exec(raw)?.[0].length ?? 0;
-    const a = start + vorn;
-    const b = Math.max(a, end - hinten);
-    lineFont.current = { from: a, to: b, font: detectFont(code.slice(a, b)) };
+    const innen = raw.slice(vorn, raw.length - hinten);
+    const umschlossen = vorn > 0 && hinten > 0 && !innen.includes('<');
+    const a = umschlossen ? start + vorn : start;
+    const b = umschlossen ? Math.max(a, end - hinten) : end;
+    // Die Schrift wird am reinen Text erkannt, nicht am Code: die Buchstaben
+    // aus "size" sind schlicht und haetten die ganze Zeile schlicht aussehen
+    // lassen.
+    lineFont.current = { from: a, to: b, font: detectFont(stripTags(code.slice(a, b))) };
     el.focus();
     el.setSelectionRange(a, b);
     sel.current = [a, b];

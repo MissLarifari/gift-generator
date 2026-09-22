@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectFont, scriptTyped, applyFont, normalizeFontChars } from '../engine';
+import { detectFont, scriptTyped, applyFont, normalizeFontChars, stripTags } from '../engine';
 
 // The script a line is written in is not a tag — it lives in the letters. So
 // typing a word into an ornate line used to produce plain letters in the middle
@@ -22,6 +22,15 @@ describe('recognising the script of a line', () => {
     // A plain word sitting inside an ornate one — exactly what this feature
     // exists to prevent. It must not be mistaken for a clean ornate line.
     expect(detectFont('∂αѕ salz')).toBe('normal');
+  });
+
+  // Bei ".. ∂єя <size=40>ѕυρρє</size>" steht die Deko VOR dem Tag. Am Code
+  // gemessen haelt die Erkennung so eine Zeile fuer schlichten Text — die
+  // Buchstaben aus "size" sind ja schlicht. Darum erst die Tags weg.
+  it('needs the tags stripped before it can see the script', () => {
+    const mitTag = '.. ' + applyFont('der', 'fancy') + ' <size=40>' + applyFont('suppe', 'fancy') + '</size>';
+    expect(detectFont(mitTag)).toBe('normal');
+    expect(detectFont(stripTags(mitTag))).toBe('fancy');
   });
 
   it('leaves what it cannot fold back alone', () => {
