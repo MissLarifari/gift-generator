@@ -123,7 +123,13 @@ export default function Header({
           )}
         </div>
 
-        <button className="icon-btn" onClick={onAbout} title={t('g_help')} aria-label={t('g_help')}><HelpCircle size={16} /></button>
+        {/* Mit Beschriftung statt nur als Fragezeichen: das Blatt geht beim
+            ersten Besuch von selbst auf und danach nie wieder — dann muss man
+            auch sehen koennen, wo man es zurueckholt. Auf schmalen Fenstern
+            bleibt das Zeichen allein stehen, wie beim Gaestebuch-Knopf. */}
+        <button className="btn btn-sm gbbtn" onClick={onAbout} title={t('g_help')} aria-label={t('g_help')}>
+          <HelpCircle size={15} /> <span className="gbbtn-l">{t('howto_title')}</span>
+        </button>
       </div>
     </header>
   );
