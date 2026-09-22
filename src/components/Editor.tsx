@@ -1,6 +1,6 @@
 import { useCallback, useImperativeHandle, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
 import { Bold, Italic, Palette, Type, CaseSensitive, Smile, Eraser, Undo2, Rainbow, ArrowLeft, Pipette } from 'lucide-react';
-import { applyFont, gradientText, giftChars, giftBytes, parseCode, hasTag, retag, untag, type FontStyle } from '../engine';
+import { applyFont, detectFont, scriptTyped, gradientText, giftChars, giftBytes, parseCode, hasTag, retag, untag, type FontStyle } from '../engine';
 import { FONT_STYLES, SYMBOLS, KAOMOJI } from '../state';
 import { useI18n } from '../i18n';
 import { hexToHsv, hsvToHex, hexToRgb, rgbToHex, type Rgb } from '../color';
@@ -349,6 +349,14 @@ export default function Editor({
   const { t } = useI18n();
   const box = useRef<HTMLTextAreaElement>(null);
   const sel = useRef<[number, number]>([0, 0]);
+  /**
+   * Die zuletzt aus der Vorschau angeklickte Zeile und ihre Zierschrift.
+   *
+   * Die Schrift ist kein Tag, sie steckt in den Buchstaben. Ohne dieses
+   * Gedaechtnis kaeme jedes neu getippte Wort schlicht heraus, mitten in einer
+   * verzierten Zeile, und man muesste jedes Mal von Hand auf "Schrift" druecken.
+   */
+  const lineFont = useRef<{ from: number; to: number; font: FontStyle } | null>(null);
   const [pop, setPop] = useState<Pop>(null);
   const [grad, setGrad] = useState<[string, string]>(['#ff4fa3', '#ffd84d']);
 
@@ -356,6 +364,32 @@ export default function Editor({
   const bytes = giftBytes(code);
   const { warnings } = parseCode(code);
   const over = chars > LIMIT_CHARS || bytes > LIMIT_BYTES;
+
+  /**
+   * Tippen im Kasten. Was in einer verzierten Zeile landet, bekommt deren
+   * Schrift — das Layout schreibt also mit, statt dass man hinterher von Hand
+   * nachbessert.
+   */
+  const typed = (next: string, caret: number) => {
+    const merk = lineFont.current;
+    const [a] = sel.current;
+    const gesetzt = merk && a >= merk.from && a <= merk.to
+      ? scriptTyped(next, a, caret, merk.font)
+      : null;
+    if (!merk || !gesetzt) { setCode(next, 'type'); return; }
+    lineFont.current = { ...merk, to: merk.to + (next.length - code.length) };
+    setCode(next.slice(0, gesetzt.at) + gesetzt.text + next.slice(gesetzt.at + gesetzt.text.length), 'type');
+    // Der Kasten bekommt einen anderen Text zurueck als den, den er gerade
+    // selbst hatte — der Browser wirft den Cursor dabei ans Ende. Ohne das
+    // hier landete das naechste Wort am Schluss des ganzen Codes statt in der
+    // Zeile. Jeder Buchstabe wird 1:1 getauscht, die Stelle bleibt also gueltig.
+    requestAnimationFrame(() => {
+      const el = box.current;
+      if (!el) return;
+      el.setSelectionRange(caret, caret);
+      sel.current = [caret, caret];
+    });
+  };
 
   /* ---------- selection ---------- */
 
@@ -436,11 +470,20 @@ export default function Editor({
   const selectLine = useCallback((start: number, end: number, deco: boolean) => {
     const el = box.current;
     if (!el) return;
+    // Markiert werden die WOERTER, nicht die Zeile mit ihren Tags. Wer eine
+    // Zeile anklickt und lostippt, will den Text austauschen — und nicht Farbe
+    // und Groesse gleich mit wegwerfen.
+    const raw = code.slice(start, end);
+    const vorn = /^(?:<[^<>]*>)*/.exec(raw)?.[0].length ?? 0;
+    const hinten = /(?:<[^<>]*>)*$/.exec(raw)?.[0].length ?? 0;
+    const a = start + vorn;
+    const b = Math.max(a, end - hinten);
+    lineFont.current = { from: a, to: b, font: detectFont(code.slice(a, b)) };
     el.focus();
-    el.setSelectionRange(start, end);
-    sel.current = [start, end];
+    el.setSelectionRange(a, b);
+    sel.current = [a, b];
     setPop(deco ? 'symbol' : null);
-  }, []);
+  }, [code]);
   useImperativeHandle(ref, () => ({ selectLine }), [selectLine]);
 
   const stripSelection = () =>
@@ -483,7 +526,7 @@ export default function Editor({
           value={code}
           spellCheck={false}
           placeholder={t('e_placeholder')}
-          onChange={(e) => { setCode(e.target.value, 'type'); remember(); }}
+          onChange={(e) => { typed(e.target.value, e.target.selectionStart ?? 0); remember(); }}
           onSelect={remember}
           onMouseUp={remember}
           onKeyUp={remember}
