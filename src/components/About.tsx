@@ -40,6 +40,10 @@ export default function About({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
+        {/* Was das Ding ueberhaupt ist, bevor es erklaert wird, wie man es
+            bedient. Wer das Blatt aufmacht, weiss oft genau das noch nicht. */}
+        <p className="sheet-intro">{t('howto_intro')}</p>
+
         <ol className="steps">
           {STEPS.map(({ icon: Icon, key }, i) => (
             <li key={key}>

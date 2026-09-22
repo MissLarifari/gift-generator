@@ -56,7 +56,7 @@ describe('nothing German leaks into the other languages', () => {
 });
 
 describe('the how-it-works text', () => {
-  const KEYS = ['howto_title', 'howto_sub', 'howto_1', 'howto_2', 'howto_3', 'howto_4', 'howto_5', 'howto_note'];
+  const KEYS = ['howto_title', 'howto_sub', 'howto_intro', 'howto_1', 'howto_2', 'howto_3', 'howto_4', 'howto_5', 'howto_note'];
 
   for (const lang of LANGS) {
     it(`${lang} has all five steps`, () => {

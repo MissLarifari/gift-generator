@@ -1218,6 +1218,15 @@ button { color: inherit; }
 .step-i { flex: 0 0 auto; margin-top: 3px; color: var(--muted); }
 .step-t { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.55; color: var(--text); }
 
+/* Die Beschreibung oben im Hilfe-Blatt: was Gifty ist, vor den Schritten. */
+.sheet-intro {
+  margin: 0 0 16px;
+  font-size: 12.8px;
+  line-height: 1.62;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
 .sheet-note {
   margin: 14px 0 0;
   padding-top: 12px;
