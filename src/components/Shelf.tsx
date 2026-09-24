@@ -339,6 +339,37 @@ export default function Shelf({
     return [...seen.values()].reverse().slice(0, STRIP);
   }, [base]);
 
+  /**
+   * A section that is empty only because of the build, and the way out of it.
+   *
+   * Gifts are shaped: a note-shaped saying does not exist under the two-part
+   * build, so a section holding 38 cards in one build holds none in another.
+   * Clicking it showed a heading and nothing underneath, which reads as
+   * broken — the same trap the language switch above already guards against,
+   * and the reason that guard was written.
+   */
+  const notNamed = (e: Entry) => !e.tags.holiday && !e.tags.celebration && !e.tags.hot;
+
+  const emptyHint = (pred: (e: Entry) => boolean) => {
+    const elsewhere = LOOKS.find((lk) => lk.id !== activeLook
+      && ENTRIES.some((e) => pred(e)
+        && (shownLang === 'all' || e.lang === shownLang)
+        && fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), lk.id)));
+    return (
+      <div style={{ padding: '13px 2px 2px' }}>
+        <p className="hint" style={{ margin: '0 0 11px' }}>{elsewhere ? t('g_none_look') : t('g_none_here')}</p>
+        {elsewhere && (
+          <button className="allcard" onClick={() => onApplyLook(elsewhere)}>
+            <Wand2 size={15} style={{ color: 'var(--muted)', flex: '0 0 auto' }} />
+            <span className="allcard-t">{t('g_to_look').replace('%s', t('look_' + elsewhere.id))}
+              <span className="allcard-s">{t('g_to_look_sub')}</span></span>
+            <ChevronRight size={14} style={{ color: 'var(--dim)', flex: '0 0 auto' }} />
+          </button>
+        )}
+      </div>
+    );
+  };
+
   /* ---------- the body ---------- */
 
   const body = () => {
@@ -373,42 +404,48 @@ export default function Shelf({
       case 'themes':
         return <>
           {head(t('grp_Themen'), t('g_pick_cat'), usedThemes(everyday).length)}
-          {themeCards()}
+          {usedThemes(everyday).length ? themeCards() : emptyHint(notNamed)}
           {strip(t('g_recent'), t('g_library'), pick(recent))}
         </>;
       case 'vibes':
         return <>
           {head(t('grp_Vibes'), t('g_by_vibe'), usedVibes(everyday).length)}
-          {vibeCards(everyday)}
+          {usedVibes(everyday).length ? vibeCards(everyday) : emptyHint(notNamed)}
           {strip(t('g_popular'), t('g_library'), popular())}
         </>;
-      case 'holidays':
+      case 'holidays': {
+        const names = usedNamed(holidays, 'holiday');
         return <>
-          {head(t('grp_Holidays'), t('g_pick_cat'), usedNamed(holidays, 'holiday').length)}
-          {cards(usedNamed(holidays, 'holiday').map((h) => ({
+          {head(t('grp_Holidays'), t('g_pick_cat'), names.length)}
+          {names.length ? cards(names.map((h) => ({
             id: h, label: h, tint: holidays.find((e) => e.tags.holiday === h)?.cat.theme.mainColor ?? 'var(--accent)',
             n: holidays.filter((e) => e.tags.holiday === h).length,
-          })), (id) => ({ k: 'holiday', id }))}
+          })), (id) => ({ k: 'holiday', id })) : emptyHint((e) => !!e.tags.holiday)}
           {strip(t('g_recent'), t('g_library'), pick(recent))}
         </>;
-      case 'celebrations':
+      }
+      case 'celebrations': {
+        const names = usedNamed(parties, 'celebration');
         return <>
-          {head(t('grp_Celebrations'), t('g_pick_cat'), usedNamed(parties, 'celebration').length)}
-          {cards(usedNamed(parties, 'celebration').map((c) => ({
-            id: c, label: c, tint: parties.find((e) => e.tags.celebration === c)?.cat.theme.mainColor ?? 'var(--accent)',
-            n: parties.filter((e) => e.tags.celebration === c).length,
-          })), (id) => ({ k: 'celebration', id }))}
+          {head(t('grp_Celebrations'), t('g_pick_cat'), names.length)}
+          {names.length ? cards(names.map((h) => ({
+            id: h, label: h, tint: parties.find((e) => e.tags.celebration === h)?.cat.theme.mainColor ?? 'var(--accent)',
+            n: parties.filter((e) => e.tags.celebration === h).length,
+          })), (id) => ({ k: 'celebration', id })) : emptyHint((e) => !!e.tags.celebration)}
           {strip(t('g_recent'), t('g_library'), pick(recent))}
         </>;
-      case 'hots':
+      }
+      case 'hots': {
+        const names = usedNamed(hots, 'hot');
         return <>
-          {head(t('grp_Hot'), t('g_pick_cat'), usedNamed(hots, 'hot').length)}
-          {cards(usedNamed(hots, 'hot').map((h) => ({
+          {head(t('grp_Hot'), t('g_pick_cat'), names.length)}
+          {names.length ? cards(names.map((h) => ({
             id: h, label: h, tint: hots.find((e) => e.tags.hot === h)?.cat.theme.mainColor ?? 'var(--accent)',
             n: hots.filter((e) => e.tags.hot === h).length,
-          })), (id) => ({ k: 'hot', id }))}
+          })), (id) => ({ k: 'hot', id })) : emptyHint((e) => !!e.tags.hot)}
           {strip(t('g_recent'), t('g_library'), pick(recent))}
         </>;
+      }
       case 'theme': {
         const label = THEMES.find((x) => x.id === view.id)?.label ?? view.id;
         const inTheme = everyday.filter((e) => e.tags.themes.includes(view.id));
