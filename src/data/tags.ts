@@ -72,6 +72,9 @@ export interface Tags {
   /** A holiday and a celebration keep a section of their own, as before. */
   holiday?: string;
   celebration?: string;
+  /** The hot sets, same idea: a named section instead of a theme, so they
+   *  stay out of the everyday shelf unless you go looking for them. */
+  hot?: string;
 }
 
 /**
@@ -96,10 +99,11 @@ export const CATEGORY_TAGS: Record<string, Tags> = {
   'Submissive':         { themes: ['partner'], vibes: ['spicy', 'soft'] },
   'Voyeur':             { themes: ['crush'], vibes: ['spicy', 'dark'] },
   'Aftercare':          { themes: ['partner', 'support'], vibes: ['soft', 'emotional'] },
-  'Horny':              { themes: ['partner', 'crush'], vibes: ['spicy', 'flirty'] },
-  'That Was Insane':    { themes: ['partner'], vibes: ['spicy', 'emotional'] },
-  'Still Thinking':     { themes: ['partner', 'crush'], vibes: ['spicy', 'emotional'] },
-  'Tease':              { themes: ['crush'], vibes: ['flirty', 'spicy'] },
+
+  'Horny':           { themes: ['partner', 'crush'], vibes: ['spicy', 'flirty'], hot: 'Horny' },
+  'That Was Insane': { themes: ['partner'], vibes: ['spicy', 'emotional'], hot: 'That Was Insane' },
+  'Still Thinking':  { themes: ['partner', 'crush'], vibes: ['spicy', 'emotional'], hot: 'Still Thinking' },
+  'Tease':           { themes: ['crush'], vibes: ['flirty', 'spicy'], hot: 'Tease' },
   'Soft / Cottagecore': { themes: ['special', 'thinking'], vibes: ['soft', 'wholesome'] },
   'Goth / Dark':        { themes: ['special'], vibes: ['dark', 'emotional'] },
   'Drunk vibes':        { themes: ['friends'], vibes: ['chaotic', 'funny'] },
@@ -136,6 +140,7 @@ export function tagsOf(cat: TplCategory, item?: TplItem): Tags {
     vibes: own.vibes ?? base.vibes,
     holiday: own.holiday ?? base.holiday,
     celebration: own.celebration ?? base.celebration,
+    hot: own.hot ?? base.hot,
   };
 }
 
@@ -174,8 +179,9 @@ export const usedThemes = (rows: Entry[]): Tag[] =>
 export const usedVibes = (rows: Entry[]): Tag[] =>
   VIBES.filter((v) => rows.some((r) => r.tags.vibes.includes(v.id)));
 
-/** Holidays and celebrations keep their own names, in the order they are given. */
-export const usedNamed = (rows: Entry[], field: 'holiday' | 'celebration'): string[] => {
+/** The named sections — holidays, celebrations and the hot sets — keep their
+ *  own names, in the order they are given. */
+export const usedNamed = (rows: Entry[], field: 'holiday' | 'celebration' | 'hot'): string[] => {
   const seen: string[] = [];
   for (const key of Object.keys(CATEGORY_TAGS)) {
     const name = CATEGORY_TAGS[key][field];

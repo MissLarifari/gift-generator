@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Search, X, ChevronLeft, ChevronRight, Star, Clock, Tag as TagIcon, Sparkles, CalendarDays, PartyPopper, LayoutGrid, Home, Wand2 } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Star, Clock, Tag as TagIcon, Sparkles, CalendarDays, PartyPopper, Flame, LayoutGrid, Home, Wand2 } from 'lucide-react';
 import { type TplCategory, type TplItem } from '../data/templates';
 import { ENTRIES, usedThemes, usedVibes, usedNamed, THEMES, VIBES, type Entry } from '../data/tags';
 import { LOOKS, lookIdOf, fitsLook, type Look } from '../data/looks';
@@ -45,11 +45,12 @@ type View =
   | { k: 'themes' } | { k: 'theme'; id: string }
   | { k: 'vibes' } | { k: 'vibe'; id: string }
   | { k: 'holidays' } | { k: 'holiday'; id: string }
-  | { k: 'celebrations' } | { k: 'celebration'; id: string };
+  | { k: 'celebrations' } | { k: 'celebration'; id: string }
+  | { k: 'hots' } | { k: 'hot'; id: string };
 
 /** Which section a drilled-in view belongs to — for the breadcrumb. */
 const PARENT: Record<string, View['k']> = {
-  theme: 'themes', vibe: 'vibes', holiday: 'holidays', celebration: 'celebrations',
+  theme: 'themes', vibe: 'vibes', holiday: 'holidays', celebration: 'celebrations', hot: 'hots',
 };
 
 const readCounts = (): Record<string, number> => {
@@ -129,9 +130,10 @@ export default function Shelf({
     try { localStorage.setItem(LANG_KEY, v); } catch { /* private mode */ }
   }, []);
 
-  const everyday = useMemo(() => base.filter((e) => !e.tags.holiday && !e.tags.celebration), [base]);
+  const everyday = useMemo(() => base.filter((e) => !e.tags.holiday && !e.tags.celebration && !e.tags.hot), [base]);
   const holidays = useMemo(() => base.filter((e) => e.tags.holiday), [base]);
   const parties = useMemo(() => base.filter((e) => e.tags.celebration), [base]);
+  const hots = useMemo(() => base.filter((e) => e.tags.hot), [base]);
   const favSet = useMemo(() => new Set(favs), [favs]);
   const byKey = useMemo(() => new Map(base.map((e) => [e.key, e])), [base]);
 
@@ -177,9 +179,10 @@ export default function Shelf({
         .filter((e) => cross.length === 0 || cross.some((th) => e.tags.themes.includes(th)));
       case 'holiday': return holidays.filter((e) => e.tags.holiday === view.id);
       case 'celebration': return parties.filter((e) => e.tags.celebration === view.id);
+      case 'hot': return hots.filter((e) => e.tags.hot === view.id);
       default: return [];
     }
-  }, [query, view, cross, base, everyday, holidays, parties, favs, recent, byKey]);
+  }, [query, view, cross, base, everyday, holidays, parties, hots, favs, recent, byKey]);
 
   const go = (v: View) => { setView(v); setCross([]); };
 
@@ -397,6 +400,15 @@ export default function Shelf({
           })), (id) => ({ k: 'celebration', id }))}
           {strip(t('g_recent'), t('g_library'), pick(recent))}
         </>;
+      case 'hots':
+        return <>
+          {head(t('grp_Hot'), t('g_pick_cat'), usedNamed(hots, 'hot').length)}
+          {cards(usedNamed(hots, 'hot').map((h) => ({
+            id: h, label: h, tint: hots.find((e) => e.tags.hot === h)?.cat.theme.mainColor ?? 'var(--accent)',
+            n: hots.filter((e) => e.tags.hot === h).length,
+          })), (id) => ({ k: 'hot', id }))}
+          {strip(t('g_recent'), t('g_library'), pick(recent))}
+        </>;
       case 'theme': {
         const label = THEMES.find((x) => x.id === view.id)?.label ?? view.id;
         const inTheme = everyday.filter((e) => e.tags.themes.includes(view.id));
@@ -411,6 +423,8 @@ export default function Shelf({
         return <>{crumb('holidays', t('grp_Holidays'), view.id, rows.length)}{grid(rows)}</>;
       case 'celebration':
         return <>{crumb('celebrations', t('grp_Celebrations'), view.id, rows.length)}{grid(rows)}</>;
+      case 'hot':
+        return <>{crumb('hots', t('grp_Hot'), view.id, rows.length)}{grid(rows)}</>;
       case 'favs':
         return rows.length ? grid(rows) : <p className="hint" style={{ padding: '22px 4px' }}>{t('g_no_favs')}</p>;
       case 'recent':
@@ -484,6 +498,7 @@ export default function Shelf({
             {nav('vibes', <Sparkles size={11} />, t('grp_Vibes'), everyday.length)}
             {nav('holidays', <CalendarDays size={11} />, t('grp_Holidays'), holidays.length)}
             {nav('celebrations', <PartyPopper size={11} />, t('grp_Celebrations'), parties.length)}
+            {nav('hots', <Flame size={11} />, t('grp_Hot'), hots.length)}
           </div>
         </div>
 

@@ -28,7 +28,7 @@ export interface TplItem {
   lang?: TplLang;
   /** Subject and tone tags. Left out, the card inherits its category's — see
    *  CATEGORY_TAGS in tags.ts. Set here only to make one card differ. */
-  tags?: { themes?: string[]; vibes?: string[]; holiday?: string; celebration?: string };
+  tags?: { themes?: string[]; vibes?: string[]; holiday?: string; celebration?: string; hot?: string };
   // Optional: a single card that looks different from the rest of its category.
   // Each field given here REPLACES the category's field outright (it is not
   // merged key by key), so an override states every value it needs.
@@ -60,7 +60,7 @@ export interface TplTheme {
 }
 export interface TplCategory { label: string; group: string; items: TplItem[]; theme: TplTheme }
 
-export const TEMPLATE_GROUPS = ['Themen', 'Vibes', 'Holidays', 'Celebrations'] as const;
+export const TEMPLATE_GROUPS = ['Themen', 'Vibes', 'Holidays', 'Celebrations', 'Hot'] as const;
 
 export const it = (l: string, main: string, top: string, bottom: string, theme?: Partial<TplTheme>): TplItem =>
   (theme ? { l, main, top, bottom, theme } : { l, main, top, bottom });
@@ -195,6 +195,7 @@ export const CATEGORY_ORDER: string[] = [
   'Little Notes', 'Cute Notes', 'Two Parts', 'Cute', 'Romance',
   'Friends', 'Friends / Roast', 'Funny', 'Funny / Chaotic',
   'Flirty bold', 'Wicked', 'Spicy', 'Dominant', 'Submissive', 'Voyeur', 'Aftercare',
+  // Heiss — a group of its own, not a corner of Themen
   'Horny', 'That Was Insane', 'Still Thinking', 'Tease',
   // Stimmungen
   'Soft / Cottagecore', 'Goth / Dark', 'Drunk vibes', 'Pride',
@@ -817,12 +818,16 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Kleine Pause', 'take a minute', '.. youve done enough ..', '.. now be still'),
     it('Komm Her Ruhen', 'come rest here', '.. no expectations ..', '.. just warmth'),
   ] },
-  // The four hot sets, written on 2026-09-24 and picked from the collection
+  // The four hot sets — their own group in the shelf, the way the holidays
+  // are: they carry a `hot` tag, which keeps them out of Themen and Stimmungen
+  // and gives them a section of their own.
+  //
+  // Written on 2026-09-24 and picked from the collection
   // document on the desktop. Each saying is ONE sentence carried by the three
   // lines - the small line above is the run-up, the loud line the middle, the
   // small line below the tail. Read top -> main -> bottom and it is a
   // sentence, which is the rule these are written to.
-  { label: 'Horny', group: 'Themen', theme: { ...th('#ff2d6f', '#f2f2f2', '#f2f2f2', deco('° ♥ ✦ ♥ °', '', '(⌣‿⌣)')),
+  { label: 'Horny', group: 'Hot', theme: { ...th('#ff2d6f', '#f2f2f2', '#f2f2f2', deco('° ♥ ✦ ♥ °', '', '(⌣‿⌣)')),
       decoColors: { dekoTop: '#ff9ec7', dekoBottom: '#ff9ec7', kaomoji: '#ff9ec7' },
       fonts: { topText: 'fancy', mainText: 'fancy', bottomText: 'fancy' },
       sizes: { mainText: 44 },
@@ -838,7 +843,7 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Nicht mehr nett', 'nicely anymore', '.. i am not asking ..', '.. i want you now'),
     it('Andere Pläne', 'and my whole night', '.. you walked past ..', '.. changed plans'),
   ] },
-  { label: 'That Was Insane', group: 'Themen', theme: { ...th('#ff7a45', '#f2f2f2', '#f2f2f2', deco('° ✦ ★ ✦ °', '', '(◕‿◕)')),
+  { label: 'That Was Insane', group: 'Hot', theme: { ...th('#ff7a45', '#f2f2f2', '#f2f2f2', deco('° ✦ ★ ✦ °', '', '(◕‿◕)')),
       decoColors: { dekoTop: '#ffc08a', dekoBottom: '#ffc08a', kaomoji: '#ffc08a' },
       fonts: { topText: 'fancy', mainText: 'fancy', bottomText: 'fancy' },
       sizes: { mainText: 44 },
@@ -854,7 +859,7 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Kein Abend', 'that was', '.. that was not a night ..', '.. an experience'),
     it('Unvergesslich', 'and you gave me', '.. i came here for fun ..', '.. something unforgettable'),
   ] },
-  { label: 'Still Thinking', group: 'Themen', theme: { ...th('#d8a7ff', '#f2f2f2', '#f2f2f2', deco('° ☾ ♡ ☾ °', '', '(´◡`)♡')),
+  { label: 'Still Thinking', group: 'Hot', theme: { ...th('#d8a7ff', '#f2f2f2', '#f2f2f2', deco('° ☾ ♡ ☾ °', '', '(´◡`)♡')),
       decoColors: { dekoTop: '#e9ccff', dekoBottom: '#e9ccff', kaomoji: '#e9ccff' },
       fonts: { topText: 'fancy', mainText: 'fancy', bottomText: 'fancy' },
       sizes: { mainText: 44 },
@@ -868,7 +873,7 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
     it('Stört den ganzen Tag', 'keeps interrupting', '.. that memory of you ..', '.. my whole day'),
     it('Unvergessbar', 'impossible to forget', '.. you are ..', '.. and you know exactly why'),
   ] },
-  { label: 'Tease', group: 'Themen', theme: { ...th('#ff71b8', '#f2f2f2', '#f2f2f2', deco('° ✦ ♡ ✦ °', '', '(¬‿¬)')),
+  { label: 'Tease', group: 'Hot', theme: { ...th('#ff71b8', '#f2f2f2', '#f2f2f2', deco('° ✦ ♡ ✦ °', '', '(¬‿¬)')),
       decoColors: { dekoTop: '#ffb3d9', dekoBottom: '#ffb3d9', kaomoji: '#ffb3d9' },
       fonts: { topText: 'fancy', mainText: 'fancy', bottomText: 'fancy' },
       sizes: { mainText: 44 },

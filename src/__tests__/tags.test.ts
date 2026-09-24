@@ -70,6 +70,32 @@ describe('only what is filled shows up', () => {
   });
 });
 
+describe('the hot sets are a group of their own', () => {
+  const HOT = ['Horny', 'That Was Insane', 'Still Thinking', 'Tease'];
+
+  it('are the four that carry a hot tag, in shelf order', () => {
+    expect(usedNamed(ENTRIES, 'hot')).toEqual(HOT);
+  });
+
+  it('hold all 38 sayings between them', () => {
+    expect(ENTRIES.filter((e) => e.tags.hot).length).toBe(38);
+  });
+
+  // The point of the group: they stay out of the everyday shelf. Someone
+  // browsing Themen or Stimmungen should not walk into them by accident —
+  // that is the same rule the holidays follow.
+  it('stay out of the everyday shelf, the way the holidays do', () => {
+    const everyday = ENTRIES.filter((e) => !e.tags.holiday && !e.tags.celebration && !e.tags.hot);
+    expect(everyday.some((e) => HOT.includes(e.cat.label))).toBe(false);
+  });
+
+  it('keep their themes and vibes, so a search still knows what they are', () => {
+    for (const label of HOT) {
+      expect(CATEGORY_TAGS[label].vibes, label).toContain('spicy');
+    }
+  });
+});
+
 describe('every tag carries its own look', () => {
   it('each theme and vibe has a colour and a blurb', () => {
     for (const t of [...THEMES, ...VIBES]) {
