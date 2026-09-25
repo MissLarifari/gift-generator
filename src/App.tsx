@@ -12,7 +12,7 @@ import ColorPickerOverlay, { type ColorState } from './components/ColorPickerOve
 import { generate, stripTags, type GiftState, type FieldId } from './engine';
 import { composeTemplate, type TplCategory, type TplItem } from './data/templates';
 import { LOOKS, composeLook, lookIdOf, type Look } from './data/looks';
-import { moveCodeLine, canReorderLines } from './engine';
+import { moveCodeLine, canReorderLines, runSpans, lineSpans, parseCode, detectFont, applyFont, normalizeFontChars } from './engine';
 import { createDefaultState, type Commit } from './state';
 import { useHistory } from './useHistory';
 import { readShareCodeFromUrl, clearShareHash } from './share';
@@ -210,6 +210,28 @@ export default function App() {
     setCode(moveCodeLine(code, from, to));
   }, [code, setCode]);
 
+  /**
+   * Typing into one coloured piece of the gift, in the preview itself.
+   *
+   * Only that piece's text is replaced; the tags around it are left exactly
+   * where they were, which is what keeps a line that is half small-white and
+   * half large-pink from collapsing into one colour. Whatever is typed takes
+   * the script the piece is already written in, so a plain "a" becomes the
+   * ornate letter rather than breaking the line in two alphabets.
+   */
+  const editRun = useCallback((line: number, run: number, text: string) => {
+    const span = lineSpans(code)[line];
+    const runs = parseCode(code).lines[line];
+    if (!span || !runs) return;
+    const [a, b] = span;
+    const places = runSpans(code.slice(a, b), runs);
+    const place = places?.[run];
+    if (!place) return;
+    const [ra, rb] = place;
+    const next = applyFont(normalizeFontChars(text), detectFont(code.slice(a + ra, a + rb)));
+    setCode(code.slice(0, a + ra) + next + code.slice(a + rb), `run:${line}:${run}`);
+  }, [code, setCode]);
+
   // A shared gift loads once; clear the hash so editing isn't pinned to it.
   useEffect(() => { clearShareHash(); }, []);
 
@@ -311,7 +333,7 @@ export default function App() {
         <section className="preview-column scroll-y" aria-label={t('preview')} style={{ minHeight: 0, paddingTop: 4, overflowX: 'auto', scrollbarGutter: 'stable' }}>
           <div style={{ height: 'fit-content', width: 506, maxWidth: '100%', paddingBottom: 8 }}>
             <div className="preview-heading"><strong>{t('preview')}</strong><button className="btn btn-sm btn-ghost" aria-pressed={plainView} onClick={togglePreview}>{t(plainView ? 'g_game_view' : 'g_work_view')}</button></div>
-            <Preview compact={plainView} code={code} onReorder={moveLine} hiLine={hiLine} onPickLine={(a, b, deco) => { setWorkspaceView('edit'); if (mode === 'code') editor.current?.selectLine(a, b, deco); else pickField(a); }} />
+            <Preview compact={plainView} code={code} onReorder={moveLine} onEditRun={editRun} hiLine={hiLine} onPickLine={(a, b, deco) => { setWorkspaceView('edit'); if (mode === 'code') editor.current?.selectLine(a, b, deco); else pickField(a); }} />
             {/* The grips only show under the cursor, so nothing on the page said
                the lines can be moved at all. This says it, and only where it is
                true — a gift whose tags run across lines gets no grips. */}

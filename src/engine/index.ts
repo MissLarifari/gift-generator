@@ -8,3 +8,4 @@ export * from './optimize';
 export * from './ranges';
 export * from './parse';
 export * from './reorder';
+export * from './runspans';

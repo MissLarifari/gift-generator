@@ -3,7 +3,7 @@ import { parseCode, lineSpans, isDecoLine } from '../engine';
 import { useI18n } from '../i18n';
 import { useState } from 'react';
 import { GripVertical } from 'lucide-react';
-import { canReorderLines } from '../engine';
+import { canReorderLines, runSpans } from '../engine';
 
 // A replica of the 3dxchat gift popup at its real width, drawn straight from
 // the code in the editor. Rebuilt 2026-09-05 from Lari's screenshot of a live
@@ -14,6 +14,38 @@ import { canReorderLines } from '../engine';
 // Dropped as noise: the sender's name repeated under the gift.
 
 const POPUP_W = 506;
+
+/** How many characters into the element the caret sits. */
+function caretIn(el: HTMLElement): number {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return 0;
+  const r = sel.getRangeAt(0).cloneRange();
+  r.selectNodeContents(el);
+  r.setEnd(sel.getRangeAt(0).endContainer, sel.getRangeAt(0).endOffset);
+  return [...r.toString()].length;
+}
+
+/**
+ * Puts the caret back after the text was rewritten underneath it.
+ *
+ * Typing a plain letter into an ornate run turns it into a different letter,
+ * so React replaces the whole text node and the caret jumps to the front. The
+ * offset is counted in characters and restored on the next frame, once the new
+ * text is there.
+ */
+function keepCaret(el: HTMLElement, at: number) {
+  requestAnimationFrame(() => {
+    const node = el.firstChild;
+    if (!node || node.nodeType !== Node.TEXT_NODE) return;
+    const len = (node.textContent ?? '').length;
+    const r = document.createRange();
+    r.setStart(node, Math.min(at, len));
+    r.collapse(true);
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(r);
+  });
+}
 
 // <size=N> is an absolute size. 3dxchat's default for gift text is 14, so one
 // rule covers everything: N/14 rem. The old field-based preview divided the
@@ -60,12 +92,14 @@ const tab = (label: string, on = false) => (
   </span>
 );
 
-export default function Preview({ code, onPickLine, onReorder, hiLine, compact = false }: {
+export default function Preview({ code, onPickLine, onReorder, onEditRun, hiLine, compact = false }: {
   compact?: boolean;
   code: string;
   onPickLine?: (start: number, end: number, deco: boolean) => void;
   /** Eine Zeile an eine andere Stelle des Geschenks legen. */
   onReorder?: (from: number, to: number) => void;
+  /** Ein farbiges Stueck einer Zeile neu beschriften. */
+  onEditRun?: (line: number, run: number, text: string) => void;
   /** Zeile, die gerade im Feld bearbeitet wird — sie leuchtet hier auf, damit
    *  man sieht, an welcher Stelle des Geschenks man schreibt. */
   hiLine?: number | null;
@@ -81,6 +115,9 @@ export default function Preview({ code, onPickLine, onReorder, hiLine, compact =
   // Handles only where a line can leave without taking someone else's colour
   // with it — see canReorderLines.
   const movable = !!onReorder && lines.length > 1 && canReorderLines(code);
+  // Which run is being typed into, so the others stay plain text and the
+  // caret is only ever restored where it actually is.
+  const [editing, setEditing] = useState<string | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
   const drop = (to: number) => {
@@ -154,19 +191,42 @@ export default function Preview({ code, onPickLine, onReorder, hiLine, compact =
                     <GripVertical size={13} />
                   </button>
                 )}
-                {runs.map((r, n) => (
-                  <span
-                    key={n}
-                    style={{
-                      color: r.color ?? C.noColor,
-                      fontSize: rem(r.size),
-                      fontWeight: r.bold ? 700 : 400,
-                      fontStyle: r.italic ? 'italic' : 'normal',
-                    }}
-                  >
-                    {r.text}
-                  </span>
-                ))}
+                {runs.map((r, n) => {
+                  // A run can be typed into only when its place in the code is
+                  // certain — see runSpans, which returns null rather than guess.
+                  const canType = !!onEditRun && !!runSpans(code.slice(a, b), runs);
+                  const id = i + ':' + n;
+                  return (
+                    <span
+                      key={n}
+                      className={canType ? 'gift-run' : undefined}
+                      contentEditable={canType || undefined}
+                      suppressContentEditableWarning={canType}
+                      spellCheck={false}
+                      data-typing={editing === id || undefined}
+                      onFocus={canType ? () => setEditing(id) : undefined}
+                      onBlur={canType ? () => setEditing(null) : undefined}
+                      onClick={canType ? (ev) => ev.stopPropagation() : undefined}
+                      onKeyDown={canType ? (ev) => {
+                        if (ev.key === 'Enter') { ev.preventDefault(); (ev.target as HTMLElement).blur(); }
+                      } : undefined}
+                      onInput={canType ? (ev) => {
+                        const el = ev.currentTarget;
+                        const at = caretIn(el);
+                        onEditRun(i, n, el.textContent ?? '');
+                        keepCaret(el, at);
+                      } : undefined}
+                      style={{
+                        color: r.color ?? C.noColor,
+                        fontSize: rem(r.size),
+                        fontWeight: r.bold ? 700 : 400,
+                        fontStyle: r.italic ? 'italic' : 'normal',
+                      }}
+                    >
+                      {r.text}
+                    </span>
+                  );
+                })}
               </div>
               );
             })

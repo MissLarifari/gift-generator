@@ -1024,6 +1024,13 @@ button { color: inherit; }
 /* Where it would land, and where it came from. */
 .gift-row-over { box-shadow: inset 0 2px 0 var(--accent); }
 .gift-row-lifted { opacity: 0.4; }
+
+/* --- typing straight into the gift ---
+   Each coloured piece is its own little field. Nothing is drawn around it
+   until the cursor is near, so the gift still looks like a gift. */
+.gift-run { outline: none; border-radius: 3px; cursor: text; }
+.gift-run:hover { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.gift-run[data-typing] { box-shadow: 0 0 0 1px var(--accent-line); background: rgba(139, 141, 255, 0.10); }
 /* Said once under the gift, because a handle that only appears on hover is
    a feature nobody finds. */
 .preview-hint { margin: 9px 6px 0; font-size: 11px; line-height: 1.4; color: var(--dim); text-align: center; }
