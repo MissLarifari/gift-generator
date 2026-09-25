@@ -1233,11 +1233,11 @@ button { color: inherit; }
 .group-head[aria-expanded='true'] { color: var(--text); }
 .group-arrow { flex: 0 0 auto; color: var(--dim); transition: transform 0.13s ease; }
 .group-arrow[data-open='true'] { transform: rotate(90deg); color: var(--accent); }
-/* The little picture in front of the name: dim until the group is open or
-   the mouse is on it, so a column of them stays quiet. */
-.group-icon { flex: 0 0 auto; color: var(--dim); transition: color 0.13s ease; }
-.group-head:hover .group-icon { color: var(--muted); }
-.group-head[aria-expanded='true'] .group-icon { color: var(--bloom); }
+/* The little picture in front of the name, in the category's own colour. It
+   sits a shade back so a column of thirty does not flicker, and comes to full
+   strength under the cursor or when the group is open. */
+.group-icon { flex: 0 0 auto; opacity: 0.75; transition: opacity 0.13s ease; }
+.group-head:hover .group-icon, .group-head[aria-expanded='true'] .group-icon { opacity: 1; }
 .group-name { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .group-n { flex: 0 0 auto; font-size: 10.5px; color: var(--dim); }
 /* Inside an open group the gifts are the same little cards as everywhere

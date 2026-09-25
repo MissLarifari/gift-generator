@@ -526,12 +526,19 @@ export default function Shelf({
     // This used to fold by the words the sayings share, which produced honest
     // but useless headings — "at 5", "i want 5", "du bist mein 9". A heading
     // has to be a category, and every gift already belongs to exactly one.
-    const byCat = new Map<string, { items: Entry[]; icon: LucideIcon }>();
+    // The icon wears the category's own colour — the one its loud line is
+    // printed in. Nothing to invent and nothing to keep in step: a category
+    // that changes its pink changes its icon with it.
+    const byCat = new Map<string, { items: Entry[]; icon: LucideIcon; tint: string }>();
     for (const e of list) {
       const label = categoryLabel(e.cat);
       const bucket = byCat.get(label);
       if (bucket) bucket.items.push(e);
-      else byCat.set(label, { items: [e], icon: categoryIcon(e.cat.label, e.cat.theme.lookId) });
+      else byCat.set(label, {
+        items: [e],
+        icon: categoryIcon(e.cat.label, e.cat.theme.lookId),
+        tint: e.cat.theme.mainColor,
+      });
     }
     const groups = [...byCat.entries()]
       .map(([label, g]) => ({ label, ...g }))
@@ -548,7 +555,7 @@ export default function Shelf({
             <div key={label} className="giftgroup">
               <button className="group-head" aria-expanded={shown} onClick={() => toggleGroup(label)}>
                 <ChevronRight size={13} className="group-arrow" data-open={shown} />
-                <Icon size={13} className="group-icon" aria-hidden="true" />
+                <Icon size={13} className="group-icon" style={{ color: g.tint }} aria-hidden="true" />
                 <span className="group-name">{label}</span>
                 <span className="group-n">{g.items.length}</span>
               </button>
