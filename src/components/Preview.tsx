@@ -121,7 +121,7 @@ export default function Preview({ code, onPickLine, onReorder, hiLine, compact =
         </div>
 
         </>}
-        <div className="flex flex-col items-center" style={{ gap: 5 }}>
+        <div className="gift-text flex flex-col items-center" style={{ gap: 5 }}>
           {code.trim() === '' ? (
             <span style={{ color: '#5b616c', fontSize: 13 }}>{t('e_empty')}</span>
           ) : (

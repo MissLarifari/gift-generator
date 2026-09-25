@@ -46,6 +46,18 @@
   --r: 14px;
   --r-lg: 20px;
 
+  /* The gift text, and only the gift text.
+     The ornate scripts are not one alphabet: they borrow from Greek,
+     Cyrillic, IPA, Phonetic Extensions, Math, Letterlike Symbols, Thai,
+     Hebrew and Dingbats. Inter ships latin, latin-ext, cyrillic, greek and
+     vietnamese — everything else fell through to whatever the browser
+     picked on its own, and Chrome and Firefox do not pick the same thing.
+     Hence an explicit chain: named fonts, in order, so both engines walk
+     the same list instead of guessing. */
+  --gift-font: 'Inter', 'Segoe UI', 'Segoe UI Symbol', 'Segoe UI Historic',
+    'Noto Sans Symbols 2', 'Noto Sans Math', 'DejaVu Sans', 'Arial Unicode MS',
+    system-ui, sans-serif;
+
   --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
@@ -203,6 +215,11 @@ button { color: inherit; }
   .modebar { flex-wrap: wrap; }
   .modebar .hint { display: none; }
   header .eyebrow, header .sister-link > span { display: none; }
+}
+
+/* Wherever ornate gift text is drawn, it is drawn with the same chain. */
+.gift-text, .gift-row, .spark-t, .layout-miniature-content {
+  font-family: var(--gift-font);
 }
 
 /* ---------- typography ---------- */
@@ -844,7 +861,11 @@ button { color: inherit; }
   outline: none;
   background: transparent;
   color: var(--text);
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  /* Monospace for the code, then the same named symbol fonts as the gift
+     text: the ornate letters in here fall outside JetBrains Mono too, and
+     without naming them each browser guesses differently. */
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular,
+    'Segoe UI Symbol', 'Segoe UI Historic', 'Noto Sans Symbols 2', 'DejaVu Sans', monospace;
   font-size: 13px;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -859,7 +880,11 @@ button { color: inherit; }
   gap: 10px;
   padding: 9px 16px;
   border-top: 1px solid var(--line-soft);
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  /* Monospace for the code, then the same named symbol fonts as the gift
+     text: the ornate letters in here fall outside JetBrains Mono too, and
+     without naming them each browser guesses differently. */
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular,
+    'Segoe UI Symbol', 'Segoe UI Historic', 'Noto Sans Symbols 2', 'DejaVu Sans', monospace;
   font-size: 11px;
   color: var(--dim);
 }
