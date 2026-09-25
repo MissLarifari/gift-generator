@@ -81,9 +81,9 @@ button { color: inherit; }
 ::-webkit-scrollbar-corner { background: transparent; }
 
 .scroll-y { overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
-/* The gift list keeps a floor: whatever the head above it needs, there is
-   always a hand of gifts to look at rather than a sliver. */
-.selection-column > .scroll-y { min-height: 200px; }
+/* The list no longer scrolls on its own — the panel around it does, so there
+   are never two bars for one column, and the head rolls away with it. */
+.selection-column > .scroll-y { overflow: visible; flex: 0 0 auto; }
 
 /* Keep editing in view; galleries and secondary tools open only on request. */
 .workspace { display: grid; grid-template-columns: minmax(240px, .8fr) minmax(300px, 1fr) 522px; overflow: auto; }
@@ -103,7 +103,14 @@ button { color: inherit; }
 .guestbook-disclosure { border-top: 1px solid var(--line-soft); flex-shrink: 0; }
 .guestbook-disclosure[open] { max-height: 45vh; overflow-y: auto; }
 .workspace-tabs { display: none; }
-.selection-column { display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden; container-type: inline-size; }
+/* The shelf scrolls as ONE column.
+   It used to hide its overflow and let only the gift list scroll inside it.
+   That works while the window is tall; in a short one the head alone was
+   440px of a 460px panel, the list got 32, and the thirteen pixels that did
+   not fit were simply unreachable — nothing scrolled, because the page does
+   not scroll either. One scroll area instead: whatever the window leaves,
+   everything in the panel can be reached by rolling it. */
+.selection-column { display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; container-type: inline-size; }
 /* The gallery opens inside the shelf, so it gets a lid of its own rather than
    growing until the sayings are off the screen. */
 #shelf-layout-picker:not([hidden]) { margin-top: 12px; max-height: 340px; overflow-y: auto; padding: 2px; }
@@ -153,7 +160,7 @@ button { color: inherit; }
   .workspace-tabs { display: flex; flex-shrink: 0; margin: 10px 14px 0; border-bottom: 1px solid var(--line); }
   .workspace-tabs > button { flex: 1; border: 0; border-bottom: 2px solid transparent; padding: 12px 5px; background: none; font-size: 13px; color: var(--muted); cursor: pointer; }
   .workspace-tabs > button[aria-current='page'] { color: var(--text); border-bottom-color: var(--bloom); }
-  .workspace > .selection-column { display: flex; height: 100%; max-height: none; overflow: hidden !important; }
+  .workspace > .selection-column { display: flex; height: 100%; max-height: none; overflow-y: auto !important; overflow-x: hidden !important; }
   .workspace[data-view='select'] > .editor-column, .workspace[data-view='select'] > .preview-column,
   .workspace[data-view='edit'] > .selection-column, .workspace[data-view='edit'] > .preview-column,
   .workspace[data-view='preview'] > .selection-column, .workspace[data-view='preview'] > .editor-column { display: none; }

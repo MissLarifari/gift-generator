@@ -1,11 +1,14 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Search, X, ChevronLeft, ChevronRight, Star, Clock, LayoutGrid, Wand2 } from 'lucide-react';
 import { type TplCategory, type TplItem } from '../data/templates';
-import { groupByOpening, GROUP_FROM } from '../data/grouping';
 import { ENTRIES, usedThemes, usedVibes, usedNamed, THEMES, VIBES, type Entry } from '../data/tags';
 import { LOOKS, lookIdOf, fitsLook, sayingShapeOf, type Look } from '../data/looks';
 import { directory, type DirView } from '../data/directory';
 import { useI18n } from '../i18n';
+
+/** Below this many gifts a list reads fine as it is; folding it into
+ *  categories only adds clicks. */
+const GROUP_FROM = 60;
 
 // The shelf: a browser, not a filter list.
 //
@@ -511,15 +514,26 @@ export default function Shelf({
 
   function grid(list: Entry[]) {
     if (list.length === 0) return <p className="hint" style={{ padding: '22px 4px' }}>{t('g_no_fit')}</p>;
-    // A search is already a filter; folding its handful of hits away again
-    // would be hiding the answer. So while searching, the list is flat.
     // A short list reads fine as it is; folding it away only adds clicks. And
     // a search is already a filter — hiding its hits again would be hiding the
     // answer. Both stay flat.
     if (query || list.length < GROUP_FROM) return <div className="cardgrid">{list.map(card)}</div>;
 
-    const groups = groupByOpening(list, readable, 3);
-    if (groups.every((g) => !g.label)) return <div className="cardgrid">{list.map(card)}</div>;
+    // Folded by the category each gift comes from.
+    //
+    // This used to fold by the words the sayings share, which produced honest
+    // but useless headings — "at 5", "i want 5", "du bist mein 9". A heading
+    // has to be a category, and every gift already belongs to exactly one.
+    const byCat = new Map<string, Entry[]>();
+    for (const e of list) {
+      const label = categoryLabel(e.cat);
+      const bucket = byCat.get(label);
+      if (bucket) bucket.push(e); else byCat.set(label, [e]);
+    }
+    const groups = [...byCat.entries()]
+      .map(([label, items]) => ({ label, items }))
+      .sort((a, b) => b.items.length - a.items.length || a.label.localeCompare(b.label));
+    if (groups.length < 2) return <div className="cardgrid">{list.map(card)}</div>;
 
     return (
       <div className="cardgrid">
@@ -544,7 +558,9 @@ export default function Shelf({
   return (
     // selection-column is what the workspace grid and the mobile tabs address
     // this panel by; without it the shelf stays on screen under "Bearbeiten".
-    <section className="selection-column slab flex flex-col" aria-label={t('g_select')} style={{ minHeight: 0, overflow: 'hidden' }}>
+    <section className="selection-column slab flex flex-col" aria-label={t('g_select')} style={{ minHeight: 0 }}>
+      {/* No inline overflow here: it beat the stylesheet, and the stylesheet is
+          what decides that this column scrolls as one. */}
       {/* 1 — whose panel this is */}
       <div className="panel-head flex items-start justify-between" style={{ gap: 10 }}>
         <div>
