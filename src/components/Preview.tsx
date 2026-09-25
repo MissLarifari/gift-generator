@@ -1,6 +1,9 @@
 import { X, Menu } from 'lucide-react';
 import { parseCode, lineSpans, isDecoLine } from '../engine';
 import { useI18n } from '../i18n';
+import { useState } from 'react';
+import { GripVertical } from 'lucide-react';
+import { canReorderLines } from '../engine';
 
 // A replica of the 3dxchat gift popup at its real width, drawn straight from
 // the code in the editor. Rebuilt 2026-09-05 from Lari's screenshot of a live
@@ -57,9 +60,12 @@ const tab = (label: string, on = false) => (
   </span>
 );
 
-export default function Preview({ code, onPickLine, hiLine }: {
+export default function Preview({ code, onPickLine, onReorder, hiLine, compact = false }: {
+  compact?: boolean;
   code: string;
   onPickLine?: (start: number, end: number, deco: boolean) => void;
+  /** Eine Zeile an eine andere Stelle des Geschenks legen. */
+  onReorder?: (from: number, to: number) => void;
   /** Zeile, die gerade im Feld bearbeitet wird — sie leuchtet hier auf, damit
    *  man sieht, an welcher Stelle des Geschenks man schreibt. */
   hiLine?: number | null;
@@ -72,10 +78,25 @@ export default function Preview({ code, onPickLine, hiLine }: {
   // the click to the wrong line.
   const spans = lineSpans(code);
   const clickable = !!onPickLine && spans.length === lines.length;
+  // Handles only where a line can leave without taking someone else's colour
+  // with it — see canReorderLines.
+  const movable = !!onReorder && lines.length > 1 && canReorderLines(code);
+  const [dragging, setDragging] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
+  const drop = (to: number) => {
+    if (dragging !== null && dragging !== to) onReorder!(dragging, to);
+    setDragging(null); setOver(null);
+  };
+  const byKey = (e: React.KeyboardEvent, i: number) => {
+    if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    e.preventDefault();
+    const to = e.key === 'ArrowUp' ? i - 1 : i + 1;
+    if (to >= 0 && to < lines.length) onReorder!(i, to);
+  };
 
   return (
     <div style={{ width: POPUP_W, maxWidth: '100%', background: C.body, border: '1px solid ' + C.frame, borderRadius: 4, overflow: 'hidden', boxShadow: '0 18px 50px rgba(0,0,0,.5)' }}>
-      <div className="flex items-center" style={{ gap: 10, padding: '9px 12px', background: C.bar }}>
+      {!compact && <><div className="flex items-center" style={{ gap: 10, padding: '9px 12px', background: C.bar }}>
         <span style={{ fontSize: 15, fontWeight: 700, color: C.name }}>Sophey</span>
         <span style={{ fontSize: 12.5, fontWeight: 600, color: C.pillInk, background: C.pill, padding: '3px 12px', borderRadius: 999 }}>Back to Profile</span>
         <span style={{ flex: 1 }} />
@@ -90,14 +111,16 @@ export default function Preview({ code, onPickLine, hiLine }: {
         <span style={{ display: 'grid', placeItems: 'center', width: 44, color: C.tabInk }}><Menu size={16} /></span>
       </div>
 
-      <div style={{ padding: '20px 22px 26px', textAlign: 'center' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: C.sender }}>MissLarifari</div>
+      </>}
+      <div style={{ padding: compact ? '36px 22px' : '20px 22px 26px', textAlign: 'center' }}>
+        {!compact && <><div style={{ fontSize: 15, fontWeight: 700, color: C.sender }}>MissLarifari</div>
         <div style={{ fontSize: 13, color: C.date, marginTop: 3 }}>{today()}</div>
 
         <div className="flex items-center justify-center" style={{ margin: '16px 0 14px' }}>
           <img src={import.meta.env.BASE_URL + 'gift-sticker.png'} alt="" style={{ maxWidth: 240, maxHeight: 240, width: 'auto', height: 'auto', objectFit: 'contain' }} />
         </div>
 
+        </>}
         <div className="flex flex-col items-center" style={{ gap: 5 }}>
           {code.trim() === '' ? (
             <span style={{ color: '#5b616c', fontSize: 13 }}>{t('e_empty')}</span>
@@ -108,11 +131,29 @@ export default function Preview({ code, onPickLine, hiLine }: {
               return (
               <div
                 key={i}
-                className={[clickable ? 'gift-row' : '', hiLine === i ? 'gift-row-on' : ''].filter(Boolean).join(' ') || undefined}
+                className={[clickable ? 'gift-row' : '', hiLine === i ? 'gift-row-on' : '',
+                  movable ? 'gift-row-movable' : '', over === i && dragging !== null && dragging !== i ? 'gift-row-over' : '',
+                  dragging === i ? 'gift-row-lifted' : ''].filter(Boolean).join(' ') || undefined}
                 title={clickable ? t(deco ? 'e_pick_deco' : 'e_pick_line') : undefined}
                 onClick={clickable ? () => onPickLine(a, b, deco) : undefined}
+                onDragOver={movable ? (ev) => { ev.preventDefault(); setOver(i); } : undefined}
+                onDrop={movable ? (ev) => { ev.preventDefault(); drop(i); } : undefined}
                 style={{ minHeight: 4, lineHeight: 1.25 }}
               >
+                {movable && (
+                  <button
+                    className="gift-grip"
+                    draggable
+                    onDragStart={(ev) => { ev.dataTransfer.effectAllowed = 'move'; setDragging(i); }}
+                    onDragEnd={() => { setDragging(null); setOver(null); }}
+                    onKeyDown={(ev) => byKey(ev, i)}
+                    onClick={(ev) => ev.stopPropagation()}
+                    title={t('e_move_line')}
+                    aria-label={t('e_move_line')}
+                  >
+                    <GripVertical size={13} />
+                  </button>
+                )}
                 {runs.map((r, n) => (
                   <span
                     key={n}

@@ -7,3 +7,4 @@ export * from './generate';
 export * from './optimize';
 export * from './ranges';
 export * from './parse';
+export * from './reorder';

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { LayoutGrid, ChevronRight, Code2, SlidersHorizontal, AlertTriangle } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Code2, SlidersHorizontal, AlertTriangle } from 'lucide-react';
 import Header from './components/Header';
 import Shelf from './components/Shelf';
 import Editor, { type EditorHandle } from './components/Editor';
@@ -12,6 +12,7 @@ import ColorPickerOverlay, { type ColorState } from './components/ColorPickerOve
 import { generate, stripTags, type GiftState, type FieldId } from './engine';
 import { composeTemplate, type TplCategory, type TplItem } from './data/templates';
 import { LOOKS, composeLook, lookIdOf, type Look } from './data/looks';
+import { moveCodeLine, canReorderLines } from './engine';
 import { createDefaultState, type Commit } from './state';
 import { useHistory } from './useHistory';
 import { readShareCodeFromUrl, clearShareHash } from './share';
@@ -28,8 +29,8 @@ import { useI18n } from './i18n';
 // the structure back. That is what lets a finished gift be pasted in from the
 // game and edited like anything else.
 
-const PANELS_KEY = 'gifty_panels_v2';
 const MODE_KEY = 'gifty_edit_mode';
+const VIEW_KEY = 'gifty_preview_plain';
 const INTRO_KEY = 'gifty_seen_intro';
 
 /**
@@ -66,18 +67,6 @@ const readMode = (): EditMode => {
 // through composeLook, the same path the layout chip takes, so the two cannot
 // drift apart. A shared link wins over it.
 const START = composeLook(createDefaultState(), LOOKS.find((l) => l.id === 'twoWords') ?? LOOKS[0]);
-
-// A folded panel: a tab you click to bring it back. The label runs vertically
-// so the panel still says what it is while costing almost no width.
-function Tab({ label, icon, onOpen }: { label: string; icon: ReactNode; onOpen: () => void }) {
-  return (
-    <button className="handle" onClick={onOpen} title={label} aria-label={label} aria-expanded={false}>
-      <ChevronRight size={14} />
-      {icon}
-      <span className="handle-label">{label}</span>
-    </button>
-  );
-}
 
 export default function App() {
   const { t } = useI18n();
@@ -203,23 +192,23 @@ export default function App() {
     })), [commitBuild]);
 
 
-  const [panels, setPanels] = useState<{ left: boolean }>(() => {
-    try {
-      const raw = localStorage.getItem(PANELS_KEY);
-      if (raw) return { left: !!JSON.parse(raw).left };
-    } catch { /* ignore */ }
-    // Below this the shelf, the editor and a 506px gift cannot all fit, and
-    // the code box is the one that gets squeezed. So it starts folded — one
-    // click still opens it, and then the gift column scrolls instead.
-    return { left: window.innerWidth >= 1280 };
+  const [workspaceView, setWorkspaceView] = useState<'select' | 'edit' | 'preview'>('select');
+  // The gift as the recipient sees it — window, avatar and all — is what the
+  // preview has always been, and what makes it worth looking at. The slim
+  // text-only view is the option, not the default, and the choice is kept.
+  const [plainView, setPlainView] = useState(() => {
+    try { return localStorage.getItem(VIEW_KEY) === '1'; } catch { return false; }
   });
-  const toggleShelf = useCallback(() => {
-    setPanels((p) => {
-      const next = { left: !p.left };
-      try { localStorage.setItem(PANELS_KEY, JSON.stringify(next)); } catch { /* ignore */ }
-      return next;
-    });
-  }, []);
+  const togglePreview = useCallback(() => setPlainView((v) => {
+    try { localStorage.setItem(VIEW_KEY, v ? '0' : '1'); } catch { /* private mode */ }
+    return !v;
+  }), []);
+  const chooseLayout = () => setWorkspaceView('select');
+  // Dragging a line in the preview is an edit to the code like any other, so
+  // it lands in the same history and Ctrl+Z takes it back.
+  const moveLine = useCallback((from: number, to: number) => {
+    setCode(moveCodeLine(code, from, to));
+  }, [code, setCode]);
 
   // A shared gift loads once; clear the hash so editing isn't pinned to it.
   useEffect(() => { clearShareHash(); }, []);
@@ -255,43 +244,32 @@ export default function App() {
   return (
     <div className="h-full flex flex-col">
       <Header undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} onAbout={() => setAbout(true)} />
+      <nav className="workspace-tabs" aria-label={t('g_customize')}>
+        {(['select', 'edit', 'preview'] as const).map(view => <button key={view} aria-current={workspaceView === view ? 'page' : undefined} onClick={() => setWorkspaceView(view)}>{t(view === 'select' ? 'g_select' : view === 'edit' ? 'g_edit' : 'preview')}</button>)}
+      </nav>
 
       <main
-        className="flex-1 min-h-0 grid"
+        className="workspace flex-1 min-h-0"
+        data-view={workspaceView}
         // Editor in the middle, gift on the right — the shape of the tool Lari
         // already uses. The shelf folds to a 46px tab and gives back its width.
         style={{
-          // Capped and centred: on a wide monitor an editor that keeps growing
-          // is just a huge empty box — a line of gift code is rarely 80 chars.
-          //
-          // The gift column is a hard 506px. It is a replica measured against
-          // the client, so a preview that quietly squeezes to 414 to make room
-          // is worse than useless — it would lie about what the recipient sees.
-          // Shelf and editor both take fr, so spare width is SHARED instead of
-          // filling one to its cap before the other sees any — that ordering
-          // once left the code box at 194px beside a fat shelf. The shelf gets
-          // an equal share. Weighting it 1.3 looked right on a 1920 screen and
-          // pinned the editor to its 420 floor on a 1480 one — the code box
-          // back at 286 beside a 482 shelf.
-          gridTemplateColumns: `${panels.left ? 'minmax(248px, 1fr)' : '46px'} minmax(420px, 1fr) 522px`,
+          // The responsive column layout lives in index.css.
           gap: 14,
           padding: 14,
           width: '100%',
           maxWidth: 1740,
           // Below roughly 1030 with the shelf open the three columns cannot
           // fit; scrolling sideways is honest, clipping the gift is not.
-          overflowX: 'auto',
           margin: '0 auto',
           transition: 'grid-template-columns .22s ease',
         }}
       >
-        {panels.left
-          ? <Shelf onApply={applyTemplate} onApplyLook={applyLook} activeLook={lookId} onFold={toggleShelf} />
-          : <Tab label={t('g_templates')} icon={<LayoutGrid size={15} />} onOpen={toggleShelf} />}
+        <Shelf onApply={applyTemplate} onApplyLook={applyLook} activeLook={lookId} />
 
         {/* Der Editor steht auf seiner natuerlichen Hoehe; darunter blieb die
             halbe Spalte leer. Da gehoert das Gaestebuch hin. */}
-        <div className="flex flex-col" style={{ minWidth: 0, minHeight: 0, gap: 14 }}>
+        <div className="editor-column flex flex-col" style={{ minWidth: 0, minHeight: 0, gap: 14 }}>
           {/* Zwei Wege zum selben Geschenk. Der Code bleibt der Standard und
               die Wahrheit; die Felder sind fuer alle, denen er zu umstaendlich
               ist. Der Schalter steht ueber dem Kasten, nicht darin — er gehoert
@@ -321,15 +299,23 @@ export default function App() {
 
           {mode === 'code'
             ? <Editor ref={editor} code={code} setCode={setCode} undo={undo} canUndo={canUndo} />
-            : <EditorPanel state={build} commit={commitBuild} onOpenColor={setColorField} looks={LOOKS} activeLook={lookId} onApplyLook={applyLook} onFocusField={setHiField} focusReq={focusReq} />}
-          <Guestbook />
+            : <EditorPanel state={build} commit={commitBuild} onOpenColor={setColorField} looks={LOOKS} activeLook={lookId} onApplyLook={applyLook} onChooseLayout={chooseLayout} onFocusField={setHiField} focusReq={focusReq} />}
+          <details className="quiet-details guestbook-disclosure">
+            <summary>{t('gb_title')}</summary>
+            <Guestbook />
+          </details>
         </div>
 
         {/* The gutter is reserved whether or not this scrolls, so the 506px
             replica keeps its width instead of losing 10px to a scrollbar. */}
-        <section className="scroll-y" style={{ minHeight: 0, paddingTop: 4, overflowX: 'auto', scrollbarGutter: 'stable' }}>
+        <section className="preview-column scroll-y" aria-label={t('preview')} style={{ minHeight: 0, paddingTop: 4, overflowX: 'auto', scrollbarGutter: 'stable' }}>
           <div style={{ height: 'fit-content', width: 506, maxWidth: '100%', paddingBottom: 8 }}>
-            <Preview code={code} hiLine={hiLine} onPickLine={mode === 'code' ? (a, b, deco) => editor.current?.selectLine(a, b, deco) : (a) => pickField(a)} />
+            <div className="preview-heading"><strong>{t('preview')}</strong><button className="btn btn-sm btn-ghost" aria-pressed={plainView} onClick={togglePreview}>{t(plainView ? 'g_game_view' : 'g_work_view')}</button></div>
+            <Preview compact={plainView} code={code} onReorder={moveLine} hiLine={hiLine} onPickLine={(a, b, deco) => { setWorkspaceView('edit'); if (mode === 'code') editor.current?.selectLine(a, b, deco); else pickField(a); }} />
+            {/* The grips only show under the cursor, so nothing on the page said
+               the lines can be moved at all. This says it, and only where it is
+               true — a gift whose tags run across lines gets no grips. */}
+            {canReorderLines(code) && <p className="preview-hint">{t('e_move_hint')}</p>}
             <Actions code={code} setCode={setCode} onReset={resetAll} />
             <ThankYou />
           </div>
