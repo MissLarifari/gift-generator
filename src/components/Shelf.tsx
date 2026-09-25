@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Search, X, ChevronLeft, ChevronRight, Star, Clock, Tag as TagIcon, Sparkles, CalendarDays, PartyPopper, Flame, LayoutGrid, Home, Wand2 } from 'lucide-react';
 import { type TplCategory, type TplItem } from '../data/templates';
+import { groupByOpening, GROUP_FROM } from '../data/grouping';
 import { ENTRIES, usedThemes, usedVibes, usedNamed, THEMES, VIBES, type Entry } from '../data/tags';
-import { LOOKS, lookIdOf, fitsLook, type Look } from '../data/looks';
+import { LOOKS, lookIdOf, fitsLook, sayingShapeOf, type Look } from '../data/looks';
 import { useI18n } from '../i18n';
 
 // The shelf: a browser, not a filter list.
@@ -89,6 +90,9 @@ export default function Shelf({
   onFold?: () => void;
 }) {
   const { t } = useI18n();
+  // A collected look is a decorated note and takes the note's sayings; and its
+  // category is named in German in the data, so the shelf asks i18n for it.
+  const categoryLabel = useCallback((cat: TplCategory) => cat.theme.lookId ? t('look_' + cat.theme.lookId) : cat.label, [t]);
   const [q, setQ] = useState('');
   const [view, setView] = useState<View>({ k: 'home' });
   const [cross, setCross] = useState<string[]>([]);   // vibe filter inside a theme, and back
@@ -96,16 +100,24 @@ export default function Shelf({
   const [recent, setRecent] = useState<string[]>(() => readList(RECENT_KEY));
   const [uses, setUses] = useState<Record<string, number>>(readCounts);
   const [giftLang, setGiftLang] = useState<GiftLang>(readGiftLang);
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const toggleGroup = (label: string) => setOpen((prev) => {
+    const next = new Set(prev);
+    if (!next.delete(label)) next.add(label);
+    return next;
+  });
   const query = q.trim().toLowerCase();
 
   /* ---------- what the layout allows ---------- */
 
   // How many there are in each language, so the control can say so before it
   // is pressed — an empty section after a click is the worse way to find out.
+  const shelfShape = sayingShapeOf(activeLook);
+
   const langCounts = useMemo(() => {
-    const fits = ENTRIES.filter((e) => fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), activeLook));
+    const fits = ENTRIES.filter((e) => fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), shelfShape));
     return { all: fits.length, en: fits.filter((e) => e.lang === 'en').length, de: fits.filter((e) => e.lang === 'de').length };
-  }, [activeLook]);
+  }, [shelfShape]);
 
   /**
    * A remembered language that has nothing behind it is ignored.
@@ -121,8 +133,8 @@ export default function Shelf({
   const base = useMemo(
     () => ENTRIES.filter((e) =>
       (shownLang === 'all' || e.lang === shownLang)
-      && fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), activeLook)),
-    [activeLook, shownLang],
+      && fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), shelfShape)),
+    [shelfShape, shownLang],
   );
 
   const pickLang = useCallback((v: GiftLang) => {
@@ -167,7 +179,7 @@ export default function Shelf({
   const rows = useMemo((): Entry[] => {
     if (query) {
       return base.filter((e) =>
-        `${e.item.l} ${e.item.main} ${e.item.top} ${e.item.bottom} ${e.cat.label}`.toLowerCase().includes(query));
+        `${e.item.l} ${e.item.main} ${e.item.top} ${e.item.bottom} ${e.cat.label} ${categoryLabel(e.cat)}`.toLowerCase().includes(query));
     }
     switch (view.k) {
       case 'all': return base;
@@ -182,7 +194,7 @@ export default function Shelf({
       case 'hot': return hots.filter((e) => e.tags.hot === view.id);
       default: return [];
     }
-  }, [query, view, cross, base, everyday, holidays, parties, hots, favs, recent, byKey]);
+  }, [query, view, cross, base, everyday, holidays, parties, hots, favs, recent, byKey, categoryLabel]);
 
   const go = (v: View) => { setView(v); setCross([]); };
 
@@ -249,7 +261,7 @@ export default function Shelf({
     const on = favSet.has(e.key);
     return (
       <div key={e.key + '#' + i} className="spark-wrap">
-        <button className="spark" onClick={() => use(e)} title={e.cat.label}>
+        <button className="spark" onClick={() => use(e)} title={categoryLabel(e.cat)}>
           <div className="spark-t">
             {e.lang === 'de' && <span className="spark-lang">DE</span>}
             {e.item.main || e.item.l}
@@ -317,7 +329,7 @@ export default function Shelf({
       <button className="spotlight" onClick={() => use(e)}>
         <span className="spot-eyebrow"><Wand2 size={11} /> {t('g_spotlight')}</span>
         <span className="spot-main">{readable(e) || e.item.main || e.item.l}</span>
-        <span className="spot-sub">{e.cat.label}</span>
+        <span className="spot-sub">{categoryLabel(e.cat)}</span>
         <span className="spot-foot">
           {e.tags.vibes.slice(0, 3).map((v) => (
             <span key={v} className="spot-tag">{VIBES.find((x) => x.id === v)?.label ?? v}</span>
@@ -351,10 +363,10 @@ export default function Shelf({
   const notNamed = (e: Entry) => !e.tags.holiday && !e.tags.celebration && !e.tags.hot;
 
   const emptyHint = (pred: (e: Entry) => boolean) => {
-    const elsewhere = LOOKS.find((lk) => lk.id !== activeLook
+    const elsewhere = LOOKS.find((lk) => sayingShapeOf(lk.id) !== shelfShape
       && ENTRIES.some((e) => pred(e)
         && (shownLang === 'all' || e.lang === shownLang)
-        && fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), lk.id)));
+        && fitsLook(lookIdOf({ ...e.cat.theme, ...e.item.theme }), sayingShapeOf(lk.id))));
     return (
       <div style={{ padding: '13px 2px 2px' }}>
         <p className="hint" style={{ margin: '0 0 11px' }}>{elsewhere ? t('g_none_look') : t('g_none_here')}</p>
@@ -473,11 +485,40 @@ export default function Shelf({
 
   function grid(list: Entry[]) {
     if (list.length === 0) return <p className="hint" style={{ padding: '22px 4px' }}>{t('g_no_fit')}</p>;
-    return <div className="cardgrid">{list.map(card)}</div>;
+    // A search is already a filter; folding its handful of hits away again
+    // would be hiding the answer. So while searching, the list is flat.
+    // A short list reads fine as it is; folding it away only adds clicks. And
+    // a search is already a filter — hiding its hits again would be hiding the
+    // answer. Both stay flat.
+    if (query || list.length < GROUP_FROM) return <div className="cardgrid">{list.map(card)}</div>;
+
+    const groups = groupByOpening(list, readable, 3);
+    if (groups.every((g) => !g.label)) return <div className="cardgrid">{list.map(card)}</div>;
+
+    return (
+      <div className="cardgrid">
+        {groups.map((g) => {
+          const label = g.label || t('g_other');
+          const shown = open.has(label);
+          return (
+            <div key={label} className="giftgroup">
+              <button className="group-head" aria-expanded={shown} onClick={() => toggleGroup(label)}>
+                <ChevronRight size={13} className="group-arrow" data-open={shown} />
+                <span className="group-name">{label}</span>
+                <span className="group-n">{g.items.length}</span>
+              </button>
+              {shown && <div className="group-items">{g.items.map(card)}</div>}
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 
   return (
-    <section className="slab flex flex-col" style={{ minHeight: 0, overflow: 'hidden' }}>
+    // selection-column is what the workspace grid and the mobile tabs address
+    // this panel by; without it the shelf stays on screen under "Bearbeiten".
+    <section className="selection-column slab flex flex-col" aria-label={t('g_select')} style={{ minHeight: 0, overflow: 'hidden' }}>
       {/* 1 — whose panel this is */}
       <div className="panel-head flex items-start justify-between" style={{ gap: 10 }}>
         <div>
@@ -495,7 +536,9 @@ export default function Shelf({
       <div className="sec">
         <div className="sec-t">{t('layout')}</div>
         <div className="sec-s">{t('g_layout_sub')}</div>
-        <div className="seg" role="group" aria-label={t('layout')}>
+        {/* Seventeen names where there were three: the row keeps its shape and
+           scrolls sideways instead of squashing every name to three letters. */}
+        <div className="seg layout-picker" role="group" aria-label={t('layout')}>
           {LOOKS.map((l) => (
             <button key={l.id} data-on={activeLook === l.id} onClick={() => onApplyLook(l)} title={t('look_' + l.id + '_h')}>
               {t('look_' + l.id)}
