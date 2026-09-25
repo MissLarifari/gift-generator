@@ -64,7 +64,8 @@ describe('what a look applies over words that are already there', () => {
     for (const l of LOOKS) {
       for (const f of ['dekoTop', 'dekoBottom', 'topText'] as const) {
         const v = l.text[f];
-        if (v) expect(v, `${l.id}.${f}`).not.toMatch(/\p{L}{2,}/u);
+        // These IPA letters form the butterfly ornament, not a word.
+        if (v) expect(v.replaceAll('ʚɞ', ''), `${l.id}.${f}`).not.toMatch(/\p{L}{2,}/u);
       }
     }
   });

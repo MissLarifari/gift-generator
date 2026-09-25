@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { I18N, LANGS } from '../i18n';
 import { REFUSALS } from '../guestbook';
+import { LOOKS } from '../data/looks';
 
 // A missing key does not crash: t() quietly falls back to English, so a gap
 // shows up as one stray English word in an otherwise German panel — easy to
@@ -41,7 +42,7 @@ describe('nothing German leaks into the other languages', () => {
 
   it('every layout has a name and a hint in every language', () => {
     for (const lang of LANGS)
-      for (const id of ['note', 'twoWords', 'sparkle'])
+      for (const { id } of LOOKS)
         for (const suffix of ['', '_h']) expect(I18N[lang]['look_' + id + suffix], `${lang}.${id}${suffix}`).toBeTruthy();
   });
 

@@ -6,6 +6,8 @@ export type FieldId = 'dekoTop' | 'topText' | 'mainText' | 'bottomText' | 'kaomo
 export type Layout = 'center' | 'inline' | 'pyramid' | 'sparkle' | 'heart' | 'custom';
 
 export interface GiftState {
+  /** Explicit identity for named layouts with more than three text rows. */
+  lookId?: string;
   text: Record<FieldId, string>;
   /**
    * Styling inside a line, as character ranges over `text[field]`. A field

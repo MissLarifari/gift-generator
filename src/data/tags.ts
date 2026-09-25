@@ -1,4 +1,5 @@
 import { TEMPLATE_CATEGORIES, type TplCategory, type TplItem, type TplLang } from './templates';
+import { ROMANTIC_LOOKS } from './romanticLooks';
 
 // Tags instead of one long list of categories.
 //
@@ -83,6 +84,7 @@ export interface Tags {
  * and funny and no rule would work that out.
  */
 export const CATEGORY_TAGS: Record<string, Tags> = {
+  ...Object.fromEntries(ROMANTIC_LOOKS.map(l => [l.label, { themes: ['love'], vibes: ['sweet'] }])),
   'Little Notes':       { themes: ['special', 'thinking'], vibes: ['sweet', 'soft'] },
   'Cute Notes':         { themes: ['special', 'thinking', 'support'], vibes: ['sweet', 'wholesome'] },
   'Two Parts':          { themes: ['special'], vibes: ['sweet', 'romantic'] },

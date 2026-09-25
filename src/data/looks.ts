@@ -1,4 +1,14 @@
 import type { FieldId, FontStyle, GiftState, StyleRange } from '../engine';
+import { FIELD_ORDER, isDecoLine } from '../engine';
+import { ROMANTIC_LOOKS } from './romanticLooks';
+import { createDefaultState } from '../state';
+
+export const LOOK_FAMILIES: string[][] = [
+  ['note'], ['twoWords'], ['sparkle'], ['heartSmile', 'favoriteTrouble'],
+  ['sweetTemptation', 'littleMagic'], ['homeIsYou', 'alwaysYou'],
+  ['sneakyHeart', 'stolenHeart'], ['littleDetour', 'bestDetour'],
+  ['happyPlace', 'oneMoreKiss'], ['flyingHug'], ['guiltyCute'],
+];
 
 // A "look" is the build of a gift without its words: which deco lines it uses,
 // which line carries the colour, how big the big word is, which script runs.
@@ -26,7 +36,7 @@ export interface Look {
    *  values put the loudness on the whole line instead. Without this the second
    *  half of the two-part build stayed small and white on every gift but the
    *  example, which made the build silently not a two-parter at all. */
-  applied?: { sizes?: Partial<Record<FieldId, number>>; noColor?: Partial<Record<FieldId, boolean>> };
+  applied?: { sizes?: Partial<Record<FieldId, number>>; noColor?: Partial<Record<FieldId, boolean>>; colors?: Partial<Record<FieldId, string>> };
   colors: Partial<Record<FieldId, string>>;
   fonts: Partial<Record<FieldId, FontStyle>>;
   sizes: Partial<Record<FieldId, number>>;
@@ -102,6 +112,7 @@ export const LOOKS: Look[] = [
     noColor: { topText: true, bottomText: true, mainText: false },
     lineOrder: ['dekoTop', 'topText', 'mainText', 'bottomText', 'kaomoji', 'dekoBottom'],
   },
+  ...ROMANTIC_LOOKS,
 ];
 
 /**
@@ -111,6 +122,7 @@ export const LOOKS: Look[] = [
  * line is a second loud word.
  */
 export function lookIdOf(build: {
+  lookId?: string;
   sizes?: Partial<Record<FieldId, number>>;
   fonts?: Partial<Record<FieldId, FontStyle>>;
   ranges?: Partial<Record<FieldId, StyleRange[]>>;
@@ -119,6 +131,7 @@ export function lookIdOf(build: {
   /** …a template theme carries it here. Both are read, so one function serves both. */
   deco?: { dekoBottom?: string | null };
 }): string | null {
+  if (build.lookId && ROMANTIC_LOOKS.some(l => l.id === build.lookId)) return build.lookId;
   // A loud bottom line is what makes the two-word build — whether the size sits
   // on the whole line or on a range inside it.
   const loudBottom =
@@ -149,18 +162,33 @@ export function fitsLook(built: string | null, wanted: string | null | undefined
 }
 
 /**
+ * Which shape of saying a look takes from the shelf.
+ *
+ * The three original builds each have a library written for them. The
+ * fourteen collected looks do not — they are decorated NOTES: same three word
+ * rows, different ornament around them. Filtering the shelf by their own id
+ * therefore left exactly one card standing, their own example, and choosing a
+ * saying for them was impossible. They borrow the note's shelf instead, and
+ * the words are poured into the look on the way in (composeLook keepWords).
+ */
+export function sayingShapeOf(lookId: string | null | undefined): string | null | undefined {
+  return lookId && ROMANTIC_LOOKS.some((l) => l.id === lookId) ? 'note' : lookId;
+}
+
+/**
  * Is the gift still showing a look's own example, untouched? Then switching
  * builds may swap in the new example — otherwise half the lines would carry
  * over and the preview comes out lopsided. Anything typed is never replaced.
  */
 export function isUntouchedSample(text: Partial<Record<FieldId, string>>): boolean {
   const t = (k: FieldId) => text[k] ?? '';
-  if (!t('topText') && !t('mainText') && !t('bottomText')) return true;
+  if (FIELD_ORDER.every(f => !t(f) || isDecoLine(t(f)))) return true;
   return LOOKS.some(
     (l) =>
+      (ROMANTIC_LOOKS.includes(l) ? Object.keys(l.sample).every(k => (l.sample[k as FieldId] ?? '') === t(k as FieldId)) :
       (l.sample.topText ?? '') === t('topText') &&
       (l.sample.mainText ?? '') === t('mainText') &&
-      (l.sample.bottomText ?? '') === t('bottomText'),
+      (l.sample.bottomText ?? '') === t('bottomText')),
   );
 }
 
@@ -173,32 +201,92 @@ export function isUntouchedSample(text: Partial<Record<FieldId, string>>): boole
  * One function so the gift the page opens with and the gift a click on the
  * layout chip builds cannot drift apart.
  */
+/** The three text rows of a gift, always in this reading order. */
+const TEXT_ROWS: FieldId[] = ['topText', 'mainText', 'bottomText'];
+
+/**
+ * A look's three text rows, in the order they are SEEN.
+ *
+ * Usually that is run-up, middle, tail. Arrow Focus shows its loud line LAST,
+ * so for that one it is topText, bottomText, mainText — and that difference is
+ * the whole reason this function exists.
+ */
+export function wordSlotsOf(look: Look): FieldId[] {
+  return (look.lineOrder ?? FIELD_ORDER).filter((f) => TEXT_ROWS.includes(f));
+}
+
+/**
+ * Moves a saying into a look so it still READS.
+ *
+ * The three parts arrive in reading order — run-up, middle, tail — because
+ * that is how every saying in the shelf is written. Copied field for field
+ * they land wrong in a look that stacks its rows differently: Arrow Focus
+ * shows its loud line LAST, so the tail ended up above the middle and the
+ * sentence fell apart ("you have been / and not in a polite way / on my mind
+ * all day"). So the parts are handed to the look's word rows slot for slot,
+ * in the order those rows are seen. Where the counts do not match, the parts
+ * stay on the fields they came from.
+ */
+function pourWords(words: Partial<Record<FieldId, string>>, from: FieldId[], look: Look): Partial<Record<FieldId, string>> {
+  const parts = from.filter((f) => f in words);
+  const slots = wordSlotsOf(look);
+  // Only a reordering of the very same rows. A gift that fills two of the
+  // three, or writes into a row this look does not use, keeps every part
+  // where it already is — moving those would be guessing.
+  const same = parts.length === slots.length && parts.every((f) => slots.includes(f));
+  if (!same) return words;
+  const out: Partial<Record<FieldId, string>> = {};
+  parts.forEach((f, i) => { out[slots[i]] = words[f]; });
+  return out;
+}
+
 export function composeLook(s: GiftState, look: Look, keepWords = false): GiftState {
   // keepWords: apply the FRAME only. Needed when a ready-made card is loaded
   // into a layout — one of those cards happens to be the note look's own
   // example, and without this it was mistaken for an empty gift and had its
   // words replaced by the new look's example.
   const fresh = !keepWords && isUntouchedSample(s.text);
+  if (fresh) s = createDefaultState();
   // Over someone else's gift, Sparkle keeps that gift's own deco row and just
   // repeats it underneath.
   const mirrored = look.mirrorDeco && !fresh && s.text.dekoTop
     ? { dekoTop: s.text.dekoTop, dekoBottom: s.text.dekoTop }
     : null;
+  const carried = FIELD_ORDER.filter(f => s.text[f] && !isDecoLine(s.text[f]));
+  const seen = (s.lineOrder?.length ? s.lineOrder : FIELD_ORDER).filter(f => carried.includes(f));
+  const plain = Object.fromEntries(carried.map(f => [f, s.text[f]])) as Partial<Record<FieldId, string>>;
+  // Slot for slot, so the sentence survives a look that stacks its rows in a
+  // different order. Only when the words are being carried over at all.
+  const words = keepWords ? pourWords(plain, seen, look) : plain;
+  const decoration = { ...look.text, ...mirrored };
+  const ranges = { ...s.ranges };
+  // Ranges on replaced ornaments belong to the previous ornament's positions.
+  for (const field of FIELD_ORDER) if (field in decoration && !(field in words)) delete ranges[field];
+  // And a range measured for the gift's OWN build sits on the wrong letters
+  // once its words move into another one — the look's `applied` carries the
+  // accent across instead, spread over the whole row.
+  if (keepWords) for (const field of TEXT_ROWS) delete ranges[field];
+  const defaults = createDefaultState();
   return {
     ...s,
+    lookId: ROMANTIC_LOOKS.some(l => l.id === look.id) ? look.id : undefined,
     // The example's ranges (a loud word inside a small white line) only make
     // sense on the example's words.
-    ranges: fresh ? { ...look.sampleRanges } : s.ranges,
+    ranges: fresh ? { ...look.sampleRanges } : ranges,
     text: {
       ...s.text,
+      // A row the new look does not fill and does not need: its old words
+      // belong to the gift that is being replaced, not to this one.
+      ...Object.fromEntries(carried.map((f) => [f, ''])),
       ...look.text,
       ...mirrored,
+      ...words,
       ...(fresh ? { topText: '', mainText: '', bottomText: '', ...look.sample } : null),
     },
-    colors: { ...s.colors, ...look.colors },
-    fonts: { ...s.fonts, ...look.fonts },
-    sizes: { ...s.sizes, ...look.sizes, ...(fresh ? null : look.applied?.sizes) },
-    noColor: { ...s.noColor, ...look.noColor, ...(fresh ? null : look.applied?.noColor) },
+    colors: { ...defaults.colors, ...look.colors, ...(fresh ? null : look.applied?.colors) },
+    fonts: { ...defaults.fonts, ...look.fonts },
+    sizes: { ...defaults.sizes, ...look.sizes, ...(fresh ? null : look.applied?.sizes) },
+    noColor: { ...defaults.noColor, ...look.noColor, ...(fresh ? null : look.applied?.noColor) },
     lineOrder: look.lineOrder ? [...look.lineOrder] : s.lineOrder,
   };
 }

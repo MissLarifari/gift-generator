@@ -15,8 +15,9 @@
 // it(label, mainText, topText, bottomText) — top and bottom may be ''.
 // th(mainColour, topColour, bottomColour, deco) — plus optional grad/fonts/noColor.
 
-import type { FieldId, FontStyle, GiftState } from '../engine';
+import type { FieldId, FontStyle, GiftState, StyleRange } from '../engine';
 import { createDefaultState } from '../state';
+import { ROMANTIC_LOOKS } from './romanticLooks';
 
 /** The language the GIFT TEXT is written in. Labels are German either way -
  *  they are the browsing titles, not the gift. */
@@ -36,6 +37,8 @@ export interface TplItem {
 }
 export interface TplDeco { dekoTop: string | null; dekoBottom: string | null; kaomoji: string | null }
 export interface TplTheme {
+  lookId?: string;
+  ranges?: Partial<Record<FieldId, StyleRange[]>>;
   mainColor: string;
   topColor: string;
   botColor: string;
@@ -53,7 +56,7 @@ export interface TplTheme {
   // Optional: a category with its own font sizes. The main line is always
   // wrapped in <size=…> anyway, so overriding it is free; the small lines only
   // grow a wrapper when they differ from their default, which costs bytes.
-  sizes?: Partial<Record<'topText' | 'mainText' | 'bottomText', number>>;
+  sizes?: Partial<Record<FieldId, number>>;
   // Optional: a category that stacks its lines in its own order - e.g. a deco
   // row sitting BETWEEN two large words instead of above them.
   lineOrder?: FieldId[];
@@ -191,6 +194,7 @@ const twoBirthday = twoIn('(✿≧‿≦)');
  * list still shows — it just falls to the end of its group.
  */
 export const CATEGORY_ORDER: string[] = [
+  ...ROMANTIC_LOOKS.map(l => l.label),
   // Themen — from the note you leave on a pillow to the ones you do not
   'Little Notes', 'Cute Notes', 'Two Parts', 'Cute', 'Romance',
   'Friends', 'Friends / Roast', 'Funny', 'Funny / Chaotic',
@@ -208,6 +212,30 @@ export const CATEGORY_ORDER: string[] = [
 
 
 export const TEMPLATE_CATEGORIES: TplCategory[] = [
+  ...ROMANTIC_LOOKS.map((look): TplCategory => ({
+    label: look.label,
+    group: 'Themen',
+    theme: {
+      lookId: look.id,
+      mainColor: look.colors.mainText ?? '#ffffff',
+      topColor: look.colors.topText ?? '#ffffff',
+      botColor: look.colors.bottomText ?? '#ffffff',
+      mainGrad: null,
+      deco: {
+        dekoTop: look.sample.dekoTop ?? '',
+        dekoBottom: look.sample.dekoBottom ?? '',
+        kaomoji: look.sample.kaomoji ?? '',
+      },
+      decoColors: { dekoTop: look.colors.dekoTop, dekoBottom: look.colors.dekoBottom, kaomoji: look.colors.kaomoji },
+      fonts: look.fonts,
+      noColor: look.noColor,
+      sizes: look.sizes,
+      lineOrder: look.lineOrder,
+      ranges: look.sampleRanges,
+    },
+    items: [{ l: look.label, main: look.sample.mainText ?? '', top: look.sample.topText ?? '', bottom: look.sample.bottomText ?? '',
+      tags: { themes: ['love'], vibes: ['sweet'] } }],
+  })),
   { label: 'Little Notes', group: 'Themen', theme: { ...th('#ff4fa3', '#f2f2f2', '#f2f2f2', deco('° ✿ ★ ✿ °', '', 'ʚɞ')),
       decoColors: { dekoTop: '#ff9ec7', kaomoji: '#ff9ec7' },
       fonts: { topText: 'fancy', mainText: 'fancy', bottomText: 'fancy' },
@@ -1377,12 +1405,14 @@ export const TEMPLATE_CATEGORIES: TplCategory[] = [
  */
 export function composeTemplate(s: GiftState, cat: TplCategory, item: TplItem): GiftState {
   const th = { ...cat.theme, ...item.theme };
+  if (th.lookId) s = createDefaultState();
   const text = { ...s.text, mainText: item.main, topText: item.top, bottomText: item.bottom };
   if (th.deco.dekoTop != null) text.dekoTop = th.deco.dekoTop;
   if (th.deco.dekoBottom != null) text.dekoBottom = th.deco.dekoBottom;
   if (th.deco.kaomoji != null) text.kaomoji = th.deco.kaomoji;
   return {
     ...s,
+    lookId: th.lookId,
     text,
     colors: { ...s.colors, mainText: th.mainColor, topText: th.topColor, bottomText: th.botColor, ...th.decoColors },
     grads: {
@@ -1397,6 +1427,6 @@ export function composeTemplate(s: GiftState, cat: TplCategory, item: TplItem): 
     sizes: { ...createDefaultState().sizes, ...th.sizes },
     lineOrder: th.lineOrder ? [...th.lineOrder] : s.lineOrder,
     // Ranges belong to the words they were drawn on, and a card brings its own.
-    ranges: {},
+    ranges: { ...th.ranges },
   };
 }
