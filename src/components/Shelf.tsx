@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Search, X, ChevronLeft, ChevronRight, Star, Clock, Tag as TagIcon, Sparkles, CalendarDays, PartyPopper, Flame, LayoutGrid, Home, Wand2 } from 'lucide-react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { Search, X, ChevronLeft, ChevronRight, Star, Clock, LayoutGrid, Wand2 } from 'lucide-react';
 import { type TplCategory, type TplItem } from '../data/templates';
 import { groupByOpening, GROUP_FROM } from '../data/grouping';
 import { ENTRIES, usedThemes, usedVibes, usedNamed, THEMES, VIBES, type Entry } from '../data/tags';
 import { LOOKS, lookIdOf, fitsLook, sayingShapeOf, type Look } from '../data/looks';
+import { directory, type DirView } from '../data/directory';
 import { useI18n } from '../i18n';
 
 // The shelf: a browser, not a filter list.
@@ -94,7 +95,10 @@ export default function Shelf({
   // category is named in German in the data, so the shelf asks i18n for it.
   const categoryLabel = useCallback((cat: TplCategory) => cat.theme.lookId ? t('look_' + cat.theme.lookId) : cat.label, [t]);
   const [q, setQ] = useState('');
-  const [view, setView] = useState<View>({ k: 'home' });
+  // Opens on the whole shelf. "Start" was a page you had to leave before you
+  // could choose anything, and it is not a category — the gift of the day it
+  // held still shows, above the list.
+  const [view, setView] = useState<View>({ k: 'all' });
   const [cross, setCross] = useState<string[]>([]);   // vibe filter inside a theme, and back
   const [favs, setFavs] = useState<string[]>(() => readList(FAVS_KEY));
   const [recent, setRecent] = useState<string[]>(() => readList(RECENT_KEY));
@@ -197,6 +201,28 @@ export default function Shelf({
   }, [query, view, cross, base, everyday, holidays, parties, hots, favs, recent, byKey, categoryLabel]);
 
   const go = (v: View) => { setView(v); setCross([]); };
+  /** Is this directory entry the one being shown? */
+  const sameDir = (v: DirView) => view.k === v.k && 'id' in view && view.id === v.id;
+
+  // Which category is showing, and whether the list of them is open.
+  //
+  // Choosing one folds the list away. With all thirty-seven chips standing
+  // open the sayings sit below them, off the bottom of the panel — you click
+  // a category, the chip lights up, and nothing you can see happens.
+  // Closed on arrival, so the shelf opens on gifts rather than on a wall of
+  // category names with the list pushed off the bottom.
+  const [catsOpen, setCatsOpen] = useState(false);
+  const [looksOpen, setLooksOpen] = useState(false);
+  const chosen = directory(base).flatMap((g) => g.entries).find((e) => sameDir(e.view));
+  const results = useRef<HTMLDivElement>(null);
+  const pickCat = (v: DirView) => {
+    go(v as View);
+    setCatsOpen(false);
+    // The panel itself does not scroll — it hides its overflow and the list
+    // inside it does the scrolling. So put that list back at its top; a
+    // scrollIntoView here would move the page instead and fix nothing.
+    requestAnimationFrame(() => { if (results.current) results.current.scrollTop = 0; });
+  };
 
   /* ---------- pieces ---------- */
 
@@ -532,18 +558,29 @@ export default function Shelf({
         )}
       </div>
 
-      {/* 2 — the layout decides which gifts exist at all */}
+      {/* 2 — the layout decides which gifts exist at all.
+          Seventeen names laid out at once came to 301px of a 866px panel and
+          left the sayings 186. So the section shows the one that is chosen and
+          opens the rest on a click — the same fold the categories use. */}
       <div className="sec">
-        <div className="sec-t">{t('layout')}</div>
-        <div className="sec-s">{t('g_layout_sub')}</div>
-        {/* Seventeen names where there were three: the row keeps its shape and
-           scrolls sideways instead of squashing every name to three letters. */}
-        <div className="seg layout-picker" role="group" aria-label={t('layout')}>
-          {LOOKS.map((l) => (
-            <button key={l.id} data-on={activeLook === l.id} onClick={() => onApplyLook(l)} title={t('look_' + l.id + '_h')}>
-              {t('look_' + l.id)}
-            </button>
-          ))}
+        <button className="cats-head" aria-expanded={looksOpen} aria-controls="shelf-looks"
+          onClick={() => setLooksOpen((v) => !v)}>
+          <span>
+            <span className="sec-t">{t('layout')}</span>
+            <span className="sec-s" style={{ marginBottom: 0 }}>{t('g_layout_sub')}</span>
+          </span>
+          {!looksOpen && <span className="cats-now">{activeLook ? t('look_' + activeLook) : t('g_choose_layout')}</span>}
+          <ChevronRight size={13} className="cats-arrow" data-open={looksOpen} />
+        </button>
+        <div id="shelf-looks" hidden={!looksOpen}>
+          <div className="seg layout-picker" role="group" aria-label={t('layout')} style={{ marginTop: 8 }}>
+            {LOOKS.map((l) => (
+              <button key={l.id} data-on={activeLook === l.id}
+                onClick={() => { onApplyLook(l); setLooksOpen(false); }} title={t('look_' + l.id + '_h')}>
+                {t('look_' + l.id)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -562,38 +599,51 @@ export default function Shelf({
         </div>
       </div>}
 
-      {/* 3 + 4 — search, then the two ways in */}
+      {/* 3 — the sayings: where you look for one, and the three shelves that
+          are not a category — everything, your own, and where you just were. */}
       <div className="sec">
+        <div className="sec-t">{t('g_sayings_title')}</div>
+        <div className="sec-s">{t('g_sayings_sub')}</div>
         <div className="searchbox">
           <Search size={14} style={{ color: 'var(--dim)', flex: '0 0 auto' }} />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('g_search_gifts')} aria-label={t('g_search_gifts')} />
           {q && <button className="icon-btn" style={{ width: 22, height: 22 }} onClick={() => setQ('')} aria-label={t('cancel')}><X size={13} /></button>}
         </div>
-
-        <div style={{ marginTop: 13 }}>
-          <div className="navlab">{t('g_browse')}</div>
-          <div className="navrow">
-            {nav('home', <Home size={11} />, t('g_home'))}
-            {nav('themes', <TagIcon size={11} />, t('grp_Themen'), everyday.length)}
-            {nav('vibes', <Sparkles size={11} />, t('grp_Vibes'), everyday.length)}
-            {nav('holidays', <CalendarDays size={11} />, t('grp_Holidays'), holidays.length)}
-            {nav('celebrations', <PartyPopper size={11} />, t('grp_Celebrations'), parties.length)}
-            {nav('hots', <Flame size={11} />, t('grp_Hot'), hots.length)}
-          </div>
+        <div className="navrow" style={{ marginTop: 10 }}>
+          {nav('all', <LayoutGrid size={11} />, t('g_all'), base.length)}
+          {nav('favs', <Star size={11} />, t('g_favorites'), favs.length || undefined)}
+          {nav('recent', <Clock size={11} />, t('g_recent'), recent.length || undefined)}
         </div>
+      </div>
 
-        <div style={{ marginTop: 11, paddingTop: 11, borderTop: '1px dashed var(--line-soft)' }}>
-          <div className="navlab">{t('g_library')}</div>
-          <div className="navrow">
-            {nav('favs', <Star size={11} />, t('g_favorites'), favs.length || undefined)}
-            {nav('recent', <Clock size={11} />, t('g_recent'), recent.length || undefined)}
-            {nav('all', <LayoutGrid size={11} />, t('g_all'), base.length)}
-          </div>
+      {/* 4 — the categories, and they are categories of SAYINGS. Five
+          headings that say what you are choosing, instead of the four names
+          the tag table happens to use for its own columns. */}
+      <div className="sec sec-cats">
+        <button className="cats-head" aria-expanded={catsOpen} aria-controls="shelf-cats"
+          onClick={() => setCatsOpen((v) => !v)}>
+          <span className="sec-t">{t('g_categories')}</span>
+          {chosen && !catsOpen && <span className="cats-now">{chosen.label} <span className="n">{chosen.n}</span></span>}
+          <ChevronRight size={13} className="cats-arrow" data-open={catsOpen} />
+        </button>
+        <div id="shelf-cats" hidden={!catsOpen}>
+          {directory(base).map((g) => (
+            <div className="catgroup" key={g.title}>
+              <div className="catgroup-t">{t(g.title)}</div>
+              <div className="navrow">
+                {g.entries.map((e) => (
+                  <button key={e.id} className="nav" data-on={sameDir(e.view)} onClick={() => pickCat(e.view)}>
+                    {e.label} <span className="n">{e.n}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* 5 — what you came for */}
-      <div className="scroll-y" style={{ flex: 1, minHeight: 0, padding: '14px 15px 18px' }}>
+      <div ref={results} className="scroll-y" style={{ flex: 1, minHeight: 0, padding: '14px 15px 18px' }}>
         {/* Where you are and what is switched on, in one line. */}
         <div className="status">
           <span>{t('layout')}: <b>{activeLook ? t('look_' + activeLook) : '—'}</b></span>

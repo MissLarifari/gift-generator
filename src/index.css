@@ -1066,6 +1066,31 @@ button { color: inherit; }
 .searchbox input::placeholder { color: var(--dim); }
 
 /* --- browse / library: two named groups, not one pill soup --- */
+/* A heading inside the categories: smaller than the section title, because
+   it groups chips rather than opening a new part of the panel. */
+/* The heading is the fold: choosing a category closes the list and names
+   the choice here, so the sayings come up to meet you. */
+.cats-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 2px 0 8px;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.cats-head .sec-t { flex: 0 0 auto; }
+.cats-now { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cats-now .n { margin-left: 4px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9.5px; color: var(--dim); }
+.cats-arrow { margin-left: auto; flex: 0 0 auto; color: var(--dim); transition: transform 0.13s ease; }
+.cats-arrow[data-open='true'] { transform: rotate(90deg); color: var(--accent); }
+.cats-head:hover .cats-arrow { color: var(--text); }
+.catgroup + .catgroup { margin-top: 11px; }
+.catgroup-t { margin-bottom: 6px; font-size: 10.5px; font-weight: 600; color: var(--muted); }
+.sec-cats .navrow { gap: 4px; }
+.sec-cats .nav { padding: 5px 9px; font-size: 11px; }
 .navlab { margin-bottom: 6px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
 .navrow { display: flex; flex-wrap: wrap; gap: 5px; }
 .nav {
