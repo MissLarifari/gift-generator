@@ -72,12 +72,16 @@ button { color: inherit; }
 
 :focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; border-radius: 4px; }
 
-/* Thin, and the same dark as everything else until you reach for it. */
-* { scrollbar-width: thin; scrollbar-color: #2a313b transparent; }
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: #2a313b; border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover { background: #3b4450; background-clip: padding-box; }
-::-webkit-scrollbar-track { background: transparent; }
+/* A bar you can see and grab.
+   It used to be 8px of near-black on near-black: the panel scrolled, but
+   nothing said so, and a column that ends in blank space reads as broken
+   rather than as "there is more below". */
+* { scrollbar-width: auto; scrollbar-color: #454e5c #171b21; }
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-thumb { background: #454e5c; border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; min-height: 40px; }
+::-webkit-scrollbar-thumb:hover { background: #5a6575; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:active { background: var(--accent); background-clip: padding-box; }
+::-webkit-scrollbar-track { background: #171b21; border-radius: 999px; }
 ::-webkit-scrollbar-corner { background: transparent; }
 
 .scroll-y { overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
@@ -110,7 +114,17 @@ button { color: inherit; }
    not fit were simply unreachable — nothing scrolled, because the page does
    not scroll either. One scroll area instead: whatever the window leaves,
    everything in the panel can be reached by rolling it. */
-.selection-column { display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; container-type: inline-size; }
+.selection-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  /* scroll, not auto: the bar is drawn even before you need it, so the
+     column says it can be rolled instead of just ending. */
+  overflow-y: scroll;
+  overflow-x: hidden;
+  container-type: inline-size;
+}
 /* The gallery opens inside the shelf, so it gets a lid of its own rather than
    growing until the sayings are off the screen. */
 #shelf-layout-picker:not([hidden]) { margin-top: 12px; max-height: 340px; overflow-y: auto; padding: 2px; }
@@ -154,13 +168,17 @@ button { color: inherit; }
   .workspace .editor-column { min-height: auto !important; }
   .workspace .editor-column > .panel { flex-shrink: 0; }
   .workspace .editor-column > .slab { flex: 0 0 auto !important; min-height: 320px !important; height: 360px; }
-  .preview-column { justify-self: center; width: 522px; max-width: 100%; height: max-content; overflow-y: visible; }
+  /* Each tab's column scrolls on its own. height:max-content let the preview
+     grow to 991px inside a 620px window with the page unable to scroll, so
+     its counters and buttons were simply gone. */
+  .preview-column { justify-self: center; width: 522px; max-width: 100%; height: 100%; min-height: 0; overflow-y: auto; }
+  .workspace > .editor-column { height: 100%; min-height: 0; overflow-y: auto; }
   .editor-column .scroll-y { overflow-y: visible; }
   .editor-column .layout-gallery { overflow-y: auto; }
   .workspace-tabs { display: flex; flex-shrink: 0; margin: 10px 14px 0; border-bottom: 1px solid var(--line); }
   .workspace-tabs > button { flex: 1; border: 0; border-bottom: 2px solid transparent; padding: 12px 5px; background: none; font-size: 13px; color: var(--muted); cursor: pointer; }
   .workspace-tabs > button[aria-current='page'] { color: var(--text); border-bottom-color: var(--bloom); }
-  .workspace > .selection-column { display: flex; height: 100%; max-height: none; overflow-y: auto !important; overflow-x: hidden !important; }
+  .workspace > .selection-column { display: flex; height: 100%; max-height: none; overflow-y: scroll !important; overflow-x: hidden !important; }
   .workspace[data-view='select'] > .editor-column, .workspace[data-view='select'] > .preview-column,
   .workspace[data-view='edit'] > .selection-column, .workspace[data-view='edit'] > .preview-column,
   .workspace[data-view='preview'] > .selection-column, .workspace[data-view='preview'] > .editor-column { display: none; }
