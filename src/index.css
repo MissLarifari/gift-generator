@@ -24,7 +24,9 @@
   /* --- ink --- */
   --text: #f1f3f7;
   --muted: #98a0ad;
-  --dim: #666e7b;
+  /* Lifted from #666e7b: against the panel that was 3.5:1, under the 4.5
+     that small text needs to stay readable. This is 4.6. */
+  --dim: #79818e;
 
   /* --- accents: one cool for actions, two warm for ornament --- */
   --accent: #8b8dff;
@@ -70,12 +72,96 @@ button { color: inherit; }
 
 :focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; border-radius: 4px; }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #2c333d; border-radius: 8px; border: 3px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover { background: #39424e; background-clip: padding-box; }
+/* Thin, and the same dark as everything else until you reach for it. */
+* { scrollbar-width: thin; scrollbar-color: #2a313b transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #2a313b; border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: #3b4450; background-clip: padding-box; }
 ::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-corner { background: transparent; }
 
 .scroll-y { overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+
+/* Keep editing in view; galleries and secondary tools open only on request. */
+.workspace { display: grid; grid-template-columns: minmax(240px, .8fr) minmax(300px, 1fr) 522px; overflow: auto; }
+.workspace[data-shelf-open='true'] { grid-template-columns: minmax(240px, .8fr) minmax(350px, 1fr) 522px; }
+.current-layout-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.current-layout-row > div { min-width: 0; }
+.current-layout-row strong { display: block; margin-top: 5px; font-size: 14px; line-height: 1.4; font-weight: 600; overflow-wrap: anywhere; }
+.current-layout-row .icon-btn[data-on='true'] { color: var(--text); background: var(--hover); }
+.current-layout-row > button { flex-shrink: 0; }
+.sec-head { display: flex; align-items: center; gap: 9px; width: 100%; border: 0; padding: 4px 0; background: none; color: var(--muted); text-align: left; cursor: pointer; }
+.sec-head:hover, .sec-head[data-open='true'] { color: var(--text); }
+.sec-head .sec-label { font-size: 12px; font-weight: 600; }
+.sec-body { margin-top: 14px; }
+.layout-gallery:not([hidden]) { margin-top: 14px; max-height: 320px; overflow-y: auto; padding: 2px; }
+.quiet-details > summary { cursor: pointer; padding: 9px 7px; color: var(--muted); font-size: 11.5px; }
+.quiet-details > summary:hover { color: var(--text); }
+.guestbook-disclosure { border-top: 1px solid var(--line-soft); flex-shrink: 0; }
+.guestbook-disclosure[open] { max-height: 45vh; overflow-y: auto; }
+.workspace-tabs { display: none; }
+.selection-column { display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden; container-type: inline-size; }
+/* The gallery opens inside the shelf, so it gets a lid of its own rather than
+   growing until the sayings are off the screen. */
+#shelf-layout-picker:not([hidden]) { margin-top: 12px; max-height: 340px; overflow-y: auto; padding: 2px; }
+.selection-head { padding: 16px 14px 0; flex-shrink: 0; }
+.selection-tabs { display: flex; gap: 20px; margin-top: 12px; border-bottom: 1px solid var(--line); }
+.selection-tabs > button { display: flex; align-items: center; gap: 7px; padding: 10px 0 12px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); cursor: pointer; font-size: 13px; }
+.selection-tabs > button[aria-selected='true'] { border-bottom-color: var(--bloom); color: var(--text); }
+.layout-collection { min-height: 0; overflow-y: auto; padding: 12px; }
+.selection-hint { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 0 2px 14px; }
+.layout-family-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.layout-family { min-width: 0; background: #191e25; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.layout-family[data-active='true'] { border-color: var(--bloom); box-shadow: 0 0 0 1px var(--bloom-soft); }
+.layout-sample { display: block; width: 100%; padding: 0; border: none; background: transparent; cursor: pointer; color: var(--text); }
+.layout-sample:hover { background: var(--hover); }
+.layout-miniature { position: relative; height: 108px; overflow: hidden; pointer-events: none; }
+.layout-miniature-content { position: absolute; top: 0; left: 50%; width: 506px; height: 400px; margin-left: -253px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; transform: scale(.25); transform-origin: center top; text-align: center; }
+.layout-family-label { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 0 10px 11px; font-size: 12px; font-weight: 600; text-align: left; overflow-wrap: anywhere; }
+.layout-family-label svg { color: var(--bloom); flex-shrink: 0; }
+.layout-variants { display: flex; flex-wrap: wrap; gap: 3px; padding: 7px; border-top: 1px solid var(--line); }
+.layout-variants > button { flex: 1 1 auto; border: 0; border-radius: 5px; padding: 7px 4px; background: none; font-size: 10.5px; color: var(--muted); cursor: pointer; }
+.layout-variants > button[aria-pressed='true'] { color: var(--text); background: var(--bloom-soft); }
+.next-step { margin-top: 14px; }
+.sayings-note { padding: 12px 14px 0; margin: 0; }
+.sayings-collection:not([hidden]) { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.sayings-collection > .slab { width: 100%; border: none; border-radius: 0; }
+.preview-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 12px; gap: 10px; }
+.preview-heading > strong { font-size: 14px; }
+@container (max-width: 270px) {
+  .layout-family-grid { grid-template-columns: 1fr; }
+  .layout-miniature-content { transform: scale(.32); height: 325px; }
+}
+@media (max-width: 1150px) {
+  .workspace, .workspace[data-shelf-open='true'] { grid-template-columns: minmax(0, 1fr); align-content: start; }
+  .workspace > .handle { min-height: 40px; flex-direction: row; width: 100%; padding: 8px 14px; justify-content: flex-start; }
+  .workspace > .handle .handle-label { writing-mode: horizontal-tb; transform: none; }
+  .workspace > .slab { display: block; height: 65vh; max-height: 65vh; overflow-y: auto !important; }
+  .workspace .editor-column { min-height: auto !important; }
+  .workspace .editor-column > .panel { flex-shrink: 0; }
+  .workspace .editor-column > .slab { flex: 0 0 auto !important; min-height: 320px !important; height: 360px; }
+  .preview-column { justify-self: center; width: 522px; max-width: 100%; height: max-content; overflow-y: visible; }
+  .editor-column .scroll-y { overflow-y: visible; }
+  .editor-column .layout-gallery { overflow-y: auto; }
+  .workspace-tabs { display: flex; flex-shrink: 0; margin: 10px 14px 0; border-bottom: 1px solid var(--line); }
+  .workspace-tabs > button { flex: 1; border: 0; border-bottom: 2px solid transparent; padding: 12px 5px; background: none; font-size: 13px; color: var(--muted); cursor: pointer; }
+  .workspace-tabs > button[aria-current='page'] { color: var(--text); border-bottom-color: var(--bloom); }
+  .workspace > .selection-column { display: flex; height: 100%; max-height: none; overflow: hidden !important; }
+  .workspace[data-view='select'] > .editor-column, .workspace[data-view='select'] > .preview-column,
+  .workspace[data-view='edit'] > .selection-column, .workspace[data-view='edit'] > .preview-column,
+  .workspace[data-view='preview'] > .selection-column, .workspace[data-view='preview'] > .editor-column { display: none; }
+  .workspace .layout-collection { flex: 1; }
+  .sayings-collection:not([hidden]) { display: block; overflow-y: auto; }
+  .sayings-collection > .slab { display: block; overflow: visible !important; }
+  .layout-variants > button { min-height: 36px; }
+}
+@media (max-width: 600px) {
+  .workspace { padding: 10px !important; gap: 10px !important; }
+  .current-layout-row { flex-wrap: wrap; gap: 8px; }
+  .modebar { flex-wrap: wrap; }
+  .modebar .hint { display: none; }
+  header .eyebrow, header .sister-link > span { display: none; }
+}
 
 /* ---------- typography ---------- */
 
@@ -259,11 +345,15 @@ button { color: inherit; }
 .spark-t {
   font-size: 12.5px;
   font-weight: 500;
-  line-height: 1.25;
+  line-height: 1.35;
   color: var(--text);
-  white-space: nowrap;
+  /* The sentence wraps rather than being cut: choosing a saying you cannot
+     read is not choosing. Three lines is enough for the longest of them. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .spark-s {
   margin-top: 1px;
@@ -837,6 +927,40 @@ button { color: inherit; }
    damit man beim Tippen im Feld sieht, welche Stelle man aendert. */
 .gift-row-on { background: rgba(139, 141, 255, 0.16); box-shadow: inset 2px 0 0 var(--accent); border-radius: 4px; }
 
+/* --- moving a line by hand ---
+   The grip sits in the popup's left margin, out of the gift itself, and only
+   shows up when you are near the line. Dragging the whole line instead would
+   fight with clicking it to edit, which is what a click already does. */
+.gift-row-movable { position: relative; width: 100%; }
+.gift-grip {
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 22px;
+  color: var(--dim);
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+.gift-row-movable:hover .gift-grip, .gift-grip:focus-visible { opacity: 1; }
+.gift-grip:hover { color: var(--text); background: rgba(255, 255, 255, 0.07); }
+.gift-grip:active { cursor: grabbing; }
+@media (hover: none) { .gift-grip { opacity: 0.45; } }
+
+/* Where it would land, and where it came from. */
+.gift-row-over { box-shadow: inset 0 2px 0 var(--accent); }
+.gift-row-lifted { opacity: 0.4; }
+/* Said once under the gift, because a handle that only appears on hover is
+   a feature nobody finds. */
+.preview-hint { margin: 9px 6px 0; font-size: 11px; line-height: 1.4; color: var(--dim); text-align: center; }
+
 /* A group heading in the shelf — four shelves, not one heap. */
 .band {
   display: flex;
@@ -895,6 +1019,22 @@ button { color: inherit; }
   transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 .seg > button:hover { color: var(--text); background: var(--hover); }
+/* Seventeen layouts where there were three. The row wraps rather than scrolls:
+   a lane that slides sideways hid the last six names behind an edge, and a name
+   you cannot see is a layout you do not know you have. */
+.layout-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 3px;
+}
+.layout-picker > button {
+  min-height: 30px;
+  padding: 6px 8px;
+  font-size: 11px;
+  border-radius: var(--r-xs);
+  overflow-wrap: anywhere;
+}
+
 .seg > button[data-on='true'] {
   color: #dcdcff;
   background: linear-gradient(180deg, rgba(139, 141, 255, 0.2), rgba(139, 141, 255, 0.09));
@@ -993,7 +1133,47 @@ button { color: inherit; }
 .catcard-go { flex: 0 0 auto; color: var(--dim); transition: transform 0.16s ease, color 0.16s ease; }
 .catcard:hover .catcard-go { color: #c6c7ff; transform: translateX(2px); }
 
-.cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 5px; }
+/* One saying per row. Two columns of 114px chips fitted more on screen and
+   made every one of them unreadable.
+   And no box around each one: three hundred bordered, shaded rectangles
+   stacked up is a wall, not a list. A hairline between rows is enough to tell
+   them apart, and the row lights up only when the mouse is on it. The category
+   moves into the tooltip — repeated on every row it was half the ink on screen
+   and told you nothing you were looking for. */
+/* --- folded by their opening ---
+   The header is a line of text with an arrow, not a card. Open, its gifts step
+   in a little so the eye can see where the group starts and stops. */
+.giftgroup + .giftgroup { margin-top: 1px; }
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 28px;
+  padding: 5px 8px 5px 5px;
+  text-align: left;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.group-head:hover { color: var(--text); background: var(--hover); }
+.group-head[aria-expanded='true'] { color: var(--text); }
+.group-arrow { flex: 0 0 auto; color: var(--dim); transition: transform 0.13s ease; }
+.group-arrow[data-open='true'] { transform: rotate(90deg); color: var(--accent); }
+.group-name { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.group-n { flex: 0 0 auto; font-size: 10.5px; color: var(--dim); }
+/* Inside an open group the gifts are the same little cards as everywhere
+   else — the group only steps them in and draws a line down the side. */
+.group-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 5px;
+  margin: 4px 0 8px 10px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line-soft);
+}
 
 /* The star sits on the card, not in it: a button inside a button is not a
    thing, so the two are siblings under a positioned wrapper. */
@@ -1014,7 +1194,10 @@ button { color: inherit; }
   opacity: 0;
   transition: opacity 0.12s ease, color 0.12s ease;
 }
-.spark-wrap:hover .fav, .fav:focus-visible { opacity: 1; }
+/* Reachable without a mouse. On a touch screen there is no hover at all, so
+   there the star simply stands there, a little quieter. */
+.spark-wrap:hover .fav, .spark-wrap:focus-within .fav, .fav:focus-visible { opacity: 1; }
+@media (hover: none) { .fav { opacity: 0.5; } }
 .fav:hover { color: var(--gold); background: var(--hover); }
 .fav[data-on='true'] { opacity: 1; color: var(--gold); }
 
@@ -1333,8 +1516,9 @@ button { color: inherit; }
 .seg button:disabled { opacity: 0.35; cursor: default; }
 .spark-lang {
   display: inline-block;
-  margin-right: 5px;
-  padding: 0 4px;
+  margin-right: 6px;
+  padding: 1px 5px;
+  vertical-align: 1px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 8.5px;
   font-weight: 600;

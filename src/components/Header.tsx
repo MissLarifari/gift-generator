@@ -78,7 +78,7 @@ export default function Header({
             on the left, so it reads as "what it is › what it's called". Compact
             keeps the icon only; the full label would overflow a phone header. */}
         <a
-          className="btn btn-sm"
+          className="btn btn-sm sister-link"
           href={PROFILLY_URL}
           target="_blank"
           rel="noopener noreferrer"

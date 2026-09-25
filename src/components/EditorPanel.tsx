@@ -49,13 +49,14 @@ export default function EditorPanel(props: {
   looks: Look[];
   activeLook: string | null;
   onApplyLook: (l: Look) => void;
+  onChooseLayout?: () => void;
   /** Welche Zeile gerade bearbeitet wird — die Vorschau hebt sie hervor. */
   onFocusField?: (f: FieldId | null) => void;
   focusReq?: FocusRequest | null;
 }) {
-  const { state, commit, onOpenColor, looks, activeLook, onApplyLook, onFocusField, focusReq } = props;
+  const { state, commit, onOpenColor, looks, activeLook, onApplyLook, onChooseLayout, onFocusField, focusReq } = props;
   const { t } = useI18n();
-  const [open, setOpen] = useState<Record<Section, boolean>>({ text: true, style: false, deco: false, layout: true });
+  const [open, setOpen] = useState<Record<Section, boolean>>({ text: true, style: false, deco: false, layout: false });
   const [styleTarget, setStyleTarget] = useState<FieldId>('mainText');
   const [flash, setFlash] = useState('');
   const [pointAt, setPointAt] = useState<FocusRequest | null>(null);
@@ -67,7 +68,7 @@ export default function EditorPanel(props: {
   // at a glance, unfold it again to reach every control without hunting.
   const toggleAll = () => {
     const to = !anyOpen;
-    setOpen({ layout: to, text: to, style: to, deco: to });
+    setOpen({ layout: false, text: to, style: to, deco: to });
   };
 
   const fieldLabel = (f: FieldId) => (state.layout === 'pyramid' ? t('pyr_' + f) : t('fl_' + f));
@@ -328,7 +329,8 @@ export default function EditorPanel(props: {
   /* ---------- LAYOUT ---------- */
 
   // Grobe Skizze, wo der Text landet — je Bauform.
-  const lookThumb = (id: string) => {
+  const lookThumb = (look: Look) => {
+    const id = look.id;
     const bar = (k: string, w: string, main = false) => <span key={k} className={'lay-bar' + (main ? ' lay-bar-main' : '')} style={{ width: w }} />;
     const dot = (k: string) => <span key={k} style={{ width: 3, height: 3, borderRadius: '50%', background: '#4a515c' }} />;
     const dots = (k: string) => (
@@ -338,14 +340,19 @@ export default function EditorPanel(props: {
     );
     if (id === 'twoWords') return <>{bar('a', '34%')}{bar('b', '70%', true)}{dots('c')}{bar('d', '70%', true)}</>;
     if (id === 'sparkle') return <>{dots('a')}{bar('b', '40%')}{bar('c', '66%', true)}{dots('d')}</>;
+    if (id !== 'note') return (look.lineOrder ?? FIELDS).filter(f => look.sample[f]).map(f => {
+      if (isDecoLine(look.sample[f] ?? '')) return dots(f);
+      const size = Math.max(look.sizes[f] ?? 14, ...(look.sampleRanges?.[f] ?? []).map(r => r.style.size ?? 0));
+      return bar(f, size >= 30 ? '70%' : '42%', size >= 30);
+    });
     return <>{dots('a')}{bar('b', '40%')}{bar('c', '66%', true)}{bar('d', '40%')}</>;
   };
 
   const layoutSection = (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
       {looks.map((l) => (
-        <button key={l.id} className="lay" data-on={activeLook === l.id} onClick={() => onApplyLook(l)} title={t('look_' + l.id + '_h')}>
-          <span className="lay-canvas">{lookThumb(l.id)}</span>
+        <button key={l.id} className="lay" data-on={activeLook === l.id} onClick={() => { onApplyLook(l); setOpen(o => ({ ...o, layout: false })); }} title={t('look_' + l.id + '_h')}>
+          <span className="lay-canvas">{lookThumb(l)}</span>
           <span style={{ fontSize: 11.5, color: activeLook === l.id ? 'var(--text)' : 'var(--muted)' }}>{t('look_' + l.id)}</span>
         </button>
       ))}
@@ -380,19 +387,30 @@ export default function EditorPanel(props: {
       <div className="scroll-y" style={{ flex: 1, minHeight: 0 }}>
         {/* In the order you actually build a gift: pick the shape, write the
             words, style them, then decorate. */}
-        {section('layout', <LayoutGrid size={14} />, t('g_sec_layout'), layoutSection)}
+        <div className="sec current-layout">
+          <div className="current-layout-row">
+            <div><span className="eyebrow">{t('layout')}</span><strong>{activeLook ? t('look_' + activeLook) : t('g_choose_layout')}</strong></div>
+            <button className="btn btn-sm btn-ghost" aria-expanded={onChooseLayout ? undefined : open.layout} aria-controls={onChooseLayout ? 'layout-selection' : 'editor-layout-picker'} onClick={() => onChooseLayout ? onChooseLayout() : toggleSection('layout')}>
+              <LayoutGrid size={14} /> {t('g_change_layout')}
+            </button>
+          </div>
+          {!onChooseLayout && <div id="editor-layout-picker" hidden={!open.layout} className="layout-gallery">{open.layout && layoutSection}</div>}
+        </div>
         {section('text', <Type size={14} />, t('g_sec_text'), textSection)}
         {section('style', <Palette size={14} />, t('g_sec_style'), styleSection)}
         {section('deco', <Sparkles size={14} />, t('g_sec_deco'), decoSection)}
       </div>
 
       <div className="shrink-0" style={{ borderTop: '1px solid var(--border)', padding: 8 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-          {quick(<Wand2 size={13} />, t('g_randomize'), randomize)}
-          {quick(<Trash2 size={13} />, t('g_clear_all'), clearAll)}
-          {quick(<Download size={13} />, t('g_import'), importGift)}
-          {quick(<Upload size={13} />, t('g_export'), exportGift)}
-        </div>
+        <details className="quiet-details">
+          <summary>{t('g_more_tools')}</summary>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, paddingTop: 8 }}>
+            {quick(<Wand2 size={13} />, t('g_randomize'), randomize)}
+            {quick(<Trash2 size={13} />, t('g_clear_all'), clearAll)}
+            {quick(<Download size={13} />, t('g_import'), importGift)}
+            {quick(<Upload size={13} />, t('g_export'), exportGift)}
+          </div>
+        </details>
         {flash && <div style={{ fontSize: 11, color: 'var(--accent)', textAlign: 'center', marginTop: 6 }}>{flash}</div>}
       </div>
     </section>

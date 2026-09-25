@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { LOOK_TRANSLATIONS } from './data/lookTranslations';
 
 // UI language support — EN/DE/FR/RU. Strings ported verbatim from the legacy
 // generator's I18N block, plus a handful of React-specific keys (g_*).
@@ -15,6 +16,9 @@ type Dict = Record<string, Val>;
 
 export const I18N: Record<Lang, Dict> = {
   en: {
+    ...LOOK_TRANSLATIONS.en,
+    g_select: 'Choose', g_layouts: 'Layouts', g_sayings: 'Sayings', g_variants: 'Variants', g_standard: 'Original', g_layout_intro: 'Choose a look. Variants sit below each preview.', g_edit: 'Edit', g_game_view: 'Game view', g_work_view: 'Text preview',
+    g_change_layout: 'Change layout', g_more_tools: 'More tools', g_choose_layout: 'Choose a layout',
     chars: 'Chars', bytes: 'Bytes',
     howto_title: 'How It Works',
     gb_title: 'Guestbook',
@@ -131,9 +135,12 @@ export const I18N: Record<Lang, Dict> = {
     e_back: 'Back', e_hex: 'Hex code', e_common: 'Most used', e_shades: 'All shades',
     e_sys: '3DXChat colours', e_sys_male: 'Male', e_sys_female: 'Female', e_sys_me: '/me', e_pick_own: 'Pick any colour',
     e_dropper: 'Pick a colour off the screen',
+    g_seasonal: 'Seasonal', g_filters: 'Filters', g_other: 'Other', g_layout_preview: 'Show layout previews',
+    e_move_hint: 'Move the mouse over a line to show its drag handle. Drag it to move the line, or hold Alt and use the arrow keys.',
+    e_move_line: 'Drag to move this line — or Alt and an arrow key',
     e_pick_line: 'Click to select this line in the code', e_pick_deco: 'Click to change or remove this decoration',
     e_clear: 'Delete the selection',
-    grp_Themen: 'Themes', grp_Vibes: 'Vibes', grp_Holidays: 'Holidays', grp_Celebrations: 'Celebrations', grp_Hot: 'Hot', g_none_look: 'Nothing here in this build.', g_none_here: 'Nothing here right now.', g_to_look: 'Switch to %s', g_to_look_sub: 'That is where these gifts are',
+    grp_Themen: 'Themes', grp_Vibes: 'Vibes', grp_Holidays: 'Holidays', grp_Celebrations: 'Celebrations', grp_Hot: 'Hot', g_next_sayings: 'Next: pick a saying', g_sayings_for: '%n sayings fit %s', g_sayings_hint: 'One click puts the saying into %s — its colours, script and ornament stay.', g_none_look: 'Nothing here in this build.', g_none_here: 'Nothing here right now.', g_to_look: 'Switch to %s', g_to_look_sub: 'That is where these gifts are',
     g_recent: 'Recent', g_gifts: 'gifts', g_vibe: 'Vibe', g_theme: 'Theme', g_no_favs: 'No favourites yet. Tap the star on a gift to keep it here.', g_no_recent: 'Nothing used yet. Gifts you pick show up here.',
     g_panel_sub: 'Browse your templates', g_layout_sub: 'Choose the visual format', g_browse: 'Browse', g_library: 'Library', g_pick_cat: 'Pick a category to explore',
     g_home: 'Start', g_spotlight: 'Gift of the day', g_popular: 'Most used', g_new: 'New here', g_by_vibe: 'Browse by mood', g_by_theme: 'Browse by theme', g_all_gifts: 'All gifts', g_all_gifts_sub: 'The whole shelf, unsorted', g_open: 'Open',
@@ -167,6 +174,9 @@ export const I18N: Record<Lang, Dict> = {
     g_profile_editor: 'Profile Editor',
   },
   de: {
+    ...LOOK_TRANSLATIONS.de,
+    g_select: 'Auswählen', g_layouts: 'Layouts', g_sayings: 'Sprüche', g_variants: 'Varianten', g_standard: 'Original', g_layout_intro: 'Wähle eine Gestaltung. Varianten stehen direkt unter der Vorschau.', g_edit: 'Bearbeiten', g_game_view: 'Spielansicht', g_work_view: 'Textvorschau',
+    g_change_layout: 'Layout ändern', g_more_tools: 'Weitere Werkzeuge', g_choose_layout: 'Layout auswählen',
     chars: 'Zeichen', bytes: 'Bytes',
     howto_title: "So geht's",
     gb_title: 'Gästebuch',
@@ -281,9 +291,12 @@ export const I18N: Record<Lang, Dict> = {
     e_back: 'Zurück', e_hex: 'Hexcode', e_common: 'Am häufigsten', e_shades: 'Alle Farbtöne',
     e_sys: '3DXChat-Farben', e_sys_male: 'Männlich', e_sys_female: 'Weiblich', e_sys_me: '/me', e_pick_own: 'Beliebige Farbe wählen',
     e_dropper: 'Farbe vom Bildschirm aufnehmen',
+    g_seasonal: 'Saisonal', g_filters: 'Filter', g_other: 'Sonstige', g_layout_preview: 'Layouts als Vorschau zeigen',
+    e_move_hint: 'Fahre mit der Maus über eine Zeile, um den Ziehgriff anzuzeigen. Ziehe daran, um die Zeile zu verschieben, oder halte Alt gedrückt und nutze die Pfeiltasten.',
+    e_move_line: 'Ziehen, um die Zeile zu verschieben — oder Alt und Pfeiltaste',
     e_pick_line: 'Anklicken, um diese Zeile im Code auszuwählen', e_pick_deco: 'Anklicken, um diese Deko zu ändern oder zu entfernen',
     e_clear: 'Markierung löschen',
-    grp_Themen: 'Themen', grp_Vibes: 'Stimmungen', grp_Holidays: 'Feiertage', grp_Celebrations: 'Anlässe', grp_Hot: 'Heiß', g_none_look: 'In dieser Bauform gibt es hier nichts.', g_none_here: 'Hier ist gerade nichts.', g_to_look: 'Zu %s wechseln', g_to_look_sub: 'Da liegen diese Geschenke',
+    grp_Themen: 'Themen', grp_Vibes: 'Stimmungen', grp_Holidays: 'Feiertage', grp_Celebrations: 'Anlässe', grp_Hot: 'Heiß', g_next_sayings: 'Weiter: Spruch aussuchen', g_sayings_for: '%n Sprüche passen in %s', g_sayings_hint: 'Ein Klick setzt den Spruch in %s — Farben, Schrift und Deko bleiben.', g_none_look: 'In dieser Bauform gibt es hier nichts.', g_none_here: 'Hier ist gerade nichts.', g_to_look: 'Zu %s wechseln', g_to_look_sub: 'Da liegen diese Geschenke',
     g_recent: 'Zuletzt', g_gifts: 'Geschenke', g_vibe: 'Stimmung', g_theme: 'Thema', g_no_favs: 'Noch keine Favoriten. Tipp auf den Stern an einem Geschenk, dann liegt es hier.', g_no_recent: 'Noch nichts benutzt. Was du auswählst, erscheint hier.',
     g_panel_sub: 'Stöbere in deinen Vorlagen', g_layout_sub: 'Wähl die Bauform', g_browse: 'Stöbern', g_library: 'Sammlung', g_pick_cat: 'Wähl eine Kategorie',
     g_home: 'Start', g_spotlight: 'Geschenk des Tages', g_popular: 'Am meisten benutzt', g_new: 'Neu dazu', g_by_vibe: 'Nach Stimmung', g_by_theme: 'Nach Thema', g_all_gifts: 'Alle Geschenke', g_all_gifts_sub: 'Das ganze Regal, unsortiert', g_open: 'Öffnen',
@@ -317,6 +330,9 @@ export const I18N: Record<Lang, Dict> = {
     g_profile_editor: 'Profil-Editor',
   },
   fr: {
+    ...LOOK_TRANSLATIONS.fr,
+    g_select: 'Choisir', g_layouts: 'Mises en page', g_sayings: 'Messages', g_variants: 'Variantes', g_standard: 'Original', g_layout_intro: 'Choisis un style. Les variantes se trouvent sous chaque aperçu.', g_edit: 'Modifier', g_game_view: 'Vue du jeu', g_work_view: 'Aperçu du texte',
+    g_change_layout: 'Changer de mise en page', g_more_tools: 'Autres outils', g_choose_layout: 'Choisir une mise en page',
     chars: 'Caractères', bytes: 'Octets',
     howto_title: 'Comment ça marche',
     gb_title: 'Livre d’or',
@@ -431,9 +447,12 @@ export const I18N: Record<Lang, Dict> = {
     e_back: 'Retour', e_hex: 'Code hex', e_common: 'Les plus utilisées', e_shades: 'Toutes les teintes',
     e_sys: 'Couleurs 3DXChat', e_sys_male: 'Homme', e_sys_female: 'Femme', e_sys_me: '/me', e_pick_own: 'Choisir une couleur',
     e_dropper: 'Échantillonner une couleur à l’écran',
+    g_seasonal: 'Saisonnier', g_filters: 'Filtres', g_other: 'Autres', g_layout_preview: 'Afficher les aperçus',
+    e_move_hint: 'Passe la souris sur une ligne pour afficher sa poignée. Fais-la glisser pour déplacer la ligne, ou maintiens Alt et utilise les flèches.',
+    e_move_line: 'Fais glisser pour déplacer cette ligne — ou Alt et une flèche',
     e_pick_line: 'Clique pour sélectionner cette ligne dans le code', e_pick_deco: 'Clique pour changer ou retirer cette décoration',
     e_clear: 'Supprimer la sélection',
-    grp_Themen: 'Thèmes', grp_Vibes: 'Ambiances', grp_Holidays: 'Fêtes', grp_Celebrations: 'Célébrations', grp_Hot: 'Chaud', g_none_look: 'Rien ici dans cette mise en page.', g_none_here: 'Rien ici pour le moment.', g_to_look: 'Passer à %s', g_to_look_sub: 'C’est là que sont ces cadeaux',
+    grp_Themen: 'Thèmes', grp_Vibes: 'Ambiances', grp_Holidays: 'Fêtes', grp_Celebrations: 'Célébrations', grp_Hot: 'Chaud', g_next_sayings: 'Ensuite : choisis un message', g_sayings_for: '%n messages vont avec %s', g_sayings_hint: 'Un clic place le message dans %s — couleurs, police et décor restent.', g_none_look: 'Rien ici dans cette mise en page.', g_none_here: 'Rien ici pour le moment.', g_to_look: 'Passer à %s', g_to_look_sub: 'C’est là que sont ces cadeaux',
     g_recent: 'Récents', g_gifts: 'cadeaux', g_vibe: 'Ambiance', g_theme: 'Thème', g_no_favs: 'Pas encore de favoris. Touche l’étoile d’un cadeau pour le garder ici.', g_no_recent: 'Rien d’utilisé encore. Les cadeaux choisis apparaîtront ici.',
     g_panel_sub: 'Parcours tes modèles', g_layout_sub: 'Choisis le format', g_browse: 'Parcourir', g_library: 'Collection', g_pick_cat: 'Choisis une catégorie',
     g_home: 'Accueil', g_spotlight: 'Cadeau du jour', g_popular: 'Les plus utilisés', g_new: 'Nouveautés', g_by_vibe: 'Par ambiance', g_by_theme: 'Par thème', g_all_gifts: 'Tous les cadeaux', g_all_gifts_sub: 'Toute la collection', g_open: 'Ouvrir',
@@ -467,6 +486,9 @@ export const I18N: Record<Lang, Dict> = {
     g_profile_editor: 'Éditeur de profil',
   },
   ru: {
+    ...LOOK_TRANSLATIONS.ru,
+    g_select: 'Выбрать', g_layouts: 'Макеты', g_sayings: 'Фразы', g_variants: 'Варианты', g_standard: 'Оригинал', g_layout_intro: 'Выбери оформление. Варианты находятся под каждым примером.', g_edit: 'Редактировать', g_game_view: 'Вид в игре', g_work_view: 'Просмотр текста',
+    g_change_layout: 'Сменить макет', g_more_tools: 'Другие инструменты', g_choose_layout: 'Выбрать макет',
     chars: 'Знаки', bytes: 'Байты',
     howto_title: 'Как это работает',
     gb_title: 'Гостевая книга',
@@ -581,9 +603,12 @@ export const I18N: Record<Lang, Dict> = {
     e_back: 'Назад', e_hex: 'Hex-код', e_common: 'Чаще всего', e_shades: 'Все оттенки',
     e_sys: 'Цвета 3DXChat', e_sys_male: 'Мужской', e_sys_female: 'Женский', e_sys_me: '/me', e_pick_own: 'Любой цвет',
     e_dropper: 'Взять цвет с экрана',
+    g_seasonal: 'Сезонные', g_filters: 'Фильтры', g_other: 'Прочие', g_layout_preview: 'Показать превью макетов',
+    e_move_hint: 'Наведи мышь на строку, чтобы показать ручку перетаскивания. Потяни за неё, чтобы переставить строку, или удерживай Alt и нажимай стрелки.',
+    e_move_line: 'Перетащи, чтобы переставить строку — или Alt и стрелка',
     e_pick_line: 'Нажми, чтобы выделить эту строку в коде', e_pick_deco: 'Нажми, чтобы изменить или убрать декор',
     e_clear: 'Удалить выделенное',
-    grp_Themen: 'Темы', grp_Vibes: 'Настроения', grp_Holidays: 'Праздники', grp_Celebrations: 'События', grp_Hot: 'Горячее', g_none_look: 'В этой форме здесь ничего нет.', g_none_here: 'Здесь пока ничего нет.', g_to_look: 'Перейти к %s', g_to_look_sub: 'Там лежат эти подарки',
+    grp_Themen: 'Темы', grp_Vibes: 'Настроения', grp_Holidays: 'Праздники', grp_Celebrations: 'События', grp_Hot: 'Горячее', g_next_sayings: 'Дальше: выбери фразу', g_sayings_for: '%n фраз подходят к «%s»', g_sayings_hint: 'Один клик ставит фразу в «%s» — цвета, шрифт и украшения остаются.', g_none_look: 'В этой форме здесь ничего нет.', g_none_here: 'Здесь пока ничего нет.', g_to_look: 'Перейти к %s', g_to_look_sub: 'Там лежат эти подарки',
     g_recent: 'Недавние', g_gifts: 'подарков', g_vibe: 'Настроение', g_theme: 'Тема', g_no_favs: 'Избранного пока нет. Нажми звёздочку на подарке.', g_no_recent: 'Пока ничего. Выбранные подарки появятся здесь.',
     g_panel_sub: 'Просмотр шаблонов', g_layout_sub: 'Выбери формат', g_browse: 'Обзор', g_library: 'Коллекция', g_pick_cat: 'Выбери категорию',
     g_home: 'Главная', g_spotlight: 'Подарок дня', g_popular: 'Чаще всего', g_new: 'Новое', g_by_vibe: 'По настроению', g_by_theme: 'По теме', g_all_gifts: 'Все подарки', g_all_gifts_sub: 'Вся коллекция', g_open: 'Открыть',
