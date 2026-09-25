@@ -587,7 +587,7 @@ export default function Shelf({
       {/* 2b — and which language the sayings are written in. Hidden while the
           library is English only: a switch with nothing behind it is a promise
           the shelf cannot keep. */}
-      {langCounts.de > 0 && langCounts.en > 0 && <div className="sec">
+      {langCounts.de > 0 && langCounts.en > 0 && <div className="sec sec-lang">
         <div className="sec-t">{t('g_lang_title')}</div>
         <div className="sec-s">{t('g_lang_sub')}</div>
         <div className="seg" role="group" aria-label={t('g_lang_title')}>
@@ -601,7 +601,7 @@ export default function Shelf({
 
       {/* 3 — the sayings: where you look for one, and the three shelves that
           are not a category — everything, your own, and where you just were. */}
-      <div className="sec">
+      <div className="sec sec-sayings">
         <div className="sec-t">{t('g_sayings_title')}</div>
         <div className="sec-s">{t('g_sayings_sub')}</div>
         <div className="searchbox">

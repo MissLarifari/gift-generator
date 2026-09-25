@@ -81,6 +81,9 @@ button { color: inherit; }
 ::-webkit-scrollbar-corner { background: transparent; }
 
 .scroll-y { overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+/* The gift list keeps a floor: whatever the head above it needs, there is
+   always a hand of gifts to look at rather than a sliver. */
+.selection-column > .scroll-y { min-height: 200px; }
 
 /* Keep editing in view; galleries and secondary tools open only on request. */
 .workspace { display: grid; grid-template-columns: minmax(240px, .8fr) minmax(300px, 1fr) 522px; overflow: auto; }
@@ -132,7 +135,11 @@ button { color: inherit; }
   .layout-family-grid { grid-template-columns: 1fr; }
   .layout-miniature-content { transform: scale(.32); height: 325px; }
 }
-@media (max-width: 1150px) {
+/* Three columns need room: at 1151 the shelf column came out 254px wide,
+   every row of chips wrapped three times and the head took 515px of a 766px
+   panel. Below 1280 the tabs are the better deal — each view gets the whole
+   width instead of a third of it. */
+@media (max-width: 1279px) {
   .workspace, .workspace[data-shelf-open='true'] { grid-template-columns: minmax(0, 1fr); align-content: start; }
   .workspace > .handle { min-height: 40px; flex-direction: row; width: 100%; padding: 8px 14px; justify-content: flex-start; }
   .workspace > .handle .handle-label { writing-mode: horizontal-tb; transform: none; }
@@ -155,6 +162,16 @@ button { color: inherit; }
   .sayings-collection > .slab { display: block; overflow: visible !important; }
   .layout-variants > button { min-height: 36px; }
 }
+@media (max-width: 620px) {
+  /* On a phone the two explanatory lines wrap to three rows each and cost
+     more than they say — the controls under them are labelled. */
+  .selection-column .sec-lang .sec-s, .selection-column .sec-sayings .sec-s { display: none; }
+  .selection-column .sec-t { margin-bottom: 7px; }
+  .selection-column .panel-head { padding: 11px 13px 9px; }
+  .selection-column .panel-sub { display: none; }
+  .selection-column .sec { padding: 10px 13px; }
+}
+
 @media (max-width: 600px) {
   .workspace { padding: 10px !important; gap: 10px !important; }
   .current-layout-row { flex-wrap: wrap; gap: 8px; }
@@ -1081,7 +1098,11 @@ button { color: inherit; }
   border: 0;
   cursor: pointer;
 }
-.cats-head .sec-t { flex: 0 0 auto; }
+/* Title over subtitle, not running into each other — they are spans, and
+   inside the fold header they need telling. */
+.cats-head > span:first-child { flex: 0 1 auto; min-width: 0; }
+.cats-head .sec-t, .cats-head .sec-s { display: block; }
+.cats-head .sec-s { margin-top: 1px; }
 .cats-now { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cats-now .n { margin-left: 4px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9.5px; color: var(--dim); }
 .cats-arrow { margin-left: auto; flex: 0 0 auto; color: var(--dim); transition: transform 0.13s ease; }
