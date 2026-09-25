@@ -58,21 +58,21 @@ export const ROMANTIC_LOOKS: Look[] = [
     { field: 'topText', text: 'you make my', size: 18 },
     { field: 'mainText', text: 'heart smile', size: 40, color: pink },
     { field: 'bottomText', text: 'every single day' }, face()]),
-  makeLook('sweetTemptation', 'Nachleuchten', 'Große weiße Zierschrift mit süßem Farbakzent', [flower('✿ ♥ ✿'),
+  makeLook('sweetTemptation', 'Echo', 'Große weiße Zierschrift mit süßem Farbakzent', [flower('✿ ♥ ✿'),
     { field: 'topText', text: '.. you are my ..' },
     { field: 'mainText', text: 'way too', size: 40 },
     { field: 'bottomText', text: 'sweet temptation', ranges: accent('sweet temptation', 'sweet', pink) }, face()]),
-  makeLook('homeIsYou', 'Pfeilmitte', 'Weiße Pfeile zeigen auf dein pinkes Zuhause', [
+  makeLook('homeIsYou', 'Pfeilfokus', 'Weiße Pfeile zeigen auf dein pinkes Zuhause', [
     { field: 'dekoTop', text: '° ✿ ⋆', deco: true },
     { field: 'topText', text: 'if home were a person' },
     { field: 'bottomText', text: 'it would be' }, arrow, target, face('↖(✿ ◡‿◡)↗')]),
-  makeLook('sneakyHeart', 'Zwischenspiel', 'Ein kleiner Einschub und ein großes rosa Herz', [
+  makeLook('sneakyHeart', 'Einschub', 'Ein kleiner Einschub und ein großes rosa Herz', [
     { field: 'dekoTop', text: '✦ you ..' },
     { field: 'topText', text: '*sneαk*', size: 26, color: pink },
     { field: 'bottomText', text: 'right into' },
     { field: 'mainText', text: 'my heart', size: 44, color: rose },
     { field: 'dekoBottom', text: '.. and stay there ♥' }]),
-  makeLook('littleDetour', 'Wortbrücke', 'Ein Umweg mit Pfeil und rosa Lieblingsplatz', [
+  makeLook('littleDetour', 'Brücke', 'Ein Umweg mit Pfeil und rosa Lieblingsplatz', [
     { field: 'topText', text: '✿ my wings took a detour ..' },
     { field: 'bottomText', text: 'strαight to you', ranges: accent('strαight to you', 'strαight', undefined, 32) },
     { field: 'dekoTop', text: '↓', deco: true },
@@ -82,21 +82,21 @@ export const ROMANTIC_LOOKS: Look[] = [
     { field: 'bottomText', text: 'my little', size: 30, color: pink },
     { field: 'mainText', text: 'happy place', size: 40, color: pink },
     { field: 'dekoBottom', text: 'in this world ..' }, flowers]),
-  makeLook('favoriteTrouble', 'Blütenband · Kompakt', 'Blumen und ein großes pinkes Lieblingswort', [flower(),
+  makeLook('favoriteTrouble', 'Blütenband · Mini', 'Blumen und ein großes pinkes Lieblingswort', [flower(),
     { field: 'topText', text: 'you are my' },
     { field: 'mainText', text: 'favorite', size: 40, color: pink },
     { field: 'bottomText', text: 'kind of trouble' }, face()]),
-  makeLook('alwaysYou', 'Pfeilmitte · Mini', 'Alle kleinen Gedanken zeigen auf dich', [
+  makeLook('alwaysYou', 'Pfeilfokus · Mini', 'Alle kleinen Gedanken zeigen auf dich', [
     { field: 'dekoTop', text: '° ✿ ⋆', deco: true },
     { field: 'topText', text: 'all my little thoughts' },
     { field: 'bottomText', text: 'somehow lead to' }, arrow, target, face('(✿ ◡‿◡)')]),
-  makeLook('stolenHeart', 'Zwischenspiel · Ausruf', 'Ein frecher Einschub und ein sicher verwahrtes Herz', [
+  makeLook('stolenHeart', 'Einschub · Ausruf', 'Ein frecher Einschub und ein sicher verwahrtes Herz', [
     { field: 'dekoTop', text: '✦ excuse me ..' },
     { field: 'topText', text: '*yoink*', size: 26, color: pink },
     { field: 'bottomText', text: 'i am keeping' },
     { field: 'mainText', text: 'your heart', size: 44, color: rose },
     { field: 'dekoBottom', text: '.. safe with mine ♥' }]),
-  makeLook('littleMagic', 'Nachleuchten · Finale', 'Große weiße Schrift mit einem pinken Zauberwort', [flower('✿ ♥ ✿'),
+  makeLook('littleMagic', 'Echo · Finale', 'Große weiße Schrift mit einem pinken Zauberwort', [flower('✿ ♥ ✿'),
     { field: 'topText', text: 'you make' },
     { field: 'mainText', text: 'ordinary', size: 40 },
     { field: 'bottomText', text: 'feel like magic', ranges: accent('feel like magic', 'magic', pink) }, face()]),
@@ -105,7 +105,7 @@ export const ROMANTIC_LOOKS: Look[] = [
     { field: 'bottomText', text: 'one more', size: 26, color: pink },
     { field: 'mainText', text: 'little kiss', size: 44, color: pink },
     { field: 'dekoBottom', text: '.. or maybe ten' }, flowers]),
-  makeLook('bestDetour', 'Wortbrücke · Kontrast', 'Ein verirrtes Herz findet seinen Lieblingsumweg', [
+  makeLook('bestDetour', 'Brücke · Kontrast', 'Ein verirrtes Herz findet seinen Lieblingsumweg', [
     { field: 'topText', text: '✿ my heart missed a turn ..' },
     { field: 'bottomText', text: 'got lost in you', ranges: accent('got lost in you', 'got lost', undefined, 32) },
     { field: 'dekoTop', text: '↓', deco: true },
@@ -114,7 +114,7 @@ export const ROMANTIC_LOOKS: Look[] = [
     { field: 'topText', text: 'if hugs had wings' },
     { field: 'mainText', text: 'mine', size: 40, color: pink },
     { field: 'bottomText', text: 'would fly to you' }, face('↖(✿ ◡‿◡)↗')]),
-  makeLook('guiltyCute', 'Senkrecht', 'Eine pinke Warnung mit Pfeil auf die Schuldigen', [
+  makeLook('guiltyCute', 'Vertikal', 'Eine pinke Warnung mit Pfeil auf die Schuldigen', [
     { field: 'dekoTop', text: '✦ warning ..' },
     { field: 'topText', text: 'too cute', size: 30, color: pink },
     { field: 'bottomText', text: 'to resist' },

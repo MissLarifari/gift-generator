@@ -43,7 +43,7 @@ export default function EditorPanel(props: {
   state: GiftState;
   commit: Commit;
   onOpenColor: (f: FieldId) => void;
-  /** Die drei Bauformen von heute — Zettel, Zweiklang, Sparkle. Sie haben die
+  /** Die drei Bauformen von heute — Notiz, Duo, Glanz. Sie haben die
    *  sechs alten Anordnungen abgeloest; 'custom' war die Rohcode-Ansicht und
    *  ist jetzt der Code-Reiter neben diesem Feld. */
   looks: Look[];
@@ -200,7 +200,7 @@ export default function EditorPanel(props: {
   // waehlbar ist er hier nicht mehr; die Verzweigung ist damit weg.
   //
   // Welche Zeilen hier stehen, entscheidet ihr INHALT, nicht ihr Name. Beim
-  // Zweiklang laeuft der Satz durch die Deko-Reihen — "du bist" oben, "in
+  // Duo laeuft der Satz durch die Deko-Reihen — "du bist" oben, "in
   // meinem" in der Mitte. Das sind Woerter, also gehoeren sie in den Text und
   // nicht in eine Deko-Auswahlliste. Eine Reihe aus reinen Symbolen bleibt bei
   // der Deko. In der Reihenfolge des Geschenks, damit die Felder von oben nach

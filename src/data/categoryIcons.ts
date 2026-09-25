@@ -16,7 +16,7 @@ import {
  * gets the gift box.
  *
  * Repeats are allowed on purpose: a layout and its variant are the same idea
- * twice, and so are Blütenband and Blütenband · Kompakt.
+ * twice, and so are Blütenband and Blütenband · Mini.
  */
 const BY_LOOK: Record<string, LucideIcon> = {
   heartSmile: Flower2, favoriteTrouble: Flower2,
