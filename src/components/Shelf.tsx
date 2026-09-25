@@ -4,6 +4,8 @@ import { type TplCategory, type TplItem } from '../data/templates';
 import { ENTRIES, usedThemes, usedVibes, usedNamed, THEMES, VIBES, type Entry } from '../data/tags';
 import { LOOKS, lookIdOf, fitsLook, sayingShapeOf, type Look } from '../data/looks';
 import { directory, type DirView } from '../data/directory';
+import { categoryIcon } from '../data/categoryIcons';
+import type { LucideIcon } from 'lucide-react';
 import { useI18n } from '../i18n';
 
 /** Below this many gifts a list reads fine as it is; folding it into
@@ -524,14 +526,15 @@ export default function Shelf({
     // This used to fold by the words the sayings share, which produced honest
     // but useless headings — "at 5", "i want 5", "du bist mein 9". A heading
     // has to be a category, and every gift already belongs to exactly one.
-    const byCat = new Map<string, Entry[]>();
+    const byCat = new Map<string, { items: Entry[]; icon: LucideIcon }>();
     for (const e of list) {
       const label = categoryLabel(e.cat);
       const bucket = byCat.get(label);
-      if (bucket) bucket.push(e); else byCat.set(label, [e]);
+      if (bucket) bucket.items.push(e);
+      else byCat.set(label, { items: [e], icon: categoryIcon(e.cat.label, e.cat.theme.lookId) });
     }
     const groups = [...byCat.entries()]
-      .map(([label, items]) => ({ label, items }))
+      .map(([label, g]) => ({ label, ...g }))
       .sort((a, b) => b.items.length - a.items.length || a.label.localeCompare(b.label));
     if (groups.length < 2) return <div className="cardgrid">{list.map(card)}</div>;
 
@@ -540,10 +543,12 @@ export default function Shelf({
         {groups.map((g) => {
           const label = g.label || t('g_other');
           const shown = open.has(label);
+          const Icon = g.icon;
           return (
             <div key={label} className="giftgroup">
               <button className="group-head" aria-expanded={shown} onClick={() => toggleGroup(label)}>
                 <ChevronRight size={13} className="group-arrow" data-open={shown} />
+                <Icon size={13} className="group-icon" aria-hidden="true" />
                 <span className="group-name">{label}</span>
                 <span className="group-n">{g.items.length}</span>
               </button>
