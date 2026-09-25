@@ -30,6 +30,7 @@ const RECENT_KEY = 'gifty_recent';
 const RECENT_MAX = 30;
 const USES_KEY = 'gifty_uses';
 const LANG_KEY = 'gifty_gift_lang';
+const LOOKS_OPEN_KEY = 'gifty_looks_open';
 /** How many recents to show as a strip under the categories. */
 const STRIP = 8;
 
@@ -82,6 +83,14 @@ const readList = (key: string): string[] => {
 };
 const writeList = (key: string, v: string[]) => {
   try { localStorage.setItem(key, JSON.stringify(v)); } catch { /* private mode */ }
+};
+
+/** Whether the layout list was left standing open last time. */
+const readLooksOpen = (): boolean => {
+  try { return localStorage.getItem(LOOKS_OPEN_KEY) === '1'; } catch { return false; }
+};
+const writeLooksOpen = (v: boolean) => {
+  try { localStorage.setItem(LOOKS_OPEN_KEY, v ? '1' : '0'); } catch { /* private mode */ }
 };
 
 export default function Shelf({
@@ -217,7 +226,16 @@ export default function Shelf({
   // Closed on arrival, so the shelf opens on gifts rather than on a wall of
   // category names with the list pushed off the bottom.
   const [catsOpen, setCatsOpen] = useState(false);
-  const [looksOpen, setLooksOpen] = useState(false);
+  // The layout list is the one fold that stays exactly as you left it.
+  //
+  // Picking a category rewrites the list directly below it, so folding it away
+  // puts the answer where the chips were. Picking a LAYOUT changes the preview
+  // on the far side of the screen, and folding the list takes away the very
+  // thing being compared with nothing in its place — trying five layouts in a
+  // row meant opening the list five times over. So a pick leaves it alone, the
+  // fold is only ever the head button, and that choice outlives the visit.
+  const [looksOpen, setLooksOpen] = useState(readLooksOpen);
+  const foldLooks = (v: boolean) => { setLooksOpen(v); writeLooksOpen(v); };
   const chosen = directory(base).flatMap((g) => g.entries).find((e) => sameDir(e.view));
   const results = useRef<HTMLDivElement>(null);
   const pickCat = (v: DirView) => {
@@ -589,10 +607,12 @@ export default function Shelf({
       {/* 2 — the layout decides which gifts exist at all.
           Seventeen names laid out at once came to 301px of a 866px panel and
           left the sayings 186. So the section shows the one that is chosen and
-          opens the rest on a click — the same fold the categories use. */}
+          opens the rest on a click. Unlike the categories it then stays
+          open, because choosing a layout is something you do several times
+          over before one of them is the right one. */}
       <div className="sec">
         <button className="cats-head" aria-expanded={looksOpen} aria-controls="shelf-looks"
-          onClick={() => setLooksOpen((v) => !v)}>
+          onClick={() => foldLooks(!looksOpen)}>
           <span>
             <span className="sec-t">{t('layout')}</span>
             <span className="sec-s" style={{ marginBottom: 0 }}>{t('g_layout_sub')}</span>
@@ -604,7 +624,7 @@ export default function Shelf({
           <div className="seg layout-picker" role="group" aria-label={t('layout')} style={{ marginTop: 8 }}>
             {LOOKS.map((l) => (
               <button key={l.id} data-on={activeLook === l.id}
-                onClick={() => { onApplyLook(l); setLooksOpen(false); }} title={t('look_' + l.id + '_h')}>
+                onClick={() => onApplyLook(l)} title={t('look_' + l.id + '_h')}>
                 {t('look_' + l.id)}
               </button>
             ))}
